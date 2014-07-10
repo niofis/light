@@ -1,6 +1,7 @@
 #ifndef JOB_H
 #define JOB_H
 
+#include "scene.h"
 
 typedef struct job_desc
 {

@@ -18,5 +18,8 @@ struct job_desc* job_new()
 
 void job_del(struct job_desc* job)
 {
-
+	if (job)
+	{
+		free(job);
+	}
 }

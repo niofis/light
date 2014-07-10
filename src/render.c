@@ -4,6 +4,9 @@
 #include "primitives.h"
 #include "job.h"
 #include "render.h"
+#include "ray.h"
+#include "scene.h"
+#include "camera.h"
 
 struct vector3 vdu;
 struct vector3 vdv;
@@ -49,6 +52,11 @@ struct ray* getray(int x, int y, struct job_desc* job)
 	return ray;
 }
 
+struct color shading(struct hit_result* hr, struct scene* scene)
+{
+
+}
+
 //returns color
 struct result traceray(struct ray* ray, struct scene* scene)
 {
@@ -64,10 +72,17 @@ struct result traceray(struct ray* ray, struct scene* scene)
 	spheres = scene->spheres;
 	for (int i = 0; i < scene->num_spheres; ++i)
 	{
+		struct hit_result hr;
 		sphere = &spheres[i];
-		if (sphere_intersects(sphere, ray))
+		hr = sphere_intersects(sphere, ray);
+		if (hr.hit)
 		{
-			result.color.g = 1.0f;
+			float s = v3_dot(&hr.normal, &ray->direction);
+			if (s < 0.0f)
+			{
+				s *= -1.0f;
+			}
+			result.color.g = 1.0f * s;
 		}
 	}
 	
@@ -76,19 +91,7 @@ struct result traceray(struct ray* ray, struct scene* scene)
 }
 
 
-int color_to_argb(struct color color)
-{
-	int argb = 0;
-	argb = (int) ((color.a<1.0f ? color.a : 1.0f) * 255);
-	argb = argb << 8;
-	argb |= (int) ((color.r<1.0f ? color.r : 1.0f) * 255);
-	argb = argb << 8;
-	argb |= (int) ((color.g<1.0f ? color.g : 1.0f) * 255);
-	argb = argb << 8;
-	argb |= (int) ((color.b<1.0f ? color.b : 1.0f) * 255);
 
-	return argb;
-}
 
 int render(struct job_desc* job)
 {
@@ -110,7 +113,7 @@ int render(struct job_desc* job)
 			ray = getray(x, y, job);
 			res = traceray(ray, job->scene);
 			//ARGB
-			buffer[p] = color_to_argb(res.color);
+			buffer[p] = color_to_argb(&res.color);
 		}
 	}
 	return 0;
