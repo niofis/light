@@ -3,7 +3,7 @@
 
 #include "../vector3.h"
 
-typedef struct triangle
+struct triangle
 {
 	struct vector3 pt1;
 	struct vector3 pt2;

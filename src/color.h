@@ -1,7 +1,7 @@
 #ifndef COLOR_H
 #define COLOR_H
 
-typedef struct color
+struct color
 {
 	float a;
 	float r;

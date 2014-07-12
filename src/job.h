@@ -3,7 +3,7 @@
 
 #include "scene.h"
 
-typedef struct job_desc
+struct job_desc
 {
 	int width;
 	int height;

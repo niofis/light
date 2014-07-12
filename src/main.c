@@ -40,7 +40,6 @@
 
 #include "ppm.h"
 #include "job.h"
-#include "primitives.h"
 #include "render.h"
 
 

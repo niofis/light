@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "vector3.h"
-#include "primitives.h"
 #include "job.h"
 #include "render.h"
 #include "ray.h"
 #include "scene.h"
 #include "camera.h"
+#include "sphere.h"
 
 struct vector3 vdu;
 struct vector3 vdv;
@@ -54,6 +54,8 @@ struct ray* getray(int x, int y, struct job_desc* job)
 
 struct color shading(struct hit_result* hr, struct scene* scene)
 {
+	struct color color;
+	return color;
 
 }
 
@@ -73,8 +75,8 @@ struct result traceray(struct ray* ray, struct scene* scene)
 	for (int i = 0; i < scene->num_spheres; ++i)
 	{
 		struct hit_result hr;
-		sphere = &spheres[i];
-		hr = sphere_intersects(sphere, ray);
+		sphere = &(spheres[i]);
+		sphere_intersects(sphere, ray, &hr);
 		if (hr.hit)
 		{
 			float s = v3_dot(&hr.normal, &ray->direction);

@@ -1,7 +1,7 @@
 #ifndef VECTOR3_H
 #define VECTOR3_H
 
-typedef struct vector3
+struct vector3
 {
 	float x;
 	float y;

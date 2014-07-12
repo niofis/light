@@ -4,7 +4,7 @@
 #include "vector3.h"
 #include "color.h"
 
-typedef struct point_light
+struct point_light
 {
 	struct vector3 position;
 	struct color color;

@@ -1,10 +1,12 @@
 #ifndef RENDER_H
 #define RENDER_H
 
+#include "vector3.h"
 #include "color.h"
+#include "job.h"
 
 
-typedef struct result
+struct result
 {
 	struct color color;
 	struct vector3 point;
@@ -12,7 +14,7 @@ typedef struct result
 };
 
 
-typedef struct hit_result
+struct hit_result
 {
 	struct vector3 hit_point;
 	struct vector3 normal;

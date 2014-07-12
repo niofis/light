@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include "sphere.h"
-#include "../ray.h"
-#include "../render.h"
+#include "ray.h"
+#include "render.h"
 
 struct sphere* sphere_new(int count)
 {
@@ -20,7 +20,7 @@ void sphere_del(struct sphere* spheres)
 }
 
 //from the book "Ray Tracing from the ground up"
-struct hit_result sphere_intersects(struct sphere* sphere, struct ray* ray)
+int sphere_intersects(struct sphere* sphere, struct ray* ray, struct hit_result* result)
 {
 	float t;
 	struct vector3 temp;
@@ -30,7 +30,6 @@ struct hit_result sphere_intersects(struct sphere* sphere, struct ray* ray)
 	float disc;
 	float e;
 	float denom;
-	struct hit_result result;
 
 	v3_sub(&temp, &ray->origin, &sphere->center);
 	a = v3_dot(&ray->direction, &ray->direction);
@@ -38,11 +37,11 @@ struct hit_result sphere_intersects(struct sphere* sphere, struct ray* ray)
 	c = v3_dot(&temp, &temp) - (sphere->radius * sphere->radius);
 	disc = (b * b) - (4.0f * c);
 
-	result.hit = 0;
+	result->hit = 0;
 
 	if (disc < 0.0)
 	{
-		return result;
+		return 0;
 	}
 	else
 	{
@@ -53,46 +52,46 @@ struct hit_result sphere_intersects(struct sphere* sphere, struct ray* ray)
 		if (t > 0.001f)
 		{
 			//tmin = t;
-			result.hit = 1;
-			result.distance = t;
+			result->hit = 1;
+			result->distance = t;
 
 			//local_hit_point = ray.origin + t * ray.direction;
-			v3_copy(&result.hit_point, &ray->direction);
-			v3_mul_scalar(&result.hit_point, t);
+			v3_copy(&result->hit_point, &ray->direction);
+			v3_mul_scalar(&result->hit_point, t);
 			//for normal
-			v3_copy(&result.normal, &result.hit_point);
+			v3_copy(&result->normal, &result->hit_point);
 			//
-			v3_add(&result.hit_point, &result.hit_point, &ray->origin);
+			v3_add(&result->hit_point, &result->hit_point, &ray->origin);
 
 			//normal = (temp + t * ray.direction) / radius;
-			v3_add(&result.normal, &result.normal, &temp);
-			v3_div_scalar(&result.normal, sphere->radius);
+			v3_add(&result->normal, &result->normal, &temp);
+			v3_div_scalar(&result->normal, sphere->radius);
 
-			return result;
+			return 1;
 		}
 
 		t = (b + e) / denom; //larger root
 		if (t > 0.001f)
 		{
 			//tmin = t;
-			result.hit = 1;
-			result.distance = t;
+			result->hit = 1;
+			result->distance = t;
 
 			//local_hit_point = ray.origin + t * ray.direction;
-			v3_copy(&result.hit_point, &ray->direction);
-			v3_mul_scalar(&result.hit_point, t);
+			v3_copy(&result->hit_point, &ray->direction);
+			v3_mul_scalar(&result->hit_point, t);
 			//for normal
-			v3_copy(&result.normal, &result.hit_point);
+			v3_copy(&result->normal, &result->hit_point);
 			//
-			v3_add(&result.hit_point, &result.hit_point, &ray->origin);
+			v3_add(&result->hit_point, &result->hit_point, &ray->origin);
 
 			//normal = (temp + t * ray.direction) / radius;
-			v3_add(&result.normal, &result.normal, &temp);
-			v3_div_scalar(&result.normal, sphere->radius);
+			v3_add(&result->normal, &result->normal, &temp);
+			v3_div_scalar(&result->normal, sphere->radius);
 
-			return result;
+			return 1;
 		}
 
-		return result;
+		return 0;
 	}
 }

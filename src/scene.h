@@ -2,7 +2,7 @@
 #define SCENE_H
 
 
-typedef struct scene
+struct scene
 {
 	struct camera* camera;
 	struct triangle* triangles;

@@ -3,7 +3,7 @@
 
 #include "vector3.h"
 
-typedef struct camera
+struct camera
 {
 	struct vector3 left_top;
 	struct vector3 left_bottom;

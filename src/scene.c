@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "scene.h"
 #include "camera.h"
-#include "objects\sphere.h"
+#include "sphere.h"
 #include "point_light.h"
 
 struct scene* scene_new()

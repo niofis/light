@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include "job.h"
-#include "primitives.h"
 
 struct job_desc* job_new()
 {
