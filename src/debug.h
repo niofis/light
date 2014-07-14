@@ -2,7 +2,6 @@
 #ifndef DEBUG_H
 #include <stdio.h>
 #include "vector3.h"
-#include "primitives.h"
 
 void debug_nl();
 void debug_pause();

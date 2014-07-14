@@ -37,13 +37,13 @@
     <ClCompile Include="..\..\src\color.c">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\objects\sphere.c">
-      <Filter>src\objects</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\scene.c">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\camera.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\sphere.c">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -72,17 +72,13 @@
     <ClInclude Include="..\..\src\vector3.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\objects\sphere.h">
-      <Filter>src\objects</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\camera.h">
       <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\objects\triangle.h">
-      <Filter>src\objects</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\scene.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\sphere.h" />
+    <ClInclude Include="..\..\src\triangle.h" />
   </ItemGroup>
 </Project>

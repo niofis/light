@@ -55,6 +55,7 @@ struct ray* getray(int x, int y, struct job_desc* job)
 struct color shading(struct hit_result* hr, struct scene* scene)
 {
 	struct color color;
+	color.a = 1.0f;
 	return color;
 
 }
