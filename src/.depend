@@ -2,7 +2,7 @@ camera.o: camera.c camera.h vector3.h
 color.o: color.c color.h
 debug.o: debug.c
 job.o: job.c job.h scene.h
-main.o: main.c ppm.h job.h scene.h render.h vector3.h color.h
+main.o: main.c ppm.h job.h scene.h render.h vector3.h color.h ray.h
 sphere.o: sphere.c sphere.h vector3.h render.h color.h job.h scene.h \
  ray.h
 point_light.o: point_light.c point_light.h vector3.h color.h

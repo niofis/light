@@ -4,20 +4,14 @@
 #include "vector3.h"
 #include "color.h"
 #include "job.h"
+#include "ray.h"
 
-
-struct result
-{
-	struct color color;
-	struct vector3 point;
-	int hit;
-};
-
-
-struct hit_result
+struct trace_data 
 {
 	struct vector3 hit_point;
 	struct vector3 normal;
+	struct color color;
+	struct ray ray; //inbound ray
 	float distance;
 	int hit;
 };

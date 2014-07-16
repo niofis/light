@@ -76,7 +76,7 @@ int main(int argc, char** argv)
 	render(job);
 	finish = omp_get_wtime();
 
-	printf("Render time = %fs", finish - start);
+	printf("Render time = %fs\n", finish - start);
 
 	ppm_create("image.ppm",job->width,job->height,255,job->buffer);
 

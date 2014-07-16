@@ -21,3 +21,10 @@ void color_init(struct color* color, float a, float r, float g, float b)
 	color->g = g;
 	color->b = b;
 }
+void color_mul_scalar(struct color* color, float s)
+{
+	color->a = color->a;
+	color->r = color->r * s;
+	color->g = color->g * s;
+	color->b = color->b * s;
+}
