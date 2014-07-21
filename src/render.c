@@ -64,7 +64,8 @@ void traceray(struct trace_data* data, struct scene* scene)
 {
 	struct sphere* spheres;
 	struct sphere* sphere;
-	
+	struct trace_data* closer;
+
 	data->color.a = 1.0f;
 	data->color.r = 1.0f;
 	data->color.g = 1.0f;
@@ -84,6 +85,8 @@ void traceray(struct trace_data* data, struct scene* scene)
 			color_mul_scalar(&data->color,0.0f);
 		}
 	}
+
+	if(
 	
 
 }

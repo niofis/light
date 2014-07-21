@@ -20,7 +20,7 @@ void sphere_del(struct sphere* spheres)
 }
 
 //from the book "Ray Tracing from the ground up"
-int sphere_intersects(struct sphere* sphere, struct ray* ray, struct trace_data* result)
+int sphere_intersects(struct sphere* sphere, struct ray* ray, struct intersection* result)
 {
 	float t;
 	struct vector3 temp;
