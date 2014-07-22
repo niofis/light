@@ -59,6 +59,52 @@ void shading(struct trace_data* data, struct scene* scene)
 	color_mul_scalar(&data->color,s);
 }
 
+int find_any(struct ray* ray, struct scene* scene, float max_distance, struct intersection* result)
+{
+
+	struct sphere* spheres;
+	struct sphere* sphere;
+	struct intersection its;
+
+	spheres = scene->spheres;
+	for (int i = 0; i < scene->num_spheres; ++i)
+	{
+		sphere = &(spheres[i]);
+		sphere_intersects(sphere, ray, &its);
+		if (its.hit && its.distance < max_distance) {
+			break;
+		}
+	}
+
+	memcpy(result, &its, sizeof(struct intersection));
+
+	return its.hit;
+}
+
+int find_closer(struct ray* ray, struct scene* scene, float max_distance, struct intersection* result)
+{
+	struct sphere* spheres;
+	struct sphere* sphere;
+	struct intersection its;
+	struct intersection closer;
+
+	spheres = scene->spheres;
+	for (int i = 0; i < scene->num_spheres; ++i)
+	{
+		sphere = &(spheres[i]);
+		sphere_intersects(sphere, ray, &its);
+		if (its.hit) {
+			if (closer.hit == 0 || its.distance < closer.distance) {
+				memcpy(&closer, &its, sizeof(struct intersection));
+			}
+		}
+	}
+
+	memcpy(result, &closer, sizeof(struct intersection));
+	
+	return closer.hit;
+}
+
 //returns color
 void traceray(struct trace_data* data, struct scene* scene)
 {
@@ -71,24 +117,7 @@ void traceray(struct trace_data* data, struct scene* scene)
 	data->color.g = 1.0f;
 	data->color.b = 0.0f;
 
-	spheres = scene->spheres;
-	for (int i = 0; i < scene->num_spheres; ++i)
-	{
-		sphere = &(spheres[i]);
-		sphere_intersects(sphere, &data->ray, data);
-		if (data->hit)
-		{
-			shading(data, scene);
-		}
-		else
-		{
-			color_mul_scalar(&data->color,0.0f);
-		}
-	}
-
-	if(
 	
-
 }
 
 int render(struct job_desc* job)

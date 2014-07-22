@@ -12,7 +12,7 @@ struct intersection
 	struct vector3 normal;
 	float distance;
 	int hit;
-}
+};
 
 int render(struct job_desc* job);
 #endif
