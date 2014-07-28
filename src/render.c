@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "vector3.h"
 #include "job.h"
 #include "render.h"
@@ -7,6 +8,7 @@
 #include "scene.h"
 #include "camera.h"
 #include "sphere.h"
+#include "point_light.h"
 
 struct vector3 vdu;
 struct vector3 vdv;
@@ -49,15 +51,6 @@ void getray(struct ray* ray, int x, int y, struct job_desc* job)
 
 }
 
-void shading(struct trace_data* data, struct scene* scene)
-{
-	float s = v3_dot(&data->normal, &data->ray.direction);
-	if (s < 0.0f)
-	{
-		s *= -1.0f;
-	}
-	color_mul_scalar(&data->color,s);
-}
 
 int find_any(struct ray* ray, struct scene* scene, float max_distance, struct intersection* result)
 {
@@ -81,6 +74,44 @@ int find_any(struct ray* ray, struct scene* scene, float max_distance, struct in
 	return its.hit;
 }
 
+void shading(struct scene* scene, struct intersection* trace, struct color* color)
+{
+	struct ray light_ray;
+	struct point_light* point_lights;
+	struct point_light* point_light;
+	struct intersection result;
+	struct color light;
+	struct color light_temp;
+	float light_distance = 0.0f;
+
+	color_init(&light, 1.0f, 0.0f, 0.0f, 0.0f);
+
+	v3_copy(&light_ray.origin, &trace->hit_point);
+	for (int i = 0; i < scene->num_point_lights; ++i)
+	{
+		point_light = &(scene->point_lights[i]);
+		v3_sub(&light_ray.direction, &point_light->position, &light_ray.origin);
+		light_distance = v3_norm(&light_ray.direction);
+		v3_normalize(&light_ray.direction);
+	
+		find_any(&light_ray, scene, light_distance, &result);
+
+		if (result.hit == 0)
+		{
+			float s = v3_dot(&trace->normal, &light_ray.direction);
+			if (s < 0.0f)
+			{
+				s *= -1.0f;
+			}
+			color_mul_scalar(&light_temp, &point_light->color, s);
+			color_add(&light, &light, &light_temp);
+		}
+	}
+
+	color_mul(color, color, &light);
+}
+
+
 int find_closer(struct ray* ray, struct scene* scene, float max_distance, struct intersection* result)
 {
 	struct sphere* spheres;
@@ -88,6 +119,7 @@ int find_closer(struct ray* ray, struct scene* scene, float max_distance, struct
 	struct intersection its;
 	struct intersection closer;
 
+	closer.hit = 0;
 	spheres = scene->spheres;
 	for (int i = 0; i < scene->num_spheres; ++i)
 	{
@@ -106,18 +138,23 @@ int find_closer(struct ray* ray, struct scene* scene, float max_distance, struct
 }
 
 //returns color
-void traceray(struct trace_data* data, struct scene* scene)
+void traceray(struct ray* ray, struct scene* scene, struct color* color)
 {
-	struct sphere* spheres;
-	struct sphere* sphere;
-	struct trace_data* closer;
+	struct intersection result;
+	float max_distance = 1000.0f;
 
-	data->color.a = 1.0f;
-	data->color.r = 1.0f;
-	data->color.g = 1.0f;
-	data->color.b = 0.0f;
 
-	
+	find_closer(ray, scene, max_distance, &result);
+	if (result.hit) {
+		int val = 0;
+		color_init(color, 1.0f, 1.0f, 1.0f, 0.0f);
+		shading(scene, &result, color);
+		val = color_to_argb(color);
+	}
+	else
+	{
+		color_init(color, 1.0f, 0.0f, 0.0f, 0.0f);
+	}
 }
 
 int render(struct job_desc* job)
@@ -135,11 +172,12 @@ int render(struct job_desc* job)
 		for (x = 0; x<width; ++x)
 		{
 			int p = y*height + x;
-			struct trace_data data;
-			getray(&data.ray, x, y, job);
-			traceray(&data, job->scene);
+			struct ray ray;
+			struct color color;
+			getray(&ray, x, y, job);
+			traceray(&ray, job->scene, &color);
 			//ARGB
-			buffer[p] = color_to_argb(&data.color);
+			buffer[p] = color_to_argb(&color);
 		}
 	}
 	return 0;

@@ -49,7 +49,7 @@ int sphere_intersects(struct sphere* sphere, struct ray* ray, struct intersectio
 		denom = 2.0f * a;
 		t = (b - e) / denom; //smaller root
 
-		if (t > 0.001f)
+		if (t > 0.007f)
 		{
 			//tmin = t;
 			result->hit = 1;
@@ -71,7 +71,7 @@ int sphere_intersects(struct sphere* sphere, struct ray* ray, struct intersectio
 		}
 
 		t = (b + e) / denom; //larger root
-		if (t > 0.001f)
+		if (t > 0.007f)
 		{
 			//tmin = t;
 			result->hit = 1;
