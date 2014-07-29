@@ -10,7 +10,7 @@ struct point_light
 	struct color color;
 };
 
-struct point_light* point_light_new();
+struct point_light* point_light_new(int num);
 void point_light_delete(struct point_light* point_light);
 
 #endif

@@ -59,6 +59,8 @@ int find_any(struct ray* ray, struct scene* scene, float max_distance, struct in
 	struct sphere* sphere;
 	struct intersection its;
 
+	its.hit = 0;
+
 	spheres = scene->spheres;
 	for (int i = 0; i < scene->num_spheres; ++i)
 	{
@@ -77,7 +79,6 @@ int find_any(struct ray* ray, struct scene* scene, float max_distance, struct in
 void shading(struct scene* scene, struct intersection* trace, struct color* color)
 {
 	struct ray light_ray;
-	struct point_light* point_lights;
 	struct point_light* point_light;
 	struct intersection result;
 	struct color light;
@@ -146,10 +147,8 @@ void traceray(struct ray* ray, struct scene* scene, struct color* color)
 
 	find_closer(ray, scene, max_distance, &result);
 	if (result.hit) {
-		int val = 0;
 		color_init(color, 1.0f, 1.0f, 1.0f, 0.0f);
 		shading(scene, &result, color);
-		val = color_to_argb(color);
 	}
 	else
 	{

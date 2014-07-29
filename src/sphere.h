@@ -3,10 +3,12 @@
 #include "vector3.h"
 #include "render.h"
 #include "ray.h"
+#include "material.h"
 
 struct sphere
 {
 	struct vector3 center;
+	struct material* material;
 	float radius;
 };
 

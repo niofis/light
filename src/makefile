@@ -4,7 +4,7 @@ CFLAGS=-g -Wall -std=c99 -O3 #$(shell root-config --cflags)
 LDFLAGS=-g #$(shell root-config --ldflags)
 LDLIBS=-fopenmp -lm #$(shell root-config --libs)
 
-SRCS=camera.c color.c debug.c job.c main.c sphere.c point_light.c ppm.c ray.c render.c scene.c vector3.c
+SRCS=camera.c color.c debug.c job.c main.c sphere.c point_light.c ppm.c ray.c render.c scene.c vector3.c material.c
 OBJS=$(subst .c,.o,$(SRCS))
 
 all: light

@@ -3,15 +3,17 @@
 #include "vector3.h"
 #include "color.h"
 
-struct point_light* point_light_new()
+struct point_light* point_light_new(int num)
 {
-	struct point_light* light;
-	light = (struct point_light*) malloc(sizeof(struct point_light));
+	struct point_light* lights;
+	lights = (struct point_light*) malloc(sizeof(struct point_light) * num);
 
-	v3_init(&light->position, 5, 5, -5);
-	color_init(&light->color, 1.0f, 1.0f, 1.0f, 1.0f);
-
-	return light;
+	for(int i = 0 ; i < num; ++i)
+	{
+		v3_init(&lights[i].position, 5, 5, -5);
+		color_init(&lights[i].color, 1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	return lights;
 }
 
 void point_light_delete(struct point_light* point_light)

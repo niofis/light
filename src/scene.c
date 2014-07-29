@@ -11,13 +11,19 @@ struct scene* scene_new()
 	scn = (struct scene*) malloc(sizeof(struct scene));
 
 	scn->camera = camera_new();
-	scn->num_spheres = 1;
+
+	scn->num_spheres = 2;
 	scn->spheres = sphere_new(scn->num_spheres);
 	v3_init(&scn->spheres[0].center, 1.0f, 0.0f, 0.0f);
 	scn->spheres[0].radius = 1.0f;
+	v3_init(&scn->spheres[1].center, -2.0f, 0.0f, 0.0f);
+	scn->spheres[1].radius = 1.0f;
 
-	scn->point_lights = point_light_new();
-	scn->num_point_lights = 1;
+	scn->num_point_lights = 1; //2;
+	scn->point_lights = point_light_new(scn->num_point_lights);
+	
+	//scn->point_lights[1].position.x = -5.0f;
+
 
 	//scn->triangles = (struct triangle*) malloc(sizeof(struct triangle) * triangles_count);
 

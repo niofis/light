@@ -8,6 +8,12 @@ struct sphere* sphere_new(int count)
 {
 	struct sphere* spheres;
 	spheres = (struct sphere*) malloc(count * sizeof(struct sphere));
+	
+	for(int i = 0; i < count; ++i)
+	{
+		spheres[i].material = 0;
+	}
+
 	return spheres;
 }
 
