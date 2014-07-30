@@ -15,7 +15,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <omp.h>
 
 
 /*
@@ -38,6 +37,7 @@
 
 #define BPP 4
 
+#include "timer.h"
 #include "ppm.h"
 #include "job.h"
 #include "render.h"
@@ -69,16 +69,15 @@ struct job_desc* job_demo()
 int main(int argc, char** argv)
 {
 	struct job_desc* job = job_demo();
-	double start;
-	double finish;
+	struct timer timer;
 
-	start = omp_get_wtime();
+	timer_start(&timer);
 	render(job);
-	finish = omp_get_wtime();
+	timer_stop(&timer);
 
-	printf("Render time = %fs\n", finish - start);
+	printf("Render time = %fs\n", timer.elapsed);
 
-	ppm_create("image.ppm",job->width,job->height,255,job->buffer);
+	//ppm_create("image.ppm",job->width,job->height,255,job->buffer);
 
 	job_del(job);
 
