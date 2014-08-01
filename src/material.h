@@ -9,6 +9,6 @@ struct material
 };
 
 struct material* material_new(int number);
-void material_delete(struct material* material);
+void material_del(struct material* material);
 
 #endif

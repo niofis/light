@@ -11,6 +11,6 @@ struct point_light
 };
 
 struct point_light* point_light_new(int num);
-void point_light_delete(struct point_light* point_light);
+void point_light_del(struct point_light* point_light);
 
 #endif

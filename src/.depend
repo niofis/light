@@ -2,17 +2,17 @@ camera.o: camera.c camera.h vector3.h
 color.o: color.c color.h
 debug.o: debug.c
 job.o: job.c job.h scene.h
-main.o: main.c timer.h ppm.h job.h scene.h render.h vector3.h color.h \
-  ray.h
-sphere.o: sphere.c sphere.h vector3.h render.h color.h job.h scene.h \
-  ray.h material.h
+main.o: main.c timer.h ppm.h job.h scene.h render.h material.h color.h \
+ vector3.h ray.h
+sphere.o: sphere.c sphere.h vector3.h render.h material.h color.h job.h \
+ scene.h ray.h
 point_light.o: point_light.c point_light.h vector3.h color.h
 ppm.o: ppm.c ppm.h
 ray.o: ray.c ray.h vector3.h
-render.o: render.c vector3.h job.h scene.h render.h color.h ray.h \
-  camera.h sphere.h material.h point_light.h
-scene.o: scene.c scene.h camera.h vector3.h sphere.h render.h color.h \
-  job.h ray.h material.h point_light.h
+render.o: render.c material.h color.h vector3.h job.h scene.h render.h \
+ ray.h camera.h sphere.h point_light.h
+scene.o: scene.c scene.h material.h color.h camera.h vector3.h sphere.h \
+ render.h job.h ray.h point_light.h
 vector3.o: vector3.c vector3.h
 material.o: material.c material.h color.h
 timer.o: timer.c timer.h

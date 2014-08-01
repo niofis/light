@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "material.h"
 #include "vector3.h"
 #include "job.h"
 #include "render.h"
@@ -109,33 +110,35 @@ void shading(struct scene* scene, struct intersection* trace, struct color* colo
 		}
 	}
 
-	color_mul(color, color, &light);
+	color_mul(color, &(trace->material->color), &light);
 }
 
 
-int find_closer(struct ray* ray, struct scene* scene, float max_distance, struct intersection* result)
+int find_closest(struct ray* ray, struct scene* scene, float max_distance, struct intersection* result)
 {
 	struct sphere* spheres;
 	struct sphere* sphere;
 	struct intersection its;
-	struct intersection closer;
+	struct intersection closest;
 
-	closer.hit = 0;
+	closest.hit = 0;
 	spheres = scene->spheres;
 	for (int i = 0; i < scene->num_spheres; ++i)
 	{
 		sphere = &(spheres[i]);
 		sphere_intersects(sphere, ray, &its);
-		if (its.hit) {
-			if (closer.hit == 0 || its.distance < closer.distance) {
-				memcpy(&closer, &its, sizeof(struct intersection));
+		if (its.hit) 
+		{
+			if (closest.hit == 0 || its.distance < closest.distance) {
+				memcpy(&closest, &its, sizeof(struct intersection));
 			}
+			closest.material = sphere->material;
 		}
 	}
 
-	memcpy(result, &closer, sizeof(struct intersection));
+	memcpy(result, &closest, sizeof(struct intersection));
 	
-	return closer.hit;
+	return closest.hit;
 }
 
 //returns color
@@ -145,9 +148,9 @@ void traceray(struct ray* ray, struct scene* scene, struct color* color)
 	float max_distance = 1000.0f;
 
 
-	find_closer(ray, scene, max_distance, &result);
+	find_closest(ray, scene, max_distance, &result);
 	if (result.hit) {
-		color_init(color, 1.0f, 1.0f, 1.0f, 0.0f);
+		//color_init(color, 1.0f, 1.0f, 1.0f, 0.0f);
 		shading(scene, &result, color);
 	}
 	else

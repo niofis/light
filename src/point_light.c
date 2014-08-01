@@ -16,7 +16,7 @@ struct point_light* point_light_new(int num)
 	return lights;
 }
 
-void point_light_delete(struct point_light* point_light)
+void point_light_del(struct point_light* point_light)
 {
 	if (point_light)
 	{

@@ -77,7 +77,9 @@ int main(int argc, char** argv)
 
 	printf("Render time = %fs\n", timer.elapsed);
 
-	//ppm_create("image.ppm",job->width,job->height,255,job->buffer);
+	printf("Writing image.ppm file...\n");
+	ppm_create("image.ppm",job->width,job->height,255,job->buffer);
+	printf("Done!\n");
 
 	job_del(job);
 
