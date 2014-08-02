@@ -186,3 +186,4 @@ FakesAssemblies/
 *.ppm
 
 *.swp
+*.o
