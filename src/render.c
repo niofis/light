@@ -131,8 +131,8 @@ int find_closest(struct ray* ray, struct scene* scene, float max_distance, struc
 		{
 			if (closest.hit == 0 || its.distance < closest.distance) {
 				memcpy(&closest, &its, sizeof(struct intersection));
+				closest.material = sphere->material; 
 			}
-			closest.material = sphere->material;
 		}
 	}
 
