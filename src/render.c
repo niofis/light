@@ -173,7 +173,7 @@ int render(struct job_desc* job)
 	{
 		for (x = 0; x<width; ++x)
 		{
-			int p = y*height + x;
+			int p = y*width + x;
 			struct ray ray;
 			struct color color;
 			getray(&ray, x, y, job);
