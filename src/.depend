@@ -16,3 +16,5 @@ scene.o: scene.c scene.h material.h color.h camera.h vector3.h sphere.h \
 vector3.o: vector3.c vector3.h
 material.o: material.c material.h color.h
 timer.o: timer.c timer.h
+triangle.o: triangle.c triangle.h vector3.h material.h color.h ray.h \
+ render.h job.h scene.h

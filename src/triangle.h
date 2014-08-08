@@ -1,13 +1,21 @@
 #ifndef TRIANGLE_H
 #define TRIANGLE_H
 
-#include "../vector3.h"
+#include "vector3.h"
+#include "material.h"
+#include "ray.h"
+#include "render.h"
 
 struct triangle
 {
 	struct vector3 pt1;
 	struct vector3 pt2;
 	struct vector3 pt3;
+	struct material* material;
 };
+
+struct triangle* triangle_new(int count);
+void triangle_del(struct triangle* triangle);
+int triangle_intersects(struct triangle* triangle, struct ray* ray, struct intersection* result);
 
 #endif

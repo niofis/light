@@ -17,11 +17,11 @@ struct sphere* sphere_new(int count)
 	return spheres;
 }
 
-void sphere_del(struct sphere* spheres)
+void sphere_del(struct sphere* sphere)
 {
-	if (spheres)
+	if (sphere)
 	{
-		free(spheres);
+		free(sphere);
 	}
 }
 
