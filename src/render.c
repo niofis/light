@@ -24,8 +24,8 @@ void init_delta_vectors(struct job_desc* job)
 		&job->scene->camera->left_bottom,
 		&job->scene->camera->left_top);
 
-	v3_div_scalar(&vdu, (float) job->width);
-	v3_div_scalar(&vdv, (float) job->height);
+	v3_div_scalar(&vdu, &vdu, (float) job->width);
+	v3_div_scalar(&vdv, &vdv, (float) job->height);
 
 }
 
@@ -39,8 +39,8 @@ void getray(struct ray* ray, int x, int y, struct job_desc* job)
 	v3_copy(&u, &vdu);
 	v3_copy(&v, &vdv);
 
-	v3_mul_scalar(&u, (float) x);
-	v3_mul_scalar(&v, (float) y);
+	v3_mul_scalar(&u, &u, (float) x);
+	v3_mul_scalar(&v, &v, (float) y);
 	
 	v3_copy(&ray->direction, &job->scene->camera->left_top);
 	
@@ -70,7 +70,7 @@ int find_any(struct ray* ray, struct scene* scene, float max_distance, struct in
 	{
 		sphere = &(spheres[i]);
 		sphere_intersects(sphere, ray, &its);
-		if (its.hit && its.distance < max_distance) {
+		if (its.hit && its.distance < max_distance && its.distance > 0.001f) {
 			break;
 		}
 	}
@@ -82,10 +82,11 @@ int find_any(struct ray* ray, struct scene* scene, float max_distance, struct in
 		{
 			triangle = &(triangles[i]);
 			triangle_intersects(triangle, ray, &its);
-			if(its.hit && its.distance < max_distance)
+			if(its.hit && its.distance < max_distance && its.distance > 0.001f)
 			{
 				break;
 			}
+			its.hit = 0;
 		}
 	}
 
@@ -103,6 +104,7 @@ void shading(struct scene* scene, struct intersection* trace, struct color* colo
 	struct color light_temp;
 	float light_distance = 0.0f;
 
+	result.hit = 0;
 	color_init(&light, 1.0f, 0.0f, 0.0f, 0.0f);
 
 	v3_copy(&light_ray.origin, &trace->hit_point);
@@ -120,7 +122,7 @@ void shading(struct scene* scene, struct intersection* trace, struct color* colo
 			float s = v3_dot(&trace->normal, &light_ray.direction);
 			if (s < 0.0f)
 			{
-				s *= -1.0f;
+				s = 0.0f;
 			}
 			color_mul_scalar(&light_temp, &point_light->color, s);
 			color_add(&light, &light, &light_temp);
@@ -146,9 +148,18 @@ int find_closest(struct ray* ray, struct scene* scene, float max_distance, struc
 	{
 		sphere = &(spheres[i]);
 		sphere_intersects(sphere, ray, &its);
-		if (its.hit) 
+		if (its.hit && its.distance > 0.001f) 
 		{
 			if (closest.hit == 0 || its.distance < closest.distance) {
+				
+
+				v3_mul_scalar(&its.hit_point, &ray->direction, its.distance);				
+				v3_add(&its.hit_point, &its.hit_point, &ray->origin);
+
+
+				v3_sub(&its.normal, &its.hit_point, &sphere->center);
+				v3_normalize(&its.normal);
+
 				memcpy(&closest, &its, sizeof(struct intersection));
 				closest.material = sphere->material; 
 			}
@@ -160,10 +171,15 @@ int find_closest(struct ray* ray, struct scene* scene, float max_distance, struc
 	{
 		triangle = &(triangles[i]);
 		triangle_intersects(triangle, ray, &its);
-		if(its.hit)
+		if(its.hit && its.distance > 0.001f)
 		{
 			if (closest.hit == 0 || its.distance < closest.distance)
 			{
+				v3_copy(&its.normal, &triangle->normal);
+
+				v3_mul_scalar(&its.hit_point, &ray->direction, its.distance);
+				v3_add(&its.hit_point, &its.hit_point, &ray->origin);
+
 				memcpy(&closest, &its, sizeof(struct intersection));
 				closest.material = triangle->material;
 			}			

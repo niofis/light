@@ -60,7 +60,7 @@ int sphere_intersects(struct sphere* sphere, struct ray* ray, struct intersectio
 			//tmin = t;
 			result->hit = 1;
 			result->distance = t;
-
+/*
 			//local_hit_point = ray.origin + t * ray.direction;
 			v3_copy(&result->hit_point, &ray->direction);
 			v3_mul_scalar(&result->hit_point, t);
@@ -72,7 +72,7 @@ int sphere_intersects(struct sphere* sphere, struct ray* ray, struct intersectio
 			//normal = (temp + t * ray.direction) / radius;
 			v3_add(&result->normal, &result->normal, &temp);
 			v3_div_scalar(&result->normal, sphere->radius);
-
+*/
 			return 1;
 		}
 
@@ -82,7 +82,7 @@ int sphere_intersects(struct sphere* sphere, struct ray* ray, struct intersectio
 			//tmin = t;
 			result->hit = 1;
 			result->distance = t;
-
+/*
 			//local_hit_point = ray.origin + t * ray.direction;
 			v3_copy(&result->hit_point, &ray->direction);
 			v3_mul_scalar(&result->hit_point, t);
@@ -94,7 +94,7 @@ int sphere_intersects(struct sphere* sphere, struct ray* ray, struct intersectio
 			//normal = (temp + t * ray.direction) / radius;
 			v3_add(&result->normal, &result->normal, &temp);
 			v3_div_scalar(&result->normal, sphere->radius);
-
+*/
 			return 1;
 		}
 

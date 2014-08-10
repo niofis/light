@@ -1,6 +1,6 @@
 CC=gcc
 RM=rm -f
-CFLAGS=-g -Wall -std=c99 -O3 #$(shell root-config --cflags)
+CFLAGS=-Wall -std=c99 -O3 #$(shell root-config --cflags)
 LDFLAGS= #$(shell root-config --ldflags)
 LDLIBS=-lm #$(shell root-config --libs)
 

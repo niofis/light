@@ -18,7 +18,7 @@ float v3_dot(struct vector3* v1, struct vector3* v2);
 void v3_cross(struct vector3* res, struct vector3* v1, struct vector3* v2);
 float v3_norm(struct vector3* v1);
 void v3_normalize(struct vector3* v1);
-void v3_mul_scalar(struct vector3* v1, float f);
-void v3_div_scalar(struct vector3* v1, float f);
+void v3_mul_scalar(struct vector3* dest, struct vector3* v1, float f);
+void v3_div_scalar(struct vector3* dest, struct vector3* v1, float f);
 
 #endif

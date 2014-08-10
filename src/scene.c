@@ -42,10 +42,10 @@ struct scene* scene_new()
 
 	scn->num_triangles = 1;
 	scn->triangles = triangle_new(scn->num_triangles);
-	v3_init(&scn->triangles[0].pt1, -1.0f, 3.0f, 0.0f);
-	v3_init(&scn->triangles[0].pt2, -0.0f, 4.0f, 0.0f);
-	v3_init(&scn->triangles[0].pt3, 1.0f, 3.0f, 0.0f);
-	scn->triangles[0].material = &(scn->materials[3]);
+	v3_init(&scn->triangles[0].pt1, 4.0f, 0.0f, 0.10f);
+	v3_init(&scn->triangles[0].pt2, 5.0f, 2.0f, 0.10f);
+	v3_init(&scn->triangles[0].pt3, 6.0f, 0.0f, 0.10f);
+	scn->triangles[0].material = &(scn->materials[1]);
 
 	triangle_update(&scn->triangles[0]);
 

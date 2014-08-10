@@ -81,18 +81,18 @@ void v3_normalize(struct vector3* v1)
 	v1->z /= norm;
 }
 
-void v3_mul_scalar(struct vector3* v1, float f)
+void v3_mul_scalar(struct vector3* dest, struct vector3* v1, float f)
 {
-	v1->x *= f;
-	v1->y *= f;
-	v1->z *= f;
+	dest->x = v1->x * f;
+	dest->y = v1->y * f;
+	dest->z = v1->z * f;
 }
 
-void v3_div_scalar(struct vector3* v1, float f)
+void v3_div_scalar(struct vector3* dest, struct vector3* v1, float f)
 {
-	v1->x /= f;
-	v1->y /= f;
-	v1->z /= f;
+	dest->x = v1->x / f;
+	dest->y = v1->y / f;
+	dest->z = v1->z / f;
 }
 
 #ifdef DEBUG

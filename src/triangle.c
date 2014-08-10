@@ -76,8 +76,13 @@ int triangle_intersects(struct triangle* triangle, struct ray* ray, struct inter
 
 	result->hit = 1;
 	result->distance = t;
+
+	/*
 	v3_copy(&result->normal, &triangle->normal);
-	
+	v3_copy(&result->hit_point, &ray->direction);
+	v3_mul_scalar(&result->hit_point, t);
+	v3_add(&result->hit_point, &result->hit_point, &ray->origin);
+	*/
 	return 1;
 }
 
