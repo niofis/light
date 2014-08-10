@@ -9,6 +9,7 @@
 #include "scene.h"
 #include "camera.h"
 #include "sphere.h"
+#include "triangle.h"
 #include "point_light.h"
 
 struct vector3 vdu;
@@ -58,6 +59,8 @@ int find_any(struct ray* ray, struct scene* scene, float max_distance, struct in
 
 	struct sphere* spheres;
 	struct sphere* sphere;
+	struct triangle* triangles;
+	struct triangle* triangle;
 	struct intersection its;
 
 	its.hit = 0;
@@ -69,6 +72,20 @@ int find_any(struct ray* ray, struct scene* scene, float max_distance, struct in
 		sphere_intersects(sphere, ray, &its);
 		if (its.hit && its.distance < max_distance) {
 			break;
+		}
+	}
+
+	if(its.hit == 0)
+	{
+		triangles = scene->triangles;
+		for(int i = 0; i < scene->num_triangles; ++i)
+		{
+			triangle = &(triangles[i]);
+			triangle_intersects(triangle, ray, &its);
+			if(its.hit && its.distance < max_distance)
+			{
+				break;
+			}
 		}
 	}
 
@@ -118,6 +135,8 @@ int find_closest(struct ray* ray, struct scene* scene, float max_distance, struc
 {
 	struct sphere* spheres;
 	struct sphere* sphere;
+	struct triangle* triangle;
+	struct triangle* triangles;
 	struct intersection its;
 	struct intersection closest;
 
@@ -133,6 +152,21 @@ int find_closest(struct ray* ray, struct scene* scene, float max_distance, struc
 				memcpy(&closest, &its, sizeof(struct intersection));
 				closest.material = sphere->material; 
 			}
+		}
+	}
+
+	triangles = scene->triangles;
+	for(int i = 0; i < scene->num_triangles; ++i)
+	{
+		triangle = &(triangles[i]);
+		triangle_intersects(triangle, ray, &its);
+		if(its.hit)
+		{
+			if (closest.hit == 0 || its.distance < closest.distance)
+			{
+				memcpy(&closest, &its, sizeof(struct intersection));
+				closest.material = triangle->material;
+			}			
 		}
 	}
 

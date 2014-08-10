@@ -4,6 +4,7 @@
 #include "camera.h"
 #include "sphere.h"
 #include "point_light.h"
+#include "triangle.h"
 
 struct scene* scene_new()
 {
@@ -39,6 +40,15 @@ struct scene* scene_new()
 	scn->spheres[3].radius = 1000.0f;
 	scn->spheres[3].material = &(scn->materials[3]);
 
+	scn->num_triangles = 1;
+	scn->triangles = triangle_new(scn->num_triangles);
+	v3_init(&scn->triangles[0].pt1, -1.0f, 3.0f, 0.0f);
+	v3_init(&scn->triangles[0].pt2, -0.0f, 4.0f, 0.0f);
+	v3_init(&scn->triangles[0].pt3, 1.0f, 3.0f, 0.0f);
+	scn->triangles[0].material = &(scn->materials[3]);
+
+	triangle_update(&scn->triangles[0]);
+
 
 	scn->num_point_lights = 1; //2;
 	scn->point_lights = point_light_new(scn->num_point_lights);
@@ -64,6 +74,13 @@ void scene_del(struct scene* scn)
 		sphere_del(scn->spheres);
 		scn->spheres = 0;
 		scn->num_spheres = 0;
+	}
+
+	if(scn->triangles)
+	{
+		triangle_del(scn->triangles);
+		scn->triangles = 0;
+		scn->num_triangles = 0;
 	}
 
 	if (scn->point_lights)
