@@ -1,8 +1,8 @@
-#ifndef SCENE_H
-#define SCENE_H
+#ifndef world_H
+#define world_H
 
 
-struct scene
+struct world
 {
 	struct camera* camera;
 	struct triangle* triangles;
@@ -15,7 +15,7 @@ struct scene
 	int num_materials;
 };
 
-struct scene* scene_new();
-void scene_del(struct scene*);
+struct world* world_new();
+void world_del(struct world*);
 
 #endif

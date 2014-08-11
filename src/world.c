@@ -1,16 +1,16 @@
 #include <stdlib.h>
-#include "scene.h"
+#include "world.h"
 #include "material.h"
 #include "camera.h"
 #include "sphere.h"
 #include "point_light.h"
 #include "triangle.h"
 
-struct scene* scene_new()
+struct world* world_new()
 {
-	struct scene *scn;
+	struct world *scn;
 
-	scn = (struct scene*) malloc(sizeof(struct scene));
+	scn = (struct world*) malloc(sizeof(struct world));
 
 	scn->camera = camera_new();
 
@@ -61,7 +61,7 @@ struct scene* scene_new()
 	return scn;
 }
 
-void scene_del(struct scene* scn)
+void world_del(struct world* scn)
 {
 	if (scn->camera)
 	{

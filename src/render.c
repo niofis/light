@@ -6,7 +6,7 @@
 #include "job.h"
 #include "render.h"
 #include "ray.h"
-#include "scene.h"
+#include "world.h"
 #include "camera.h"
 #include "sphere.h"
 #include "triangle.h"
@@ -18,11 +18,11 @@ struct vector3 vdv;
 void init_delta_vectors(struct job_desc* job)
 {
 	v3_sub(&vdu,
-		&job->scene->camera->right_top,
-		&job->scene->camera->left_top);
+		&job->world->camera->right_top,
+		&job->world->camera->left_top);
 	v3_sub(&vdv,
-		&job->scene->camera->left_bottom,
-		&job->scene->camera->left_top);
+		&job->world->camera->left_bottom,
+		&job->world->camera->left_top);
 
 	v3_div_scalar(&vdu, &vdu, (float) job->width);
 	v3_div_scalar(&vdv, &vdv, (float) job->height);
@@ -34,7 +34,7 @@ void getray(struct ray* ray, int x, int y, struct job_desc* job)
 	struct vector3 u;
 	struct vector3 v;
 
-	v3_copy(&ray->origin, &job->scene->camera->eye);
+	v3_copy(&ray->origin, &job->world->camera->eye);
 	
 	v3_copy(&u, &vdu);
 	v3_copy(&v, &vdv);
@@ -42,19 +42,19 @@ void getray(struct ray* ray, int x, int y, struct job_desc* job)
 	v3_mul_scalar(&u, &u, (float) x);
 	v3_mul_scalar(&v, &v, (float) y);
 	
-	v3_copy(&ray->direction, &job->scene->camera->left_top);
+	v3_copy(&ray->direction, &job->world->camera->left_top);
 	
 	v3_add(&ray->direction, &ray->direction, &u);
 	v3_add(&ray->direction, &ray->direction, &v);
 
-	v3_sub(&ray->direction, &ray->direction, &job->scene->camera->eye);
+	v3_sub(&ray->direction, &ray->direction, &job->world->camera->eye);
 
 	v3_normalize(&ray->direction);
 
 }
 
 
-int find_any(struct ray* ray, struct scene* scene, float max_distance, struct intersection* result)
+int find_any(struct ray* ray, struct world* world, float max_distance, struct intersection* result)
 {
 
 	struct sphere* spheres;
@@ -65,8 +65,8 @@ int find_any(struct ray* ray, struct scene* scene, float max_distance, struct in
 
 	its.hit = 0;
 
-	spheres = scene->spheres;
-	for (int i = 0; i < scene->num_spheres; ++i)
+	spheres = world->spheres;
+	for (int i = 0; i < world->num_spheres; ++i)
 	{
 		sphere = &(spheres[i]);
 		sphere_intersects(sphere, ray, &its);
@@ -77,8 +77,8 @@ int find_any(struct ray* ray, struct scene* scene, float max_distance, struct in
 
 	if(its.hit == 0)
 	{
-		triangles = scene->triangles;
-		for(int i = 0; i < scene->num_triangles; ++i)
+		triangles = world->triangles;
+		for(int i = 0; i < world->num_triangles; ++i)
 		{
 			triangle = &(triangles[i]);
 			triangle_intersects(triangle, ray, &its);
@@ -95,7 +95,7 @@ int find_any(struct ray* ray, struct scene* scene, float max_distance, struct in
 	return its.hit;
 }
 
-void shading(struct scene* scene, struct intersection* trace, struct color* color)
+void shading(struct world* world, struct intersection* trace, struct color* color)
 {
 	struct ray light_ray;
 	struct point_light* point_light;
@@ -108,14 +108,14 @@ void shading(struct scene* scene, struct intersection* trace, struct color* colo
 	color_init(&light, 1.0f, 0.0f, 0.0f, 0.0f);
 
 	v3_copy(&light_ray.origin, &trace->hit_point);
-	for (int i = 0; i < scene->num_point_lights; ++i)
+	for (int i = 0; i < world->num_point_lights; ++i)
 	{
-		point_light = &(scene->point_lights[i]);
+		point_light = &(world->point_lights[i]);
 		v3_sub(&light_ray.direction, &point_light->position, &light_ray.origin);
 		light_distance = v3_norm(&light_ray.direction);
 		v3_normalize(&light_ray.direction);
 	
-		find_any(&light_ray, scene, light_distance, &result);
+		find_any(&light_ray, world, light_distance, &result);
 
 		if (result.hit == 0)
 		{
@@ -133,7 +133,7 @@ void shading(struct scene* scene, struct intersection* trace, struct color* colo
 }
 
 
-int find_closest(struct ray* ray, struct scene* scene, float max_distance, struct intersection* result)
+int find_closest(struct ray* ray, struct world* world, float max_distance, struct intersection* result)
 {
 	struct sphere* spheres;
 	struct sphere* sphere;
@@ -143,8 +143,8 @@ int find_closest(struct ray* ray, struct scene* scene, float max_distance, struc
 	struct intersection closest;
 
 	closest.hit = 0;
-	spheres = scene->spheres;
-	for (int i = 0; i < scene->num_spheres; ++i)
+	spheres = world->spheres;
+	for (int i = 0; i < world->num_spheres; ++i)
 	{
 		sphere = &(spheres[i]);
 		sphere_intersects(sphere, ray, &its);
@@ -166,8 +166,8 @@ int find_closest(struct ray* ray, struct scene* scene, float max_distance, struc
 		}
 	}
 
-	triangles = scene->triangles;
-	for(int i = 0; i < scene->num_triangles; ++i)
+	triangles = world->triangles;
+	for(int i = 0; i < world->num_triangles; ++i)
 	{
 		triangle = &(triangles[i]);
 		triangle_intersects(triangle, ray, &its);
@@ -192,16 +192,16 @@ int find_closest(struct ray* ray, struct scene* scene, float max_distance, struc
 }
 
 //returns color
-void traceray(struct ray* ray, struct scene* scene, struct color* color)
+void traceray(struct ray* ray, struct world* world, struct color* color)
 {
 	struct intersection result;
 	float max_distance = 1000.0f;
 
 
-	find_closest(ray, scene, max_distance, &result);
+	find_closest(ray, world, max_distance, &result);
 	if (result.hit) {
 		//color_init(color, 1.0f, 1.0f, 1.0f, 0.0f);
-		shading(scene, &result, color);
+		shading(world, &result, color);
 	}
 	else
 	{
@@ -227,7 +227,7 @@ int render(struct job_desc* job)
 			struct ray ray;
 			struct color color;
 			getray(&ray, x, y, job);
-			traceray(&ray, job->scene, &color);
+			traceray(&ray, job->world, &color);
 			//ARGB
 			buffer[p] = color_to_argb(&color);
 		}

@@ -1,14 +1,14 @@
 #ifndef JOB_H
 #define JOB_H
 
-#include "scene.h"
+#include "world.h"
 
 struct job_desc
 {
 	int width;
 	int height;
 	int *buffer;
-	struct scene* scene;
+	struct world* world;
 };
 
 
