@@ -157,6 +157,7 @@
     <ClCompile Include="..\..\src\point_light.c" />
     <ClCompile Include="..\..\src\main.c" />
     <ClCompile Include="..\..\src\ppm.c" />
+    <ClCompile Include="..\..\src\primitive.c" />
     <ClCompile Include="..\..\src\ray.c" />
     <ClCompile Include="..\..\src\render.c" />
     <ClCompile Include="..\..\src\world.c" />
@@ -173,6 +174,7 @@
     <ClInclude Include="..\..\src\material.h" />
     <ClInclude Include="..\..\src\point_light.h" />
     <ClInclude Include="..\..\src\ppm.h" />
+    <ClInclude Include="..\..\src\primitive.h" />
     <ClInclude Include="..\..\src\ray.h" />
     <ClInclude Include="..\..\src\render.h" />
     <ClInclude Include="..\..\src\world.h" />

@@ -55,6 +55,9 @@
     <ClCompile Include="..\..\src\world.c">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\primitive.c">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\color.h">
@@ -91,5 +94,6 @@
     <ClInclude Include="..\..\src\world.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\primitive.h" />
   </ItemGroup>
 </Project>

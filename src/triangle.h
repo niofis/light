@@ -12,8 +12,8 @@ struct triangle
 	struct vector3 pt2;
 	struct vector3 pt3;
 	struct vector3 v1;
-	struct vector3 v2;
-	struct vector3 v3;
+	struct vector3 edge1;
+	struct vector3 edge2;
 	struct vector3 normal;
 	struct material* material;
 };

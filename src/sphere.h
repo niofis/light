@@ -14,6 +14,5 @@ struct sphere
 
 struct sphere* sphere_new(int count);
 void sphere_del(struct sphere* sphere);
-//just for test purposes, intersection returns: true or false
 int sphere_intersects(struct sphere* sphere, struct ray* ray, struct intersection* result);
 #endif
