@@ -16,6 +16,7 @@ struct world
 };
 
 struct world* world_new();
+struct world* world_cornell();
 void world_del(struct world*);
 
 #endif
