@@ -12,6 +12,7 @@ struct primitive
 
 	int type;
 	void* obj;
+	struct primitive* next;
 };
 
 
