@@ -35,6 +35,7 @@
 #endif
 
 
+
 #define BPP 4
 
 #include "timer.h"
@@ -78,7 +79,7 @@ int main(int argc, char** argv)
 	printf("Render time = %fs\n", timer.elapsed);
 
 	printf("Writing image.ppm file...\n");
-	ppm_create("image.ppm",job->width,job->height,255,PPM_P3,job->buffer);
+	ppm_create("image.ppm",job->width,job->height,255,PPM_P6,job->buffer);
 	printf("Done!\n");
 
 	job_del(job);

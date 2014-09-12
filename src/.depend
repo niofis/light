@@ -18,4 +18,5 @@ material.o: material.c material.h color.h
 timer.o: timer.c timer.h
 triangle.o: triangle.c triangle.h vector3.h material.h color.h ray.h \
  render.h job.h world.h
-primitive.o: primitive.c
+primitive.o: primitive.c primitive.h triangle.h vector3.h material.h \
+ color.h ray.h render.h job.h world.h sphere.h
