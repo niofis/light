@@ -1,9 +1,9 @@
 #include <stdlib.h>
-#include <primitives_list.h>
+#include "primitives_list.h"
 
 struct prm_list* prm_list_new()
 {
-    prm_list* lst = (struct prm_list*) malloc(sizeof(struct prm_list));
+    struct prm_list* lst = (struct prm_list*) malloc(sizeof(struct prm_list));
     return lst;
 }
 
@@ -13,7 +13,7 @@ void prm_list_del(struct prm_list* list)
     struct prm_it* it;
     struct primitive* prm;
 
-    it = prm_it_new();
+    it = prm_it_new(list);
 
     prm = prm_it_next(it);
 
@@ -27,7 +27,7 @@ void prm_list_del(struct prm_list* list)
         
 }
 
-struct prm_it* prm_it_new(struct prm_lit* list)
+struct prm_it* prm_it_new(struct prm_list* list)
 {
     struct prm_it* it;
     
