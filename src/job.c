@@ -9,7 +9,7 @@ struct job_desc* job_new()
 
 	job->width = 1280;
 	job->height = 720;
-	job->buffer = (int*) malloc(sizeof(int) * 3 * job->width * job->height);
+	job->buffer = (int*) malloc(sizeof(int) * job->width * job->height);
 	job->world = world_cornell();
 
 
