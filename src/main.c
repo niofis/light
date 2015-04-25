@@ -50,7 +50,6 @@ struct job_desc* job_demo()
 
 	job = job_new();
 
-
 	return job;
 }
 
@@ -77,9 +76,10 @@ int main(int argc, char** argv)
 	timer_stop(&timer);
 
 	printf("Render time = %fs\n", timer.elapsed);
-
+	/*
 	printf("Writing image.ppm file...\n");
 	ppm_create("image.ppm",job->width,job->height,255,PPM_P6,job->buffer);
+	*/
 	printf("Done!\n");
 
 	job_del(job);
