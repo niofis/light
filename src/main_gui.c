@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,38 +19,51 @@
 #include "job.h"
 #include "render.h"
 
-#include <immintrin.h>
-
 int gui_init()
 {
   int video_flags = SDL_SWSURFACE;
   int bpp = 32;
   int running = 1;
-  SDL_Surface* screen;
-  SDL_Surface* surface;
+  SDL_Window *window;
+  SDL_Renderer *renderer;
+  SDL_Texture *texture;
   SDL_Event event;
   struct job_desc* job;
   struct timer timer;
-  float constants[] = {0, 1,2, 3, 1.0f, 4.0f};
-  __m256 ymm0 = _mm256_broadcast_ss(constants);
 
   job = job_new();
   
-  if (SDL_Init(SDL_INIT_VIDEO) < 0)
+  if (SDL_Init(SDL_INIT_VIDEO) != 0)
   {
     printf("SDL_Init failed: %s\n", SDL_GetError());
+	SDL_Quit();
     return 1;
   }
 
-  SDL_WM_SetCaption("Light", NULL);
-
-  surface = SDL_CreateRGBSurface(video_flags, job->width, job->height, bpp, 0, 0, 0, 0);
-
-  screen = SDL_SetVideoMode(job->width, job->height, bpp, video_flags);
-  if (!screen)
+  window = SDL_CreateWindow("Light", 100, 100, 1280, 720, SDL_WINDOW_SHOWN);
+  if (window == NULL)
   {
-    printf("SDL_SetVideoMode failed: %s\n", SDL_GetError());
-    return 2;
+	  printf("SDL_CreateWindow failed: %s\n", SDL_GetError());
+	  SDL_Quit();
+	  return 1;
+  }
+
+  renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+  if (renderer == NULL)
+  {
+	  SDL_DestroyWindow(window);
+	  printf("SLD_CreateRenderer failed: %s\n", SDL_GetError());
+	  SDL_Quit();
+	  return 1;
+  }
+
+  texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, job->width, job->height);
+  if (texture == NULL)
+  {
+	  SDL_DestroyRenderer(renderer);
+	  SDL_DestroyWindow(window);
+	  printf("SDL_CreateTexture failed: %s\n", SDL_GetError());
+	  return 1;
   }
 
   timer_start(&timer);
@@ -59,13 +72,11 @@ int gui_init()
 
   printf("Render time = %fs\n", timer.elapsed);
 
-  SDL_LockSurface(surface);
-  memcpy(surface->pixels, job->buffer, sizeof(int) * job->width * job->height);
-  SDL_UnlockSurface(surface);
 
-  SDL_BlitSurface(surface, NULL, screen, NULL);
-  SDL_Flip(screen);
-  
+  SDL_UpdateTexture(texture, NULL, job->buffer, job->width * sizeof(Uint32));
+  SDL_RenderClear(renderer);
+  SDL_RenderCopy(renderer, texture, NULL, NULL);
+  SDL_RenderPresent(renderer);
 
   while (running)
   {
@@ -83,13 +94,12 @@ int gui_init()
           break;
       }
     }
-    
-    //SDL_BlitSurface(surface, NULL, screen, NULL);
-    //SDL_Flip(screen);
   }
 
-  SDL_FreeSurface(screen);
-  SDL_FreeSurface(surface);
+  SDL_DestroyTexture(texture);
+  SDL_DestroyRenderer(renderer);
+  SDL_DestroyWindow(window);
+  
   SDL_Quit();
   
   job_del(job);
@@ -97,7 +107,7 @@ int gui_init()
   return 0;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
   gui_init();
 
