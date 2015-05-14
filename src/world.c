@@ -5,11 +5,17 @@
 #include "sphere.h"
 #include "point_light.h"
 #include "triangle.h"
+#include "triangle_list.h"
+
+#define TR_INIT(list,idx, x1, y1, z1, x2, y2, z2, x3, y3, z3) list->v1_x[idx] = x1; list->v1_y[idx] = y1; list->v1_z[idx] = z1;\
+	list->v2_x[idx] = x2; list->v2_y[idx] = y2; list->v2_z[idx] = z2;\
+	list->v3_x[idx] = x3; list->v3_y[idx] = y3; list->v3_z[idx] = z3;
 
 struct world* world_cornell()
 {
 	struct world* world;
-	
+	struct triangle_list* trs;
+
 	world = (struct world*) malloc(sizeof(struct world));
 
 	world->camera = camera_new();
@@ -24,18 +30,48 @@ struct world* world_cornell()
 	color_init(&(world->materials[5].color), 1.0f, 0.0f, 0.0f, 0.0f); //Black
 	color_init(&(world->materials[6].color), 1.0f, 1.0f, 0.5f, 0.0f); //Orange 
 	
-	world->num_triangles = 10;
-	world->triangles = triangle_new(world->num_triangles);
+	//world->num_triangles = 10;
+	//world->triangles = triangle_new(world->num_triangles);
+	trs = world->triangles = triangle_list_new(10);
 
 	//left wall
+	TR_INIT(trs, 0, -8.0f, 0.0f, 0.0f, -8.0f, 9.0f, 0.0f, -8.0f, 9.0f, 5.0f);
+	TR_INIT(trs, 1, -8.0f, 0.0f, 0.0f, -8.0f, 9.0f, 5.0f, -8.0f, 0.0f, 5.0f);
+	trs->material_idx[0] = 0;
+	trs->material_idx[1] = 0;
 
+	//right wall
+	TR_INIT(trs, 2, 8.0f, 0.0f, 0.0f, 8.0f, 9.0f, 5.0f, 8.0f, 9.0f, 0.0f);
+	TR_INIT(trs, 3, 8.0f, 0.0f, 0.0f, 8.0f, 0.0f, 5.0f, 8.0f, 9.0f, 5.0f);
+	trs->material_idx[2] = 1;
+	trs->material_idx[3] = 1;
+
+	//back wall
+	TR_INIT(trs, 4, -8.0f, 9.0f, 5.0f, 8.0f, 9.0f, 5.0f, 8.0f, 0.0f, 5.0f);
+	TR_INIT(trs, 5, -8.0f, 9.0f, 5.0f, 8.0f, 9.0f, 5.0f, 8.0f, 0.0f, 5.0f);
+	trs->material_idx[4] = 3;
+	trs->material_idx[5] = 3;
+
+	//ceiling
+	TR_INIT(trs, 6, -8.0f, 9.0f, 5.0f, -8.0f, 9.0f, 0.0f, 8.0f, 9.0f, 0.0f);
+	TR_INIT(trs, 7, 8.0f, 9.0f, 0.0f, 8.0f, 9.0f, 5.0f, -8.0f, 9.0f, 5.0f);
+	trs->material_idx[6] = 3;
+	trs->material_idx[7] = 3;
+
+	//floor
+	TR_INIT(trs, 8, -8.0f, 0.0f, 5.0f, 8.0f, 0.0f, 0.0f, -8.0f, 0.0f, 0.0f);
+	TR_INIT(trs, 9, 8.0f, 0.0f, 0.0f, -8.0f, 0.0f, 5.0f, 8.0f, 0.0f, 5.0f);
+	trs->material_idx[8] = 3;
+	trs->material_idx[9] = 3;
+
+	/*
 	v3_init(&world->triangles[0].pt1, -8.0f, 0.0f, 0.0f);
 	v3_init(&world->triangles[0].pt2, -8.0f, 9.0f, 0.0f);
 	v3_init(&world->triangles[0].pt3, -8.0f, 9.0f, 5.0f);
 	world->triangles[0].material = &(world->materials[0]);
-
+	
 	triangle_update(&world->triangles[0]);
-
+	
 	v3_init(&world->triangles[1].pt1, -8.0f, 0.0f, 0.0f);
 	v3_init(&world->triangles[1].pt2, -8.0f, 9.0f, 5.0f);
 	v3_init(&world->triangles[1].pt3, -8.0f, 0.0f, 5.0f);
@@ -51,6 +87,7 @@ struct world* world_cornell()
 	world->triangles[2].material = &(world->materials[1]);
 
 	triangle_update(&world->triangles[2]);
+	
 
 	v3_init(&world->triangles[3].pt1, 8.0f, 0.0f, 0.0f);
 	v3_init(&world->triangles[3].pt2, 8.0f, 0.0f, 5.0f);
@@ -58,9 +95,10 @@ struct world* world_cornell()
 	world->triangles[3].material = &(world->materials[1]);
 
 	triangle_update(&world->triangles[3]);
+	*/
 
 	//back wall
-
+	/*
 	v3_init(&world->triangles[4].pt1, -8.0f, 9.0f, 5.0f);
 	v3_init(&world->triangles[4].pt2, 8.0f, 0.0f, 5.0f);
 	v3_init(&world->triangles[4].pt3, -8.0f, 0.0f, 5.0f);
@@ -74,9 +112,9 @@ struct world* world_cornell()
 	world->triangles[5].material = &(world->materials[3]);
 
 	triangle_update(&world->triangles[5]);
-
+	*/
 	//ceiling
-
+	/*
 	v3_init(&world->triangles[6].pt1, -8.0f, 9.0f, 5.0f);
 	v3_init(&world->triangles[6].pt2, -8.0f, 9.0f, 0.0f);
 	v3_init(&world->triangles[6].pt3, 8.0f, 9.0f, 0.0f);
@@ -90,9 +128,9 @@ struct world* world_cornell()
 	world->triangles[7].material = &(world->materials[3]);
 
 	triangle_update(&world->triangles[7]);
-
+	*/
 	//floor
-
+	/*
 	v3_init(&world->triangles[8].pt1, -8.0f, 0.0f, 5.0f);
 	v3_init(&world->triangles[8].pt2, 8.0f, 0.0f, 0.0f);
 	v3_init(&world->triangles[8].pt3, -8.0f, 0.0f, 0.0f);
@@ -106,7 +144,7 @@ struct world* world_cornell()
 	world->triangles[9].material = &(world->materials[3]);
 
 	triangle_update(&world->triangles[9]);
-	
+	*/
 
 	//Spheres
 	world->num_spheres = 3;
@@ -179,6 +217,7 @@ struct world* world_new()
 	scn->spheres[3].radius = 1000.0f;
 	scn->spheres[3].material = &(scn->materials[3]);
 
+	/*
 	scn->num_triangles = 1;
 	scn->triangles = triangle_new(scn->num_triangles);
 	v3_init(&scn->triangles[0].pt1, 4.0f, 0.0f, 0.10f);
@@ -187,7 +226,7 @@ struct world* world_new()
 	scn->triangles[0].material = &(scn->materials[1]);
 
 	triangle_update(&scn->triangles[0]);
-
+	*/
 
 	scn->num_point_lights = 1; //2;
 	scn->point_lights = point_light_new(scn->num_point_lights);
@@ -217,9 +256,10 @@ void world_del(struct world* scn)
 
 	if(scn->triangles)
 	{
-		triangle_del(scn->triangles);
+		//triangle_del(scn->triangles);
+		triangle_list_del(scn->triangles);
 		scn->triangles = 0;
-		scn->num_triangles = 0;
+		//scn->num_triangles = 0;
 	}
 
 	if (scn->point_lights)

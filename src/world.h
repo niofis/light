@@ -1,15 +1,16 @@
 #ifndef world_H
 #define world_H
 
+#include "triangle_list.h";
 
 struct world
 {
 	struct camera* camera;
-	struct triangle* triangles;
+	//struct triangle* triangles;
 	struct sphere* spheres;
 	struct point_light* point_lights;
 	struct material* materials;
-	int num_triangles;
+	struct triangle_list* triangles;
 	int num_spheres;
 	int num_point_lights;
 	int num_materials;

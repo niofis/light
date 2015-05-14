@@ -15,8 +15,8 @@ struct triangle_list {
   float* normal_x;
   float* normal_y;
   float* normal_z;
-  int material_idx;
-  int group_idx;
+  int* material_idx;
+  int* group_idx;
 };
 
 struct triangle_list* triangle_list_new(int count);

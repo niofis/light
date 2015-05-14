@@ -59,8 +59,8 @@ int find_any(struct ray* ray, struct world* world, float max_distance, struct in
 
 	struct sphere* spheres;
 	struct sphere* sphere;
-	struct triangle* triangles;
-	struct triangle* triangle;
+	struct triangle_list* triangles;
+	//struct triangle* triangle;
 	struct intersection its;
 
 	its.hit = 0;
