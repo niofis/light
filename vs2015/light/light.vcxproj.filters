@@ -69,6 +69,9 @@
     <ClCompile Include="..\..\src\world.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\vector3ps.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\camera.h">
@@ -121,6 +124,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\world.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vector3ps.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
