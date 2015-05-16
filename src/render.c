@@ -143,7 +143,8 @@ int find_closest(struct ray* ray, struct world* world, float max_distance, struc
 	struct intersection closest;
 
 	closest.hit = 0;
-	spheres = world->spheres;
+	/*
+    spheres = world->spheres;
 	for (int i = 0; i < world->num_spheres; ++i)
 	{
 		sphere = &(spheres[i]);
@@ -185,10 +186,12 @@ int find_closest(struct ray* ray, struct world* world, float max_distance, struc
 			}			
 		}
 	}
+    
 
 	memcpy(result, &closest, sizeof(struct intersection));
 	
 	return closest.hit;
+    */
 }
 
 //returns color

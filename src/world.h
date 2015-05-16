@@ -1,7 +1,7 @@
 #ifndef world_H
 #define world_H
 
-#include "triangle_list.h";
+#include "triangle_list.h"
 
 struct world
 {

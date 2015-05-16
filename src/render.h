@@ -17,6 +17,8 @@ struct intersection
 	float hit_z;
 	float distance;
 	int material_id;
+    int group_id;
+    int object_id;
 	int hit;
 };
 

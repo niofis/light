@@ -21,6 +21,6 @@ struct triangle_list {
 
 struct triangle_list* triangle_list_new(int count);
 void triangle_list_del(struct triangle_list* list);
-
+void triangle_list_update_all(struct triangle_list* list);
 
 #endif

@@ -49,4 +49,42 @@ void triangle_list_del(struct triangle_list* list)
 	free(list);
 }
 
+void triangle_list_update_all(struct triangle_list* list)
+{
 
+  	/*
+    v3_sub(&triangle->edge1, &triangle->pt2, &triangle->pt1);
+	v3_sub(&triangle->edge2, &triangle->pt3, &triangle->pt1);
+	v3_cross(&triangle->normal, &triangle->edge1, &triangle->edge2);
+	v3_normalize(&triangle->normal);
+    */
+    for(int i = 0; i < list->count; ++i)
+    {
+      float norm;
+
+      //edge1
+      list->v2_x[i] -= list->v1_x[i]
+      list->v2_y[i] -= list->v1_y[i]
+      list->v2_z[i] -= list->v1_z[i]
+
+      //edge2
+      list->v3_x[i] -= list->v1_x[i]
+      list->v3_y[i] -= list->v1_y[i]
+      list->v3_z[i] -= list->v1_z[i]
+
+      //normal
+      //cross product
+      list->normal_x[i] = list->v2_y[i] * list->v3_y[i] - list->v2_z[i] * list->v3_y[i];
+      list->normal_y[i] = list->v2_z[i] * list->v3_x[i] - list->v2_x[i] * list->v3_z[i];
+      list->normal_z[i] = list->v2_x[1] * list->v3_y[i] - list->v2_y[i] * list->v3_x[i];
+      
+      //norm
+      norm = sqrt(list->normal_x[i] * list->normal_x[i] +
+                  list->normal_y[i] * list->normal_y[i] +
+                  list->normal_z[i] * list->normal_z[i]);
+      
+      list->normal_x[i] /= norm;
+      list->normal_y[i] /= norm;
+      list->normal_z[i] /= norm;
+    }
+}

@@ -64,6 +64,7 @@ struct world* world_cornell()
 	trs->material_idx[8] = 3;
 	trs->material_idx[9] = 3;
 
+    triangle_list_update_all(trs);
 	/*
 	v3_init(&world->triangles[0].pt1, -8.0f, 0.0f, 0.0f);
 	v3_init(&world->triangles[0].pt2, -8.0f, 9.0f, 0.0f);
