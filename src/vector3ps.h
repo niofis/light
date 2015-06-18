@@ -2,6 +2,7 @@
 //Vector3 packed single precision
 #ifndef VECTOR3PS
 #define VECTOR3PS
+#include "arrow.h"
 
 struct v3ps
 {
@@ -9,7 +10,7 @@ struct v3ps
   float* y;
   float* z;
   int count;
-}
+};
 
 
 struct v3ps* vector3ps_new(int count);

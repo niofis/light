@@ -40,11 +40,14 @@
     <ClCompile Include="..\..\src\world.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\almalloc.h" />
+    <ClInclude Include="..\..\src\arrow.h" />
     <ClInclude Include="..\..\src\camera.h" />
     <ClInclude Include="..\..\src\color.h" />
     <ClInclude Include="..\..\src\debug.h" />
     <ClInclude Include="..\..\src\job.h" />
     <ClInclude Include="..\..\src\material.h" />
+    <ClInclude Include="..\..\src\memory.h" />
     <ClInclude Include="..\..\src\point_light.h" />
     <ClInclude Include="..\..\src\ppm.h" />
     <ClInclude Include="..\..\src\primitive.h" />

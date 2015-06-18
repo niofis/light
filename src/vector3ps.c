@@ -8,43 +8,33 @@ struct v3ps* vector3ps_new(int count)
 
   vec = (struct v3ps*) aligned_malloc(16, sizeof(struct v3ps));
 
-  vec->x = (float *) aligned_malloc(16, sizeof(float) * count);
-  vec->y = (float *) aligned_malloc(16, sizeof(float) * count);
-  vec->z = (float *) alogned_malloc(16, sizeof(float) * count);
+  vec->x = arr_ps_new(count);
+  vec->y = arr_ps_new(count);
+  vec->z = arr_ps_new(count);
 
   return vec;
 }
 
 void v3ps_del(struct v3ps* vec)
 {
-  aligned_free(vec->x);
-  aligned_free(vec->y);
-  aligned_free(vec->z);
+  arr_ps_del(vec->x);
+  arr_ps_del(vec->y);
+  arr_ps_del(vec->z);
   aligned_free(vec);
 }
 
 void v3ps_add(struct v3ps* dest, struct v3ps* v1, struct v3ps* v2)
 {
-  int count = v1->count;
-  
-  for(int i = 0; i < count; ++i)
-  {
-    dest->x[i] = v1->x[i] + v2->x[i];
-    dest->y[i] = v1->y[i] + v2->y[i];
-    dest->z[i] = v1->z[i] + v2->z[i];
-  }
+  arr_ps_add(dest->x, v1->x, v2->x);
+  arr_ps_add(dest->y, v1->y, v2->y);
+  arr_ps_add(dest->z, v1->z, v2->z);
 }
 
 void v3ps_sub(struct v3ps* dest, struct v3ps* v1, struct v3ps* v2)
 {
-  int count = v1->count;
-
-  for(int i = 0; i < count; ++i)
-  {
-    dest->x[i] = v1->x[i] - v2->x[i];
-    dest->y[i] = v1->y[i] - v2->y[i];
-    dest->z[i] = v1->z[i] - v2->z[i];
-  }
+  arr_ps_sub(dest->x, v1->x, v2->x);
+  arr_ps_sub(dest->y, v1->y, v2->y);
+  arr_ps_sub(dest->z, v1->z, v2->z);
 }
 
 void v3ps_norm(float* n, struct v3ps* v1)
