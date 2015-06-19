@@ -44,6 +44,28 @@ void arr_ps_del(void* arr)
   aligned_free(ptr);
 }
 
+void arr_ps_copy(float* dest, float* arr1)
+{
+  const struct arr_desc* = arr_desc_get(arr1);
+  const uint32_t size = desc->length;
+  int i = 0;
+
+  for (i = 0; i < size; ++i)
+  {
+    dest[i] = arr1[i];
+  }
+}
+
+float* arr_ps_clone(float* arr1)
+{
+  const struct arr_desc* = arr_desc_get(arr1);
+  float* clone = arr_ps_new(desc->length);
+  
+  arr_ps_copy(clone, arr1);
+
+  return clone;
+}
+
 struct arr_desc* arr_desc_get(void* arr)
 {
   return (struct arr_desc*)arr - 1;
