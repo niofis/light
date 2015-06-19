@@ -83,6 +83,14 @@ void v3ps_cross(struct v3ps* dest, struct v3ps* v1, struct v3ps* v2)
 
   for(int i = 0; i < count; ++i)
   {
-    
+    float x1 = v1->x,
+          y1 = v1->y,
+          z1 = v1->z,
+          x2 = v2->x,
+          y2 = v2->y,
+          z2 = v2->z;
+    dest[i]->x = y1 * z2 - z1 * y2;
+    dest[i]->y = z1 * x2 - x1 * z2;
+    dest[i]->z = x1 * y2 - y1 * x2;
   }
 }
