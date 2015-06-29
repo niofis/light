@@ -6,7 +6,6 @@
 struct world
 {
 	struct camera* camera;
-	//struct triangle* triangles;
 	struct sphere* spheres;
 	struct point_light* point_lights;
 	struct material* materials;

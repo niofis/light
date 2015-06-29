@@ -60,7 +60,6 @@ int find_any(struct ray* ray, struct world* world, float max_distance, struct in
 	struct sphere* spheres;
 	struct sphere* sphere;
 	struct triangle_list* triangles;
-	//struct triangle* triangle;
 	struct intersection its;
 
 	its.hit = 0;
@@ -78,7 +77,7 @@ int find_any(struct ray* ray, struct world* world, float max_distance, struct in
 	if(its.hit == 0)
 	{
 		triangles = world->triangles;
-		for(int i = 0; i < world->num_triangles; ++i)
+		for(int i = 0; i < triangles->count; ++i)
 		{
 			triangle = &(triangles[i]);
 			triangle_intersects(triangle, ray, &its);
