@@ -1,4 +1,4 @@
-camera.o: ../src/camera.c ../src/camera.h ../src/vector3.h
+camera.o: ../src/camera.c ../src/camera.h
 color.o: ../src/color.c ../src/color.h
 debug.o: ../src/debug.c
 job.o: ../src/job.c ../src/job.h ../src/world.h
@@ -17,7 +17,7 @@ render.o: ../src/render.c ../src/material.h ../src/color.h \
  ../src/ray.h ../src/camera.h ../src/sphere.h ../src/triangle.h \
  ../src/point_light.h
 world.o: ../src/world.c ../src/world.h ../src/material.h ../src/color.h \
- ../src/camera.h ../src/vector3.h ../src/sphere.h ../src/render.h \
+ ../src/camera.h ../src/sphere.h ../src/vector3.h ../src/render.h \
  ../src/job.h ../src/ray.h ../src/point_light.h ../src/triangle.h
 vector3.o: ../src/vector3.c ../src/vector3.h
 material.o: ../src/material.c ../src/material.h ../src/color.h
