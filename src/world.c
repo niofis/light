@@ -108,24 +108,6 @@ struct world* world_cornell()
 	triangle_update(&world->triangles[9]);
 	
 
-	//Spheres
-	world->num_spheres = 3;
-	world->spheres = sphere_new(world->num_spheres);
-
-	v3_init(&world->spheres[0].center, 2.0f, 0.0f, 1.0f);
-	world->spheres[0].radius = 1.0f;
-	world->spheres[0].material = &(world->materials[4]);
-
-	v3_init(&world->spheres[1].center, -2.0f, 0.0f, 1.0f);
-	world->spheres[1].radius = 1.0f;
-	world->spheres[1].material = &(world->materials[6]);
-
-	v3_init(&world->spheres[2].center, 0.0f, 2.0f, 1.0f);
-	world->spheres[2].radius = 1.0f;
-	world->spheres[2].material = &(world->materials[2]);
-
-
-
 	//Lights
 	world->num_point_lights = 1; //2;
 	world->point_lights = point_light_new(world->num_point_lights);
@@ -160,25 +142,6 @@ struct world* world_new()
 	color_init(&(scn->materials[6].color), 1.0f, 1.0f, 0.5f, 0.0f); //Orange 
 
 	
-	scn->num_spheres = 4;
-	scn->spheres = sphere_new(scn->num_spheres);
-	
-	v3_init(&scn->spheres[0].center, 2.0f, 0.0f, 0.0f);
-	scn->spheres[0].radius = 1.0f;
-	scn->spheres[0].material = &(scn->materials[0]);
-	
-	v3_init(&scn->spheres[1].center, -2.0f, 0.0f, 0.0f);
-	scn->spheres[1].radius = 1.0f;
-	scn->spheres[1].material = &(scn->materials[1]);
-
-	v3_init(&scn->spheres[2].center, 0.0f, 2.0f, 0.0f);
-	scn->spheres[2].radius = 1.0f;
-	scn->spheres[2].material = &(scn->materials[2]);
-
-	v3_init(&scn->spheres[3].center, 0.0f, -1001.0f, 0.0f);
-	scn->spheres[3].radius = 1000.0f;
-	scn->spheres[3].material = &(scn->materials[3]);
-
 	scn->num_triangles = 1;
 	scn->triangles = triangle_new(scn->num_triangles);
 	v3_init(&scn->triangles[0].pt1, 4.0f, 0.0f, 0.10f);
@@ -206,13 +169,6 @@ void world_del(struct world* scn)
 	{
 		camera_del(scn->camera);
 		scn->camera = 0;
-	}
-
-	if (scn->spheres)
-	{
-		sphere_del(scn->spheres);
-		scn->spheres = 0;
-		scn->num_spheres = 0;
 	}
 
 	if(scn->triangles)

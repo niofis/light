@@ -65,16 +65,6 @@ int find_any(struct ray* ray, struct world* world, float max_distance, struct in
 
 	its.hit = 0;
 
-	spheres = world->spheres;
-	for (int i = 0; i < world->num_spheres; ++i)
-	{
-		sphere = &(spheres[i]);
-		sphere_intersects(sphere, ray, &its);
-		if (its.hit && its.distance < max_distance && its.distance > 0.001f) {
-			break;
-		}
-	}
-
 	if(its.hit == 0)
 	{
 		triangles = world->triangles;
@@ -135,36 +125,12 @@ void shading(struct world* world, struct intersection* trace, struct color* colo
 
 int find_closest(struct ray* ray, struct world* world, float max_distance, struct intersection* result)
 {
-	struct sphere* spheres;
-	struct sphere* sphere;
 	struct triangle* triangle;
 	struct triangle* triangles;
 	struct intersection its;
 	struct intersection closest;
 
 	closest.hit = 0;
-	spheres = world->spheres;
-	for (int i = 0; i < world->num_spheres; ++i)
-	{
-		sphere = &(spheres[i]);
-		sphere_intersects(sphere, ray, &its);
-		if (its.hit && its.distance > 0.001f) 
-		{
-			if (closest.hit == 0 || its.distance < closest.distance) {
-				
-
-				v3_mul_scalar(&its.hit_point, &ray->direction, its.distance);				
-				v3_add(&its.hit_point, &its.hit_point, &ray->origin);
-
-
-				v3_sub(&its.normal, &its.hit_point, &sphere->center);
-				v3_normalize(&its.normal);
-
-				memcpy(&closest, &its, sizeof(struct intersection));
-				closest.material = sphere->material; 
-			}
-		}
-	}
 
 	triangles = world->triangles;
 	for(int i = 0; i < world->num_triangles; ++i)

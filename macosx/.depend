@@ -1,0 +1,71 @@
+camera.o: ../src/camera.c ../include/camera.h ../include/vector3.h
+color.o: ../src/color.c ../include/color.h
+debug.o: ../src/debug.c
+job.o: ../src/job.c ../include/job.h ../include/world.h
+main_gui.o: ../src/main_gui.c /usr/local/include/SDL2/SDL.h \
+  /usr/local/include/SDL2/SDL_main.h \
+  /usr/local/include/SDL2/SDL_stdinc.h \
+  /usr/local/include/SDL2/SDL_config.h \
+  /usr/local/include/SDL2/SDL_platform.h \
+  /usr/local/include/SDL2/begin_code.h \
+  /usr/local/include/SDL2/close_code.h \
+  /usr/local/include/SDL2/SDL_assert.h \
+  /usr/local/include/SDL2/SDL_atomic.h \
+  /usr/local/include/SDL2/SDL_audio.h \
+  /usr/local/include/SDL2/SDL_error.h \
+  /usr/local/include/SDL2/SDL_endian.h \
+  /usr/local/include/SDL2/SDL_mutex.h \
+  /usr/local/include/SDL2/SDL_thread.h \
+  /usr/local/include/SDL2/SDL_rwops.h \
+  /usr/local/include/SDL2/SDL_clipboard.h \
+  /usr/local/include/SDL2/SDL_cpuinfo.h \
+  /usr/local/include/SDL2/SDL_events.h \
+  /usr/local/include/SDL2/SDL_video.h \
+  /usr/local/include/SDL2/SDL_pixels.h \
+  /usr/local/include/SDL2/SDL_rect.h \
+  /usr/local/include/SDL2/SDL_surface.h \
+  /usr/local/include/SDL2/SDL_blendmode.h \
+  /usr/local/include/SDL2/SDL_keyboard.h \
+  /usr/local/include/SDL2/SDL_keycode.h \
+  /usr/local/include/SDL2/SDL_scancode.h \
+  /usr/local/include/SDL2/SDL_mouse.h \
+  /usr/local/include/SDL2/SDL_joystick.h \
+  /usr/local/include/SDL2/SDL_gamecontroller.h \
+  /usr/local/include/SDL2/SDL_quit.h \
+  /usr/local/include/SDL2/SDL_gesture.h \
+  /usr/local/include/SDL2/SDL_touch.h \
+  /usr/local/include/SDL2/SDL_filesystem.h \
+  /usr/local/include/SDL2/SDL_haptic.h \
+  /usr/local/include/SDL2/SDL_hints.h \
+  /usr/local/include/SDL2/SDL_loadso.h /usr/local/include/SDL2/SDL_log.h \
+  /usr/local/include/SDL2/SDL_messagebox.h \
+  /usr/local/include/SDL2/SDL_power.h \
+  /usr/local/include/SDL2/SDL_render.h \
+  /usr/local/include/SDL2/SDL_system.h \
+  /usr/local/include/SDL2/SDL_timer.h \
+  /usr/local/include/SDL2/SDL_version.h ../include/timer.h \
+  ../include/ppm.h ../include/job.h ../include/world.h \
+  ../include/render.h ../include/material.h ../include/color.h \
+  ../include/vector3.h ../include/ray.h
+point_light.o: ../src/point_light.c ../include/point_light.h \
+  ../include/vector3.h ../include/color.h
+ppm.o: ../src/ppm.c ../include/ppm.h
+ray.o: ../src/ray.c ../include/ray.h ../include/vector3.h
+render.o: ../src/render.c ../include/material.h ../include/color.h \
+  ../include/vector3.h ../include/job.h ../include/world.h \
+  ../include/render.h ../include/ray.h ../include/camera.h \
+  ../include/sphere.h ../include/triangle.h ../include/point_light.h
+world.o: ../src/world.c ../include/world.h ../include/material.h \
+  ../include/color.h ../include/camera.h ../include/vector3.h \
+  ../include/sphere.h ../include/render.h ../include/job.h \
+  ../include/ray.h ../include/point_light.h ../include/triangle.h
+vector3.o: ../src/vector3.c ../include/vector3.h
+material.o: ../src/material.c ../include/material.h ../include/color.h
+timer.o: ../src/timer.c ../include/timer.h
+triangle.o: ../src/triangle.c ../include/triangle.h ../include/vector3.h \
+  ../include/material.h ../include/color.h ../include/ray.h \
+  ../include/render.h ../include/job.h ../include/world.h
+primitive.o: ../src/primitive.c ../include/primitive.h \
+  ../include/triangle.h ../include/vector3.h ../include/material.h \
+  ../include/color.h ../include/ray.h ../include/render.h \
+  ../include/job.h ../include/world.h ../include/sphere.h
