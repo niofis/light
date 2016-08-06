@@ -21,8 +21,6 @@
 
 int gui_init()
 {
-  int video_flags = SDL_SWSURFACE;
-  int bpp = 32;
   int running = 1;
   SDL_Window *window;
   SDL_Renderer *renderer;

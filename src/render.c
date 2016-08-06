@@ -8,7 +8,6 @@
 #include "ray.h"
 #include "world.h"
 #include "camera.h"
-#include "sphere.h"
 #include "triangle.h"
 #include "point_light.h"
 
@@ -57,8 +56,6 @@ void getray(struct ray* ray, int x, int y, struct job_desc* job)
 int find_any(struct ray* ray, struct world* world, float max_distance, struct intersection* result)
 {
 
-	struct sphere* spheres;
-	struct sphere* sphere;
 	struct triangle* triangles;
 	struct triangle* triangle;
 	struct intersection its;

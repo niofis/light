@@ -190,3 +190,4 @@ FakesAssemblies/
 *.swo
 
 light
+.depend
