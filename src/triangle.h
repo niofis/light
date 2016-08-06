@@ -1,12 +1,11 @@
-#ifndef TRIANGLE_H
-#define TRIANGLE_H
+#pragma once
 
 #include "vector3.h"
 #include "material.h"
 #include "ray.h"
 #include "render.h"
 
-struct triangle
+typedef struct
 {
 	struct vector3 pt1;
 	struct vector3 pt2;
@@ -16,10 +15,9 @@ struct triangle
 	struct vector3 edge2;
 	struct vector3 normal;
 	struct material* material;
-};
+} triangle;
 
-struct triangle* triangle_new(int count);
-void triangle_del(struct triangle* triangle);
-int triangle_intersects(struct triangle* triangle, struct ray* ray, struct intersection* result);
-void triangle_update(struct triangle* triangle);
-#endif
+triangle* triangle_new(int count);
+void triangle_destroy(triangle **tr);
+int triangle_intersects(triangle *tr, struct ray *ray, struct intersection *result);
+void triangle_update(triangle *tr);

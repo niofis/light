@@ -1,26 +1,24 @@
-#ifndef TRIANGLE_LIST
-#define TRIANGLE_LIST
+#pragma once
 
-struct triangle_list {
-  int count;
-  float* v1_x;
-  float* v1_y;
-  float* v1_z;
-  float* v2_x;
-  float* v2_y;
-  float* v2_z;
-  float* v3_x;
-  float* v3_y;
-  float* v3_z;
-  float* normal_x;
-  float* normal_y;
-  float* normal_z;
-  int material_idx;
-  int group_idx;
-};
+#include "triangle.h"
 
-struct triangle_list* triangle_list_new(int count);
-void triangle_list_del(struct triangle_list* list);
+typedef struct {
+  triangle *triangle;
+  tr_node *next;
+} tr_node;
 
+typedef struct {
+  size_t length;
+  tr_node *head;
+  tr_node *tail;
+} triangle_list;
 
-#endif
+triangle_list*
+  triangle_list_new(size_t count);
+
+void
+  triangle_list_destroy(triangle_list **list);
+
+const tr_node*
+  triangle_list_iterator(triangle_list *list);
+

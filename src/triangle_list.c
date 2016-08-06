@@ -1,19 +1,29 @@
+#include <stdlib.h>
 #include "triangle_list.h"
 
-struct triangle_list* triangle_list_new(int count)
+triangle_list*
+triangle_list_new(int count)
 {
-  struct triangle_list* list;
-
-  list = (struct triangle_list*) malloc(sizeof(struct triangle_list)); 
-
-//have to init each array to the count size e¡specified
-
+  triangle_list *list = (triangle_list*) malloc(sizeof(triangle_list));
   return list;
 }
 
-void triangle_list_del(struct triangle_list* list)
+void
+triangle_list_destroy(triangle_list **list)
+{
+  tr_node *node = *list->head;
+  while(node) {
+    triangle_destroy(*node->triangle);
+    node = node->next;
+  }
+  *list->head = NULL;
+  *list->tail = NULL;
+  free(*list);
+  *list = NULL;
+}
+
+const tr_node*
+triangle_list_iterator(triangle_list *list)
 {
 
 }
-
-
