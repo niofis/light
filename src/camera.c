@@ -2,36 +2,39 @@
 #include "camera.h"
 
 
-struct camera* camera_new()
+camera_t*
+camera_new()
 {
-	struct camera* cmr;
+	camera_t* camera;
 
-	cmr = (struct camera*) malloc(sizeof(struct camera));
+	camera = (camera_t*) malloc(sizeof(camera_t));
 
-	cmr->left_top.x = -8.0f;
-	cmr->left_top.y = 9.0f;
-	cmr->left_top.z = -50.0f;
+	camera->left_top.x = -8.0f;
+	camera->left_top.y = 9.0f;
+	camera->left_top.z = -50.0f;
 
-	cmr->right_top.x = 8.0f;
-	cmr->right_top.y = 9.0f;
-	cmr->right_top.z = -50.0f;
+	camera->right_top.x = 8.0f;
+	camera->right_top.y = 9.0f;
+	camera->right_top.z = -50.0f;
 
-	cmr->left_bottom.x = -8.0f;
-	cmr->left_bottom.y = 0.0f;
-	cmr->left_bottom.z = -50.0f;
+	camera->left_bottom.x = -8.0f;
+	camera->left_bottom.y = 0.0f;
+	camera->left_bottom.z = -50.0f;
 
-	cmr->eye.x = 0.0f;
-	cmr->eye.y = 4.5f;
-	cmr->eye.z = -75.0f;
+	camera->eye.x = 0.0f;
+	camera->eye.y = 4.5f;
+	camera->eye.z = -75.0f;
 
-	return cmr;
+	return camera;
 }
 
-void camera_del(struct camera* cmr)
+void
+camera_destroy(camera_t **camera)
 {
-	if (cmr)
+	if (*camera)
 	{
-		free(cmr);
+		free(*camera);
+        *camera = NULL;
 	}
 }
 

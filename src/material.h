@@ -1,14 +1,13 @@
-#ifndef MATERIAL_H
-#define MATERIAL_H
-
+#pragma once
 #include "color.h"
 
-struct material
+typedef struct
 {
-	struct color color;
-};
+	color_t color;
+} material_t;
 
-struct material* material_new(int number);
-void material_del(struct material* material);
+material_t*
+  material_new(int number);
 
-#endif
+void
+material_destroy(material_t **material);

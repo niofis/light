@@ -1,8 +1,10 @@
 #include "color.h"
 
-int color_to_argb(struct color* color)
+int
+color_to_argb(color_t *color)
 {
 	int argb = 0;
+    
 	argb = (int) ((color->a < 1.0f ? color->a : 1.0f) * 255);
 	argb = argb << 8;
 	argb |= (int) ((color->r < 1.0f ? color->r : 1.0f) * 255);
@@ -14,31 +16,36 @@ int color_to_argb(struct color* color)
 	return argb;
 }
 
-void color_init(struct color* color, float a, float r, float g, float b)
+void
+color_set_argb(color_t *color, float a, float r, float g, float b)
 {
 	color->a = a;
 	color->r = r;
 	color->g = g;
 	color->b = b;
 }
-void color_mul_scalar(struct color* res, struct color* color, float s)
+
+void
+color_mul_scalar(color_t *dest, const color_t *color, float s)
 {
-	res->a = color->a;
-	res->r = color->r * s;
-	res->g = color->g * s;
-	res->b = color->b * s;
+	dest->a = color->a;
+	dest->r = color->r * s;
+	dest->g = color->g * s;
+	dest->b = color->b * s;
 }
 
-void color_add(struct color* res, struct color* c1, struct color* c2)
+void
+color_add(color_t *dest, const color_t *c1, const color_t *c2)
 {
-	res->r = c1->r + c2->r;
-	res->g = c1->g + c2->g;
-	res->b = c1->b + c2->b;
+	dest->r = c1->r + c2->r;
+	dest->g = c1->g + c2->g;
+	dest->b = c1->b + c2->b;
 }
 
-void color_mul(struct color* res, struct color* c1, struct color* c2)
+void
+color_mul(color_t *dest, const color_t *c1, const color_t *c2)
 {
-	res->r = c1->r * c2->r;
-	res->g = c1->g * c2->g;
-	res->b = c1->b * c2->b;
+	dest->r = c1->r * c2->r;
+	dest->g = c1->g * c2->g;
+	dest->b = c1->b * c2->b;
 }

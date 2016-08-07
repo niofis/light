@@ -1,24 +1,47 @@
-#ifndef VECTOR3_H
-#define VECTOR3_H
+#pragma once
 
-struct vector3
+typedef struct 
 {
 	float x;
 	float y;
 	float z;
-};
+} v3_t;
 
-struct vector3* v3_new();
-void v3_del(struct vector3* v1);
-void v3_init(struct vector3*, float x, float y, float z);
-void v3_copy(struct vector3* dest, struct vector3* src);
-void v3_add(struct vector3* res, struct vector3* v1, struct vector3* v2);
-void v3_sub(struct vector3* res, struct vector3* v1, struct vector3* v2);
-float v3_dot(struct vector3* v1, struct vector3* v2);
-void v3_cross(struct vector3* res, struct vector3* v1, struct vector3* v2);
-float v3_norm(struct vector3* v1);
-void v3_normalize(struct vector3* v1);
-void v3_mul_scalar(struct vector3* dest, struct vector3* v1, float f);
-void v3_div_scalar(struct vector3* dest, struct vector3* v1, float f);
+v3_t*
+  v3_new();
 
-#endif
+v3_t*
+  v3_new_xyz(float x, float y, float z);
+
+void
+  v3_destroy(v3_t **v1);
+
+void
+  v3_set_xyz(v3_t *dest, float x, float y, float z);
+
+void
+  v3_copy(v3_t *dest, const v3_t *src);
+
+void
+  v3_add(v3_t *dest, const v3_t *v1, const v3_t *v2);
+
+void
+  v3_sub(v3_t *dest, const v3_t *v1, const v3_t *v2);
+
+float
+  v3_dot(const v3_t *v1, const v3_t *v2);
+
+void
+  v3_cross(v3_t *dest, const v3_t *v1, const v3_t *v2);
+
+float
+  v3_norm(const v3_t *v1);
+
+void
+  v3_normalize(v3_t *v1);
+
+void
+  v3_mul_scalar(v3_t *dest, const v3_t *v1, float f);
+
+void
+  v3_div_scalar(v3_t *dest, const v3_t *v1, float f);

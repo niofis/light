@@ -1,24 +1,28 @@
 #include <stdlib.h>
 #include "triangle.h"
 
-struct triangle* triangle_new(int count)
+triangle_t*
+triangle_new(int count)
 {
-	struct triangle* triangles;
+	triangle_t* triangles;
 
-	triangles = (struct triangle*) malloc(sizeof(struct triangle) * count);
+	triangles = (triangle_t*) malloc(sizeof(triangle_t) * count);
 
 	return triangles;
 }
 
-void triangle_del(struct triangle* triangle)
+void
+triangle_destroy(triangle_t **triangle)
 {
-	if(triangle)
+	if(*triangle)
 	{
-		free(triangle);
+		free(*triangle);
+        *triangle = NULL;
 	}
 }
 
-void triangle_update(struct triangle* triangle)
+void
+triangle_update(triangle_t* triangle)
 {
 	v3_sub(&triangle->edge1, &triangle->pt2, &triangle->pt1);
 	v3_sub(&triangle->edge2, &triangle->pt3, &triangle->pt1);
@@ -26,13 +30,14 @@ void triangle_update(struct triangle* triangle)
 	v3_normalize(&triangle->normal);
 }
 
-int triangle_intersects(struct triangle* triangle, struct ray* ray, struct intersection* result)
+int
+triangle_intersects(const triangle_t *triangle, const ray_t *ray, intersection_t *result)
 {
-	struct vector3* edge1;
-	struct vector3* edge2;
-	struct vector3 tvec;
-	struct vector3 pvec;
-	struct vector3 qvec;
+	const v3_t* edge1;
+    const v3_t* edge2;
+	v3_t tvec;
+	v3_t pvec;
+	v3_t qvec;
 	float det;
 	float inv_det;
 	float t;
@@ -80,9 +85,9 @@ int triangle_intersects(struct triangle* triangle, struct ray* ray, struct inter
 
 	/*
 	v3_copy(&result->normal, &triangle->normal);
-	v3_copy(&result->hit_point, &ray->direction);
+	v3_copy(&result->hit_point, &r->direction);
 	v3_mul_scalar(&result->hit_point, t);
-	v3_add(&result->hit_point, &result->hit_point, &ray->origin);
+	v3_add(&result->hit_point, &result->hit_point, &r->origin);
 	*/
 	return 1;
 }

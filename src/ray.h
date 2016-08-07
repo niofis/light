@@ -1,15 +1,15 @@
-#ifndef RAY_H
-#define RAY_H
+#pragma once
 
 #include "vector3.h"
 
-struct ray
+typedef struct
 {
-	struct vector3 direction;
-	struct vector3 origin;
-};
+	v3_t direction;
+	v3_t origin;
+} ray_t;
 
-struct ray* ray_new();
-void ray_delete();
+ray_t*
+  ray_new();
 
-#endif
+void
+  ray_destroy(ray_t **ray);

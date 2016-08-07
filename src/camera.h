@@ -1,17 +1,17 @@
-#ifndef CAMERA_H
-#define CAMERA_H
+#pragma once
 
 #include "vector3.h"
 
-struct camera
+typedef struct
 {
-	struct vector3 left_top;
-	struct vector3 left_bottom;
-	struct vector3 right_top;
-	struct vector3 eye;
-};
+	v3_t left_top;
+	v3_t left_bottom;
+	v3_t right_top;
+	v3_t eye;
+} camera_t;
 
-struct camera* camera_new();
-void camera_del(struct camera*);
+camera_t*
+  camera_new();
 
-#endif
+void
+  camera_destroy(camera_t **camera);

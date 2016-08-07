@@ -26,7 +26,7 @@ int gui_init()
   SDL_Renderer *renderer;
   SDL_Texture *texture;
   SDL_Event event;
-  struct job_desc* job;
+  job_t *job;
   struct timer timer;
 
   job = job_new();
@@ -100,7 +100,7 @@ int gui_init()
   
   SDL_Quit();
   
-  job_del(job);
+  job_destroy(&job);
 
   return 0;
 }

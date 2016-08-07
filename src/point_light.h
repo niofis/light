@@ -1,16 +1,17 @@
-#ifndef POINTLIGHT_H
-#define POINTLIGHT_H
+#pragma once
 
 #include "vector3.h"
 #include "color.h"
 
-struct point_light
+typedef struct
 {
-	struct vector3 position;
-	struct color color;
-};
+	v3_t position;
+	color_t color;
+} point_light_t;
 
-struct point_light* point_light_new(int num);
-void point_light_del(struct point_light* point_light);
+point_light_t*
+  point_light_new(int num);
 
-#endif
+void
+  point_light_destroy(point_light_t **point_light);
+

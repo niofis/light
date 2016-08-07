@@ -1,18 +1,21 @@
-#ifndef SPHERE_H
-#define SPHERE_H
+#pragma once
 #include "vector3.h"
-#include "render.h"
 #include "ray.h"
 #include "material.h"
+#include "intersection.h"
 
-struct sphere
+typedef struct
 {
-	struct vector3 center;
-	struct material* material;
+	v3_t center;
+	material_t *material;
 	float radius;
-};
+} sphere_t;
 
-struct sphere* sphere_new(int count);
-void sphere_del(struct sphere* sphere);
-int sphere_intersects(struct sphere* sphere, struct ray* ray, struct intersection* result);
-#endif
+sphere_t*
+  sphere_new(int count);
+
+void
+  sphere_destroy(sphere_t **sphere);
+
+int
+  sphere_intersects(sphere_t *sphere, ray_t *ray, intersection_t *result);

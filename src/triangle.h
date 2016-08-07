@@ -3,21 +3,28 @@
 #include "vector3.h"
 #include "material.h"
 #include "ray.h"
-#include "render.h"
+#include "intersection.h"
 
 typedef struct
 {
-	struct vector3 pt1;
-	struct vector3 pt2;
-	struct vector3 pt3;
-	struct vector3 v1;
-	struct vector3 edge1;
-	struct vector3 edge2;
-	struct vector3 normal;
-	struct material* material;
-} triangle;
+	v3_t pt1;
+	v3_t pt2;
+	v3_t pt3;
+	v3_t v1;
+	v3_t edge1;
+	v3_t edge2;
+	v3_t normal;
+	material_t *material;
+} triangle_t;
 
-triangle* triangle_new(int count);
-void triangle_destroy(triangle **tr);
-int triangle_intersects(triangle *tr, struct ray *ray, struct intersection *result);
-void triangle_update(triangle *tr);
+triangle_t*
+  triangle_new(int count);
+
+void
+  triangle_destroy(triangle_t **triangle);
+
+int
+  triangle_intersects(const triangle_t *triangle, const ray_t *ray, intersection_t *result);
+
+void
+  triangle_update(triangle_t *tr);

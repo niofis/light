@@ -1,15 +1,15 @@
 #include <stdlib.h>
 #include "triangle_list.h"
 
-triangle_list*
+triangle_list_t*
 triangle_list_new(int count)
 {
-  triangle_list *list = (triangle_list*) malloc(sizeof(triangle_list));
+  triangle_list_t *list = (triangle_list*) malloc(sizeof(triangle_list_t));
   return list;
 }
 
 void
-triangle_list_destroy(triangle_list **list)
+triangle_list_destroy(triangle_list_t **list)
 {
   tr_node *node = *list->head;
   while(node) {
@@ -22,8 +22,20 @@ triangle_list_destroy(triangle_list **list)
   *list = NULL;
 }
 
-const tr_node*
-triangle_list_iterator(triangle_list *list)
+const tr_node_t*
+triangle_list_head(const triangle_list_t *list)
 {
+  return list->head;
+}
 
+const tr_node_t*
+triangle_list_next(const tr_node_t *node)
+{
+  return node->next;
+}
+
+const tr_node_t*
+triangle_list_tail(const triangle_list_t *list)
+{
+  return list->tail;
 }

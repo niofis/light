@@ -10,11 +10,14 @@
 #include "camera.h"
 #include "triangle.h"
 #include "point_light.h"
+#include "intersection.h"
 
-struct vector3 vdu;
-struct vector3 vdv;
+//not thread safe :(
+v3_t vdu;
+v3_t vdv;
 
-void init_delta_vectors(struct job_desc* job)
+void
+init_delta_vectors(job_t *job)
 {
 	v3_sub(&vdu,
 		&job->world->camera->right_top,
@@ -28,10 +31,11 @@ void init_delta_vectors(struct job_desc* job)
 
 }
 
-void getray(struct ray* ray, int x, int y, struct job_desc* job)
+void
+getray(ray_t *ray, int x, int y, job_t *job)
 {
-	struct vector3 u;
-	struct vector3 v;
+	v3_t u;
+	v3_t v;
 
 	v3_copy(&ray->origin, &job->world->camera->eye);
 	
@@ -52,47 +56,44 @@ void getray(struct ray* ray, int x, int y, struct job_desc* job)
 
 }
 
-
-int find_any(struct ray* ray, struct world* world, float max_distance, struct intersection* result)
+int
+find_any(ray_t *ray, world_t *world, float max_distance, intersection_t *result)
 {
 
-	struct triangle* triangles;
-	struct triangle* triangle;
-	struct intersection its;
+	triangle_t *triangles;
+	triangle_t *tr;
+	intersection_t its;
 
 	its.hit = 0;
 
-	if(its.hit == 0)
-	{
+	if(its.hit == 0) {
 		triangles = world->triangles;
-		for(int i = 0; i < world->num_triangles; ++i)
-		{
-			triangle = &(triangles[i]);
-			triangle_intersects(triangle, ray, &its);
+		for(int i = 0; i < world->num_triangles; ++i) {
+			tr = &(triangles[i]);
+			triangle_intersects(tr, ray, &its);
 			if(its.hit && its.distance < max_distance && its.distance > 0.001f)
-			{
 				break;
-			}
 			its.hit = 0;
 		}
 	}
 
-	memcpy(result, &its, sizeof(struct intersection));
+	memcpy(result, &its, sizeof(intersection_t));
 
 	return its.hit;
 }
 
-void shading(struct world* world, struct intersection* trace, struct color* color)
+void
+shading(world_t *world, intersection_t *trace, color_t *color)
 {
-	struct ray light_ray;
-	struct point_light* point_light;
-	struct intersection result;
-	struct color light;
-	struct color light_temp;
+	ray_t light_ray;
+	point_light_t *point_light;
+	intersection_t result;
+	color_t light;
+	color_t light_temp;
 	float light_distance = 0.0f;
 
 	result.hit = 0;
-	color_init(&light, 1.0f, 0.0f, 0.0f, 0.0f);
+	color_set_argb(&light, 1.0f, 0.0f, 0.0f, 0.0f);
 
 	v3_copy(&light_ray.origin, &trace->hit_point);
 	for (int i = 0; i < world->num_point_lights; ++i)
@@ -120,12 +121,13 @@ void shading(struct world* world, struct intersection* trace, struct color* colo
 }
 
 
-int find_closest(struct ray* ray, struct world* world, float max_distance, struct intersection* result)
+int
+find_closest(ray_t* ray, world_t* world, float max_distance, intersection_t* result)
 {
-	struct triangle* triangle;
-	struct triangle* triangles;
-	struct intersection its;
-	struct intersection closest;
+	triangle_t *triangle;
+	triangle_t *triangles;
+	intersection_t its;
+	intersection_t closest;
 
 	closest.hit = 0;
 
@@ -143,21 +145,21 @@ int find_closest(struct ray* ray, struct world* world, float max_distance, struc
 				v3_mul_scalar(&its.hit_point, &ray->direction, its.distance);
 				v3_add(&its.hit_point, &its.hit_point, &ray->origin);
 
-				memcpy(&closest, &its, sizeof(struct intersection));
+				memcpy(&closest, &its, sizeof(intersection_t));
 				closest.material = triangle->material;
 			}			
 		}
 	}
 
-	memcpy(result, &closest, sizeof(struct intersection));
+	memcpy(result, &closest, sizeof(intersection_t));
 	
 	return closest.hit;
 }
 
-//returns color
-void traceray(struct ray* ray, struct world* world, struct color* color)
+void
+traceray(ray_t *ray, world_t *world, color_t *color)
 {
-	struct intersection result;
+	intersection_t result;
 	float max_distance = 1000.0f;
 
 
@@ -168,11 +170,12 @@ void traceray(struct ray* ray, struct world* world, struct color* color)
 	}
 	else
 	{
-		color_init(color, 1.0f, 0.0f, 0.0f, 0.0f);
+		color_set_argb(color, 1.0f, 0.0f, 0.0f, 0.0f);
 	}
 }
 
-int render(struct job_desc* job)
+int
+render(job_t *job)
 {
 	int x = 0;
 	int y = 0;
@@ -187,10 +190,10 @@ int render(struct job_desc* job)
 		for (x = 0; x<width; ++x)
 		{
 			int p = y*width + x;
-			struct ray ray;
-			struct color color;
-			getray(&ray, x, y, job);
-			traceray(&ray, job->world, &color);
+			ray_t ry;
+			color_t color;
+			getray(&ry, x, y, job);
+			traceray(&ry, job->world, &color);
 			//ARGB
 			buffer[p] = color_to_argb(&color);
 		}

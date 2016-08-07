@@ -4,32 +4,33 @@
 #include "ray.h"
 #include "render.h"
 
-struct sphere* sphere_new(int count)
+sphere_t*
+sphere_new(int count)
 {
-	struct sphere* spheres;
-	spheres = (struct sphere*) malloc(count * sizeof(struct sphere));
+	sphere_t* spheres;
+	spheres = (sphere_t*) malloc(count * sizeof(sphere_t));
 	
-	for(int i = 0; i < count; ++i)
-	{
+	for(int i = 0; i < count; ++i) {
 		spheres[i].material = 0;
 	}
 
 	return spheres;
 }
 
-void sphere_del(struct sphere* sphere)
+void
+sphere_destroy(sphere_t **sphere)
 {
-	if (sphere)
-	{
-		free(sphere);
+	if (*sphere) {
+		free(*sphere);
+        *sphere = NULL;
 	}
 }
 
 //from the book "Ray Tracing from the ground up"
-int sphere_intersects(struct sphere* sphere, struct ray* ray, struct intersection* result)
+int sphere_intersects(sphere_t *sphere, ray_t *ray, intersection_t *result)
 {
 	float t;
-	struct vector3 temp;
+	v3_t temp;
 	float a;
 	float b;
 	float c;
@@ -45,18 +46,15 @@ int sphere_intersects(struct sphere* sphere, struct ray* ray, struct intersectio
 
 	result->hit = 0;
 
-	if (disc < 0.0)
-	{
+	if (disc < 0.0) {
 		return 0;
 	}
-	else
-	{
+	else {
 		e = sqrtf(disc);
 		denom = 2.0f * a;
 		t = (b - e) / denom; //smaller root
 
-		if (t > 0.007f)
-		{
+		if (t > 0.007f) {
 			//tmin = t;
 			result->hit = 1;
 			result->distance = t;
@@ -77,8 +75,7 @@ int sphere_intersects(struct sphere* sphere, struct ray* ray, struct intersectio
 		}
 
 		t = (b + e) / denom; //larger root
-		if (t > 0.007f)
-		{
+		if (t > 0.007f) {
 			//tmin = t;
 			result->hit = 1;
 			result->distance = t;

@@ -1,18 +1,17 @@
-#ifndef JOB_H
-#define JOB_H
+#pragma once
 
 #include "world.h"
 
-struct job_desc
+typedef struct
 {
 	int width;
 	int height;
 	int *buffer;
-	struct world* world;
-};
+	world_t *world;
+} job_t;
 
+job_t*
+  job_new();
 
-struct job_desc* job_new();
-void job_del(struct job_desc*);
-
-#endif
+void
+  job_destroy(job_t **job);

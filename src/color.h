@@ -1,18 +1,24 @@
-#ifndef COLOR_H
-#define COLOR_H
+#pragma once
 
-struct color
+typedef struct
 {
 	float a;
 	float r;
 	float g;
 	float b;
-};
+} color_t;
 
-int color_to_argb(struct color* color);
+int
+  color_to_argb(color_t *color);
 
-void color_init(struct color* color, float a , float r, float g, float b);
-void color_mul_scalar(struct color* res, struct color* color, float s);
-void color_add(struct color* res, struct color* c1, struct color* c2);
-void color_mul(struct color* res, struct color* c1, struct color* c2);
-#endif
+void
+  color_set_argb(color_t *color, float a , float r, float g, float b);
+
+void
+  color_mul_scalar(color_t* dest, const color_t *color, float s);
+
+void
+  color_add(color_t *dest, const color_t *c1, const color_t *c2);
+
+void
+  color_mul(color_t *dest, const color_t *c1, const color_t *c2);

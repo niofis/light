@@ -1,22 +1,28 @@
-#ifndef world_H
-#define world_H
+#pragma once
 
+#include "camera.h"
+#include "sphere.h"
+#include "point_light.h"
+#include "triangle_list.h"
 
-struct world
+typedef struct
 {
-	struct camera* camera;
-	struct triangle* triangles;
-	struct sphere* spheres;
-	struct point_light* point_lights;
-	struct material* materials;
+	camera_t *camera;
+	triangle_t *triangles;
+	sphere_t *spheres;
+	point_light_t *point_lights;
+	material_t *materials;
 	int num_triangles;
 	int num_spheres;
 	int num_point_lights;
 	int num_materials;
-};
+} world_t;
 
-struct world* world_new();
-struct world* world_cornell();
-void world_del(struct world*);
+world_t*
+  world_new();
 
-#endif
+world_t *
+  world_cornell();
+
+void
+  world_destroy(world_t **world);

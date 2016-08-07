@@ -1,11 +1,9 @@
-#ifndef PRIMITIVE_H
-#define PRIMITIVE_H
+#pragma once
 
 #define SPHERE      1
 #define TRIANGLE    2
 
 #include "triangle.h"
-#include "sphere.h"
 
 struct primitive
 {
@@ -18,4 +16,3 @@ struct primitive
 
 int prm_intersect(struct primitive* prm, struct ray* ray, struct intersection* result);
 void prm_del(struct primitive* prm);
-#endif

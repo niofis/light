@@ -1,20 +1,22 @@
 #include <stdlib.h>
 #include "material.h"
 
-struct material* material_new(int number)
+material_t*
+material_new(int number)
 {
-	struct material* materials;
-	materials = (struct material*) malloc(sizeof(struct material) * number);
-	for(int i = 0; i < number; ++i)
-	{
-		color_init(&materials[i].color, 1.0f, 1.0f, 1.0f, 1.0f);
+	material_t* materials;
+	materials = (material_t*) malloc(sizeof(material_t) * number);
+	for(int i = 0; i < number; ++i) {
+		color_set_argb(&materials[i].color, 1.0f, 1.0f, 1.0f, 1.0f);
 	}
 	return materials;
 }
-void material_del(struct material* material)
+void
+material_destroy(material_t **material)
 {
-	if(material)
+	if(*material)
 	{
-		free(material);
+		free(*material);
+        *material = NULL;
 	}
 }

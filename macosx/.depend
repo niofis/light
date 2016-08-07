@@ -1,7 +1,10 @@
-camera.o: ../src/camera.c ../include/camera.h ../include/vector3.h
-color.o: ../src/color.c ../include/color.h
+camera.o: ../src/camera.c ../src/camera.h ../src/vector3.h
+color.o: ../src/color.c ../src/color.h
 debug.o: ../src/debug.c
-job.o: ../src/job.c ../include/job.h ../include/world.h
+job.o: ../src/job.c ../src/job.h ../src/world.h ../src/camera.h \
+  ../src/vector3.h ../src/sphere.h ../src/ray.h ../src/material.h \
+  ../src/color.h ../src/intersection.h ../src/point_light.h \
+  ../src/triangle_list.h ../src/triangle.h
 main_gui.o: ../src/main_gui.c /usr/local/include/SDL2/SDL.h \
   /usr/local/include/SDL2/SDL_main.h \
   /usr/local/include/SDL2/SDL_stdinc.h \
@@ -43,29 +46,26 @@ main_gui.o: ../src/main_gui.c /usr/local/include/SDL2/SDL.h \
   /usr/local/include/SDL2/SDL_render.h \
   /usr/local/include/SDL2/SDL_system.h \
   /usr/local/include/SDL2/SDL_timer.h \
-  /usr/local/include/SDL2/SDL_version.h ../include/timer.h \
-  ../include/ppm.h ../include/job.h ../include/world.h \
-  ../include/render.h ../include/material.h ../include/color.h \
-  ../include/vector3.h ../include/ray.h
-point_light.o: ../src/point_light.c ../include/point_light.h \
-  ../include/vector3.h ../include/color.h
-ppm.o: ../src/ppm.c ../include/ppm.h
-ray.o: ../src/ray.c ../include/ray.h ../include/vector3.h
-render.o: ../src/render.c ../include/material.h ../include/color.h \
-  ../include/vector3.h ../include/job.h ../include/world.h \
-  ../include/render.h ../include/ray.h ../include/camera.h \
-  ../include/sphere.h ../include/triangle.h ../include/point_light.h
-world.o: ../src/world.c ../include/world.h ../include/material.h \
-  ../include/color.h ../include/camera.h ../include/vector3.h \
-  ../include/sphere.h ../include/render.h ../include/job.h \
-  ../include/ray.h ../include/point_light.h ../include/triangle.h
-vector3.o: ../src/vector3.c ../include/vector3.h
-material.o: ../src/material.c ../include/material.h ../include/color.h
-timer.o: ../src/timer.c ../include/timer.h
-triangle.o: ../src/triangle.c ../include/triangle.h ../include/vector3.h \
-  ../include/material.h ../include/color.h ../include/ray.h \
-  ../include/render.h ../include/job.h ../include/world.h
-primitive.o: ../src/primitive.c ../include/primitive.h \
-  ../include/triangle.h ../include/vector3.h ../include/material.h \
-  ../include/color.h ../include/ray.h ../include/render.h \
-  ../include/job.h ../include/world.h ../include/sphere.h
+  /usr/local/include/SDL2/SDL_version.h ../src/timer.h ../src/ppm.h \
+  ../src/job.h ../src/world.h ../src/camera.h ../src/vector3.h \
+  ../src/sphere.h ../src/ray.h ../src/material.h ../src/color.h \
+  ../src/intersection.h ../src/point_light.h ../src/triangle_list.h \
+  ../src/triangle.h ../src/render.h
+point_light.o: ../src/point_light.c ../src/point_light.h ../src/vector3.h \
+  ../src/color.h
+ppm.o: ../src/ppm.c ../src/ppm.h
+ray.o: ../src/ray.c ../src/ray.h ../src/vector3.h
+render.o: ../src/render.c ../src/material.h ../src/color.h \
+  ../src/vector3.h ../src/job.h ../src/world.h ../src/camera.h \
+  ../src/sphere.h ../src/ray.h ../src/intersection.h \
+  ../src/point_light.h ../src/triangle_list.h ../src/triangle.h \
+  ../src/render.h
+world.o: ../src/world.c ../src/world.h ../src/camera.h ../src/vector3.h \
+  ../src/sphere.h ../src/ray.h ../src/material.h ../src/color.h \
+  ../src/intersection.h ../src/point_light.h ../src/triangle_list.h \
+  ../src/triangle.h
+vector3.o: ../src/vector3.c ../src/vector3.h
+material.o: ../src/material.c ../src/material.h ../src/color.h
+timer.o: ../src/timer.c ../src/timer.h
+triangle.o: ../src/triangle.c ../src/triangle.h ../src/vector3.h \
+  ../src/material.h ../src/color.h ../src/ray.h ../src/intersection.h

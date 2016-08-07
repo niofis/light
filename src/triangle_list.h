@@ -2,23 +2,28 @@
 
 #include "triangle.h"
 
-typedef struct {
-  triangle *triangle;
-  tr_node *next;
-} tr_node;
+typedef struct _trnode {
+  triangle_t *triangle;
+  struct _trnode *next;
+} tr_node_t;
 
 typedef struct {
   size_t length;
-  tr_node *head;
-  tr_node *tail;
-} triangle_list;
+  tr_node_t *head;
+  tr_node_t *tail;
+} triangle_list_t;
 
-triangle_list*
+triangle_list_t*
   triangle_list_new(size_t count);
 
 void
-  triangle_list_destroy(triangle_list **list);
+  triangle_list_destroy(triangle_list_t **list);
 
-const tr_node*
-  triangle_list_iterator(triangle_list *list);
+const tr_node_t*
+  triangle_list_head(const triangle_list_t *list);
 
+const tr_node_t*
+  triangle_list_next(const tr_node_t *node);
+
+const tr_node_t*
+  triangle_list_tail(const triangle_list_t *list);
