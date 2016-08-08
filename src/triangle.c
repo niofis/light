@@ -2,11 +2,11 @@
 #include "triangle.h"
 
 triangle_t*
-triangle_new(int count)
+triangle_new()
 {
 	triangle_t* triangles;
 
-	triangles = (triangle_t*) malloc(sizeof(triangle_t) * count);
+	triangles = (triangle_t*) malloc(sizeof(triangle_t));
 
 	return triangles;
 }

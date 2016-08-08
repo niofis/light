@@ -18,7 +18,7 @@ typedef struct
 } triangle_t;
 
 triangle_t*
-  triangle_new(int count);
+  triangle_new();
 
 void
   triangle_destroy(triangle_t **triangle);

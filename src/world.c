@@ -1,169 +1,192 @@
 #include <stdlib.h>
+#include <stdio.h>
+#include <assimp/cimport.h>
+#include <assimp/scene.h>
 #include "world.h"
 #include "material.h"
 #include "camera.h"
 #include "sphere.h"
 #include "point_light.h"
 #include "triangle.h"
+#include "triangle_list.h"
 
 world_t*
 world_cornell()
 {
-	world_t* world;
-	
-	world = (world_t*) malloc(sizeof(world_t));
+  world_t *world;
+  triangle_t *triangle;
 
-	world->camera = camera_new();
+  world = (world_t*) malloc(sizeof(world_t));
 
-	world->num_materials = 7;
-	world->materials = material_new(world->num_materials);
-	color_set_argb(&(world->materials[0].color), 1.0f, 1.0f, 0.0f, 0.0f); //Red
-	color_set_argb(&(world->materials[1].color), 1.0f, 0.0f, 1.0f, 0.0f); //Green
-	color_set_argb(&(world->materials[2].color), 1.0f, 0.0f, 0.0f, 1.0f); //Blue
-	color_set_argb(&(world->materials[3].color), 1.0f, 1.0f, 1.0f, 1.0f); //White
-	color_set_argb(&(world->materials[4].color), 1.0f, 1.0f, 1.0f, 0.0f); //Yellow
-	color_set_argb(&(world->materials[5].color), 1.0f, 0.0f, 0.0f, 0.0f); //Black
-	color_set_argb(&(world->materials[6].color), 1.0f, 1.0f, 0.5f, 0.0f); //Orange 
-	
-	world->num_triangles = 10;
-	world->triangles = triangle_new(world->num_triangles);
+  world->camera = camera_new();
 
-	//left wall
-
-	v3_set_xyz(&world->triangles[0].pt1, -8.0f, 0.0f, 0.0f);
-	v3_set_xyz(&world->triangles[0].pt2, -8.0f, 9.0f, 0.0f);
-	v3_set_xyz(&world->triangles[0].pt3, -8.0f, 9.0f, 5.0f);
-	world->triangles[0].material = &(world->materials[0]);
-
-	triangle_update(&world->triangles[0]);
-
-	v3_set_xyz(&world->triangles[1].pt1, -8.0f, 0.0f, 0.0f);
-	v3_set_xyz(&world->triangles[1].pt2, -8.0f, 9.0f, 5.0f);
-	v3_set_xyz(&world->triangles[1].pt3, -8.0f, 0.0f, 5.0f);
-	world->triangles[1].material = &(world->materials[0]);
-
-	triangle_update(&world->triangles[1]);
-
-	//right wall
-
-	v3_set_xyz(&world->triangles[2].pt1, 8.0f, 0.0f, 0.0f);
-	v3_set_xyz(&world->triangles[2].pt2, 8.0f, 9.0f, 5.0f);
-	v3_set_xyz(&world->triangles[2].pt3, 8.0f, 9.0f, 0.0f);
-	world->triangles[2].material = &(world->materials[1]);
-
-	triangle_update(&world->triangles[2]);
-
-	v3_set_xyz(&world->triangles[3].pt1, 8.0f, 0.0f, 0.0f);
-	v3_set_xyz(&world->triangles[3].pt2, 8.0f, 0.0f, 5.0f);
-	v3_set_xyz(&world->triangles[3].pt3, 8.0f, 9.0f, 5.0f);
-	world->triangles[3].material = &(world->materials[1]);
-
-	triangle_update(&world->triangles[3]);
-
-	//back wall
-
-	v3_set_xyz(&world->triangles[4].pt1, -8.0f, 9.0f, 5.0f);
-	v3_set_xyz(&world->triangles[4].pt2, 8.0f, 0.0f, 5.0f);
-	v3_set_xyz(&world->triangles[4].pt3, -8.0f, 0.0f, 5.0f);
-	world->triangles[4].material = &(world->materials[3]);
-
-	triangle_update(&world->triangles[4]);
-
-	v3_set_xyz(&world->triangles[5].pt1, -8.0f, 9.0f, 5.0f);
-	v3_set_xyz(&world->triangles[5].pt2, 8.0f, 9.0f, 5.0f);
-	v3_set_xyz(&world->triangles[5].pt3, 8.0f, 0.0f, 5.0f);
-	world->triangles[5].material = &(world->materials[3]);
-
-	triangle_update(&world->triangles[5]);
-
-	//ceiling
-
-	v3_set_xyz(&world->triangles[6].pt1, -8.0f, 9.0f, 5.0f);
-	v3_set_xyz(&world->triangles[6].pt2, -8.0f, 9.0f, 0.0f);
-	v3_set_xyz(&world->triangles[6].pt3, 8.0f, 9.0f, 0.0f);
-	world->triangles[6].material = &(world->materials[3]);
-
-	triangle_update(&world->triangles[6]);
-
-	v3_set_xyz(&world->triangles[7].pt1, 8.0f, 9.0f, 0.0f);
-	v3_set_xyz(&world->triangles[7].pt2, 8.0f, 9.0f, 5.0f);
-	v3_set_xyz(&world->triangles[7].pt3, -8.0f, 9.0f, 5.0f);
-	world->triangles[7].material = &(world->materials[3]);
-
-	triangle_update(&world->triangles[7]);
-
-	//floor
-
-	v3_set_xyz(&world->triangles[8].pt1, -8.0f, 0.0f, 5.0f);
-	v3_set_xyz(&world->triangles[8].pt2, 8.0f, 0.0f, 0.0f);
-	v3_set_xyz(&world->triangles[8].pt3, -8.0f, 0.0f, 0.0f);
-	world->triangles[8].material = &(world->materials[3]);
-
-	triangle_update(&world->triangles[8]);
-
-	v3_set_xyz(&world->triangles[9].pt1, 8.0f, 0.0f, 0.0f);
-	v3_set_xyz(&world->triangles[9].pt2, -8.0f, 0.0f, 5.0f);
-	v3_set_xyz(&world->triangles[9].pt3, 8.0f, 0.0f, 5.0f);
-	world->triangles[9].material = &(world->materials[3]);
-
-	triangle_update(&world->triangles[9]);
-	
-
-	//Lights
-	world->num_point_lights = 1; //2;
-	world->point_lights = point_light_new(world->num_point_lights);
-	v3_set_xyz(&(world->point_lights[0].position), 0.0f, 8.0f, 0.0f);
+  //Camera
+  world->camera->left_bottom.z = 0.0f;
+  world->camera->left_top.z = 0.0f;
+  world->camera->right_top.z = 0.0f;
+  world->camera->eye.z = -5.0f;
 
 
+  //Materials
 
-	//Camera
-	world->camera->left_bottom.z = 0.0f;
-	world->camera->left_top.z = 0.0f;
-	world->camera->right_top.z = 0.0f;
-	world->camera->eye.z = -5.0f;
+  world->materials = list_new();
 
-	return world;
+  material_t *red = material_new();
+  color_set_argb(&red->color, 1.0f, 1.0f, 0.0f, 0.0f);
+  list_append(world->materials, red);
+
+  material_t *green = material_new();
+  color_set_argb(&green->color, 1.0f, 0.0f, 1.0f, 0.0f);
+  list_append(world->materials, green);
+
+  material_t *white = material_new();
+  color_set_argb(&white->color, 1.0f, 1.0f, 1.0f, 1.0f);
+  list_append(world->materials, white);
+
+
+  //Triangles
+  world->triangles = list_new();
+
+  //left wall
+
+  triangle = triangle_new();
+  v3_set_xyz(&triangle->pt1, -8.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->pt2, -8.0f, 9.0f, 0.0f);
+  v3_set_xyz(&triangle->pt3, -8.0f, 9.0f, 5.0f);
+  triangle->material = red;
+  triangle_update(triangle);
+  list_append(world->triangles, triangle);
+
+  triangle = triangle_new();
+  v3_set_xyz(&triangle->pt1, -8.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->pt2, -8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->pt3, -8.0f, 0.0f, 5.0f);
+  triangle->material = red;
+  triangle_update(triangle);
+  list_append(world->triangles, triangle);
+
+  //right wall
+
+  triangle = triangle_new();
+  v3_set_xyz(&triangle->pt1, 8.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->pt2, 8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->pt3, 8.0f, 9.0f, 0.0f);
+  triangle->material = green;
+  triangle_update(triangle);
+  list_append(world->triangles, triangle);
+
+  triangle = triangle_new();
+  v3_set_xyz(&triangle->pt1, 8.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->pt2, 8.0f, 0.0f, 5.0f);
+  v3_set_xyz(&triangle->pt3, 8.0f, 9.0f, 5.0f);
+  triangle->material = green;
+  triangle_update(triangle);
+  list_append(world->triangles, triangle);
+
+  //back wall
+
+  triangle = triangle_new();
+  v3_set_xyz(&triangle->pt1, -8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->pt2, 8.0f, 0.0f, 5.0f);
+  v3_set_xyz(&triangle->pt3, -8.0f, 0.0f, 5.0f);
+  triangle->material = white;
+  triangle_update(triangle);
+  list_append(world->triangles, triangle);
+
+  triangle = triangle_new();
+  v3_set_xyz(&triangle->pt1, -8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->pt2, 8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->pt3, 8.0f, 0.0f, 5.0f);
+  triangle->material = white;
+  triangle_update(triangle);
+  list_append(world->triangles, triangle);
+
+  //ceiling
+
+  triangle = triangle_new();
+  v3_set_xyz(&triangle->pt1, -8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->pt2, -8.0f, 9.0f, 0.0f);
+  v3_set_xyz(&triangle->pt3, 8.0f, 9.0f, 0.0f);
+  triangle->material = white;
+  triangle_update(triangle);
+  list_append(world->triangles, triangle);
+
+  triangle = triangle_new();
+  v3_set_xyz(&triangle->pt1, 8.0f, 9.0f, 0.0f);
+  v3_set_xyz(&triangle->pt2, 8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->pt3, -8.0f, 9.0f, 5.0f);
+  triangle->material = white;
+  triangle_update(triangle);
+  list_append(world->triangles, triangle);
+
+  //floor
+
+  triangle = triangle_new();
+  v3_set_xyz(&triangle->pt1, -8.0f, 0.0f, 5.0f);
+  v3_set_xyz(&triangle->pt2, 8.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->pt3, -8.0f, 0.0f, 0.0f);
+  triangle->material = white;
+  triangle_update(triangle);
+  list_append(world->triangles, triangle);
+
+  triangle = triangle_new();
+  v3_set_xyz(&triangle->pt1, 8.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->pt2, -8.0f, 0.0f, 5.0f);
+  v3_set_xyz(&triangle->pt3, 8.0f, 0.0f, 5.0f);
+  triangle->material = white;
+  triangle_update(triangle);
+  list_append(world->triangles, triangle);	
+
+  //Lights
+  
+  world->lights = list_new();
+  point_light_t *light = point_light_new();
+  v3_set_xyz(&light->position, 0.0f, 6.0f, 0.0f);
+  list_append(world->lights, light);
+
+  const struct aiScene *scene = aiImportFile("../models/bunny.ply",0);
+
+  if(scene) {
+    aiReleaseImport(scene);
+  }
+  else
+    printf("Error loading model!");
+
+  return world;
 }
 
 world_t*
 world_new()
 {
-	world_t *scn;
+  world_t *scn;
 
-	scn = (world_t*) malloc(sizeof(world_t));
+  scn = (world_t*) malloc(sizeof(world_t));
 
-	scn->camera = camera_new();
+  scn->camera = camera_new();
 
-	scn->num_materials =  7;
-	scn->materials = material_new(scn->num_materials);
-	color_set_argb(&(scn->materials[0].color), 1.0f, 1.0f, 0.0f, 0.0f); //Red
-	color_set_argb(&(scn->materials[1].color), 1.0f, 0.0f, 1.0f, 0.0f); //Green
-	color_set_argb(&(scn->materials[2].color), 1.0f, 0.0f, 0.0f, 1.0f); //Blue
-	color_set_argb(&(scn->materials[3].color), 1.0f, 1.0f, 1.0f, 1.0f); //White
-	color_set_argb(&(scn->materials[4].color), 1.0f, 1.0f, 1.0f, 0.0f); //Yellow
-	color_set_argb(&(scn->materials[5].color), 1.0f, 0.0f, 0.0f, 0.0f); //Black
-	color_set_argb(&(scn->materials[6].color), 1.0f, 1.0f, 0.5f, 0.0f); //Orange 
+  scn->materials = list_new();
 
-	
-	scn->num_triangles = 1;
-	scn->triangles = triangle_new(scn->num_triangles);
-	v3_set_xyz(&scn->triangles[0].pt1, 4.0f, 0.0f, 0.10f);
-	v3_set_xyz(&scn->triangles[0].pt2, 5.0f, 2.0f, 0.10f);
-	v3_set_xyz(&scn->triangles[0].pt3, 6.0f, 0.0f, 0.10f);
-	scn->triangles[0].material = &(scn->materials[1]);
+  material_t *green = material_new();
+  color_set_argb(&green->color, 1.0f, 0.0f, 1.0f, 0.0f);
+  list_append(scn->materials, green);
 
-	triangle_update(&scn->triangles[0]);
+  scn->triangles = list_new();
+
+  triangle_t *triangle = triangle_new();
+  v3_set_xyz(&triangle->pt1, 4.0f, 0.0f, 0.10f);
+  v3_set_xyz(&triangle->pt2, 5.0f, 2.0f, 0.10f);
+  v3_set_xyz(&triangle->pt3, 6.0f, 0.0f, 0.10f);
+  triangle->material = green;
+  triangle_update(triangle);
+  list_append(scn->triangles, triangle);
 
 
-	scn->num_point_lights = 1; //2;
-	scn->point_lights = point_light_new(scn->num_point_lights);
-	
-	//scn->point_lights[1].position.x = -5.0f;
+  scn->lights = list_new();
+  point_light_t *light = point_light_new();
+  v3_set_xyz(&light->position, 0.0f, 8.0f, 0.0f);
+  list_append(scn->lights, light);
 
-
-	//scn->triangles = (struct triangle*) malloc(sizeof(struct triangle) * triangles_count);
-
-	return scn;
+  return scn;
 }
 
 void
@@ -171,26 +194,38 @@ world_destroy(world_t **world)
 {
   world_t *scn = *world;
 
+  node_t *node;
+
   if (scn->camera) {
     camera_destroy(&scn->camera);
-    scn->camera = 0;
+    scn->camera = NULL;
   }
 
   if(scn->triangles) {
-    triangle_destroy(&scn->triangles);
-    scn->triangles = 0;
-    scn->num_triangles = 0;
+    node = list_head(scn->triangles);
+    while(node) {
+      triangle_destroy((triangle_t**)&node->item);
+      node = list_next(node);
+    }
+    scn->triangles = NULL;
   }
 
-  if (scn->point_lights) {
-    point_light_destroy(&scn->point_lights);
-    scn->point_lights = 0;
-    scn->num_point_lights = 0;
+  if (scn->lights) {
+    node = list_head(scn->lights);
+    while(node) {
+      point_light_destroy((point_light_t**)&node->item);
+      node = list_next(node);
+    }
+    scn->lights = NULL;
   }
 
   if(scn->materials) {
-    material_destroy(&scn->materials);
-    scn->materials = 0;
+    node = list_head(scn->materials);
+    while(node) {
+      material_destroy((material_t**)&node->item);
+      node = list_next(node);
+    }
+    scn->materials = NULL;
   }
 
   *world = NULL;

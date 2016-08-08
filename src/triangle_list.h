@@ -14,7 +14,7 @@ typedef struct {
 } triangle_list_t;
 
 triangle_list_t*
-  triangle_list_new(size_t count);
+  triangle_list_new();
 
 void
   triangle_list_destroy(triangle_list_t **list);
@@ -27,3 +27,6 @@ const tr_node_t*
 
 const tr_node_t*
   triangle_list_tail(const triangle_list_t *list);
+
+void
+  triangle_list_append(triangle_list_t *list, triangle_t *triangle);

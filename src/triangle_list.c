@@ -2,7 +2,7 @@
 #include "triangle_list.h"
 
 triangle_list_t*
-triangle_list_new(size_t count)
+triangle_list_new()
 {
   triangle_list_t *list = (triangle_list_t*) malloc(sizeof(triangle_list_t));
   return list;
@@ -38,4 +38,15 @@ const tr_node_t*
 triangle_list_tail(const triangle_list_t *list)
 {
   return list->tail;
+}
+
+void
+triangle_list_append(triangle_list_t *list, triangle_t *triangle)
+{
+  tr_node_t *nnode = (tr_node_t*) malloc(sizeof(tr_node_t));
+  nnode->triangle = triangle;
+  nnode->next = NULL;
+
+  list->tail->next = nnode;
+  list->tail = nnode;
 }

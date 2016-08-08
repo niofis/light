@@ -3,19 +3,14 @@
 #include "camera.h"
 #include "sphere.h"
 #include "point_light.h"
-#include "triangle_list.h"
+#include "list.h"
 
 typedef struct
 {
 	camera_t *camera;
-	triangle_t *triangles;
-	sphere_t *spheres;
-	point_light_t *point_lights;
-	material_t *materials;
-	int num_triangles;
-	int num_spheres;
-	int num_point_lights;
-	int num_materials;
+	list_t *triangles;
+	list_t *lights;
+	list_t *materials;
 } world_t;
 
 world_t*

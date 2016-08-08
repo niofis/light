@@ -4,17 +4,14 @@
 #include "color.h"
 
 point_light_t*
-point_light_new(int num)
+point_light_new()
 {
-	point_light_t* lights;
-	lights = (point_light_t*) malloc(sizeof(point_light_t) * num);
+	point_light_t* light = (point_light_t*) malloc(sizeof(point_light_t));
 
-	for(int i = 0 ; i < num; ++i)
-	{
-		v3_set_xyz(&lights[i].position, 5, 5, -5);
-		color_set_argb(&lights[i].color, 1.0f, 1.0f, 1.0f, 1.0f);
-	}
-	return lights;
+	v3_set_xyz(&light->position, 5, 5, -5);
+	color_set_argb(&light->color, 1.0f, 1.0f, 1.0f, 1.0f);
+	
+    return light;
 }
 
 void

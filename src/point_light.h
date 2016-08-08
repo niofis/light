@@ -10,7 +10,7 @@ typedef struct
 } point_light_t;
 
 point_light_t*
-  point_light_new(int num);
+  point_light_new();
 
 void
   point_light_destroy(point_light_t **point_light);

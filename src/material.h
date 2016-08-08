@@ -7,7 +7,7 @@ typedef struct
 } material_t;
 
 material_t*
-  material_new(int number);
+  material_new();
 
 void
 material_destroy(material_t **material);
