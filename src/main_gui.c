@@ -1,8 +1,7 @@
 #include <stdio.h>
-#include <SDL2/SDL.h>
-
-#include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
+#include <SDL2/SDL.h>
 
 #if !defined(byte)
   #define byte unsigned char
@@ -92,6 +91,8 @@ int gui_init()
           break;
       }
     }
+
+    usleep(1000);
   }
 
   SDL_DestroyTexture(texture);
