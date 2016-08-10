@@ -21,10 +21,10 @@ world_cornell()
   world->camera = camera_new();
 
   //Camera
-  world->camera->left_bottom.z = 0.0f;
-  world->camera->left_top.z = 0.0f;
-  world->camera->right_top.z = 0.0f;
-  world->camera->eye.z = -5.0f;
+  //world->camera->left_bottom.z = 0.0f;
+  //world->camera->left_top.z = 0.0f;
+  //world->camera->right_top.z = 0.0f;
+  //world->camera->eye.z = -50.0f;
 
 
   //Materials
@@ -144,7 +144,7 @@ world_cornell()
   v3_set_xyz(&light->position, 0.0f, 6.0f, 0.0f);
   list_append(world->lights, light);
 
-  const struct aiScene *scene = aiImportFile("../models/bunny.ply",0);
+  const struct aiScene *scene = NULL;//aiImportFile("../models/sphere.dae",0);
 
   if(scene) {
     /*
@@ -156,7 +156,7 @@ world_cornell()
     struct aiVector3D vertex = mesh->mVertices[face.mIndices[0]];
     printf("first vertex: (%f, %f, %f)\n", vertex.x, vertex.y, vertex.z);
     */
-
+    float minz = 0;
     for(int mesh_idx = 0; mesh_idx < scene->mNumMeshes; mesh_idx++) {
       struct aiMesh *mesh = scene->mMeshes[mesh_idx];
       for(int face_idx = 0; face_idx < mesh->mNumFaces; face_idx++) {
@@ -169,12 +169,15 @@ world_cornell()
         v3_set_xyz(&triangle->pt2, v2.x, v2.y, v2.z);
         v3_set_xyz(&triangle->pt3, v3.x, v3.y, v3.z);
         triangle->material = white;
+        //triangle_scale_uni(triangle, 0.025f);
         triangle_update(triangle);
-        list_append(world->triangles, triangle);	
+        list_append(world->triangles, triangle);
+        if(v1.y > minz) minz = v1.y;
       }
     }
 
-    printf("Total triangles: %i\n", world->triangles->length);
+    printf("Total triangles: %zu\n", world->triangles->length);
+    printf("Min z: %f\n", minz);
 
     aiReleaseImport(scene);
   }

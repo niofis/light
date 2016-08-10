@@ -92,3 +92,10 @@ triangle_intersects(const triangle_t *triangle, const ray_t *ray, intersection_t
 	return 1;
 }
 
+void
+triangle_scale_uni(triangle_t *tr, float scale)
+{
+  v3_mul_scalar(&tr->pt1, &tr->pt1, scale);
+  v3_mul_scalar(&tr->pt2, &tr->pt2, scale);
+  v3_mul_scalar(&tr->pt3, &tr->pt3, scale);
+}

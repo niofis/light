@@ -28,3 +28,6 @@ int
 
 void
   triangle_update(triangle_t *tr);
+
+void
+  triangle_scale_uni(triangle_t *tr, float scale);
