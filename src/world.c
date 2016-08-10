@@ -147,6 +147,35 @@ world_cornell()
   const struct aiScene *scene = aiImportFile("../models/bunny.ply",0);
 
   if(scene) {
+    /*
+    printf("has meshes: %i\n", scene->mNumMeshes);
+    struct aiMesh *mesh = scene->mMeshes[0];
+    printf("has faces: %i\n", mesh->mNumFaces);
+    struct aiFace face = mesh->mFaces[0];
+    printf("has indices: %i, %i, %i\n", face.mIndices[0], face.mIndices[1], face.mIndices[2]);
+    struct aiVector3D vertex = mesh->mVertices[face.mIndices[0]];
+    printf("first vertex: (%f, %f, %f)\n", vertex.x, vertex.y, vertex.z);
+    */
+
+    for(int mesh_idx = 0; mesh_idx < scene->mNumMeshes; mesh_idx++) {
+      struct aiMesh *mesh = scene->mMeshes[mesh_idx];
+      for(int face_idx = 0; face_idx < mesh->mNumFaces; face_idx++) {
+        struct aiFace face = mesh->mFaces[face_idx];
+        struct aiVector3D v1 = mesh->mVertices[face.mIndices[0]];
+        struct aiVector3D v2 = mesh->mVertices[face.mIndices[1]];
+        struct aiVector3D v3 = mesh->mVertices[face.mIndices[2]];
+        triangle = triangle_new();
+        v3_set_xyz(&triangle->pt1, v1.x, v1.y, v1.z);
+        v3_set_xyz(&triangle->pt2, v2.x, v2.y, v2.z);
+        v3_set_xyz(&triangle->pt3, v3.x, v3.y, v3.z);
+        triangle->material = white;
+        triangle_update(triangle);
+        list_append(world->triangles, triangle);	
+      }
+    }
+
+    printf("Total triangles: %i\n", world->triangles->length);
+
     aiReleaseImport(scene);
   }
   else
