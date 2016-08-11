@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "triangle.h"
-#define EPSILON 0.000001f
+#define EPSILON 0.000005f
 
 triangle_t*
 triangle_new()
@@ -32,7 +32,7 @@ triangle_update(triangle_t* triangle)
 }
 
 int
-triangle_intersects_old(const triangle_t *triangle, const ray_t *ray, intersection_t *result)
+triangle_intersects(const triangle_t *triangle, const ray_t *ray, intersection_t *result)
 {
 	const v3_t* edge1;
     const v3_t* edge2;
@@ -67,10 +67,11 @@ triangle_intersects_old(const triangle_t *triangle, const ray_t *ray, intersecti
 	if(u < 0.0f || u > 1.0f)
 		return 0;
 
+
 	v3_cross(&qvec, &tvec, edge1);
 	
 	v = v3_dot(&ray->direction, &qvec) * inv_det;
-	if(v < 0.0f || u + v > 1.0f)
+	if(v < 0.0f || u + v > 1.0f + EPSILON) //add EPSILON to offset small precision errors
 		return 0;
 
 	t = v3_dot(edge2, &qvec) * inv_det;
@@ -89,90 +90,6 @@ triangle_intersects_old(const triangle_t *triangle, const ray_t *ray, intersecti
 	*/
 	return 0;
 }
-
-int
-triangle_intersects(const triangle_t *triangle, const ray_t *ray, intersection_t *result)
-{
-  //from: http://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/barycentric-coordinates
-
-	const v3_t* v0v1;
-    const v3_t* v0v2;
-	v3_t tvec;
-	v3_t pvec;
-	v3_t qvec;
-    v3_t N;
-	float u;
-	float v;
-    float t;
-
-	result->hit = 0;
-
-	//v3_sub(&edge1, &triangle->pt2, &triangle->pt1);
-	//v3_sub(&edge2, &triangle->pt3, &triangle->pt1);
-	v0v1 = &triangle->edge1;
-	v0v1 = &triangle->edge2;
-
-    v3_cross(&N, v0v1, v0v2);
-    float denom = v3_dot(&N, &N);
-
-    float NdotRayDirection = v3_dot(&N, &ray->direction);
-    if(fabs(NdotRayDirection) < EPSILON)
-      return 0;
-
-    float d = v3_dot(&N, &triangle->pt1);
-
-    t = (v3_dot(&N, &ray->origin) + d) / NdotRayDirection;
-    if(t < 0)
-      return 0;
-
-    v3_t P;
-
-    v3_mul_scalar(&P, &ray->direction, t);
-    v3_add(&P, &P, &ray->origin);
-
-    v3_t C;
-    v3_t edge0;
-
-    v3_sub(&edge0, &triangle->pt2, &triangle->pt1);
-
-    v3_t vp0;
-    v3_sub(&vp0, &P, &triangle->pt1);
-
-    v3_cross(&C, &edge0, &vp0);
-    if(v3_dot(&N, &C) < 0)
-      return 0;
-
-    v3_t edge1;
-    v3_sub(&edge1, &triangle->pt3, &triangle->pt2);
-
-    v3_t vp1;
-    v3_sub(&vp1, &P, &triangle->pt2);
-
-    v3_cross(&C, &edge1, &vp1);
-
-    u = v3_dot(&N, &C);
-    if(u < 0)
-      return 0;
-
-    v3_t edge2;
-    v3_sub(&edge2, &triangle->pt1, &triangle->pt3);
-
-    v3_t vp2;
-    v3_sub(&vp2, &P, &triangle->pt3);
-
-    v3_cross(&C, &edge2, &vp2);
-
-    v = v3_dot(&N, &C);
-    if(v < 0)
-      return 0;
-
-    result->hit = 1;
-      result->distance = t;
-
-printf("%f ", t);
-	return 1;
-}
-
 
 void
 triangle_scale_uni(triangle_t *tr, float scale)

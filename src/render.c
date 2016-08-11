@@ -179,9 +179,9 @@ render(job_t *job)
 
 	init_delta_vectors(job);
 
-	for (y = 0; y<height; ++y)
+	for (y = 0; y < height; ++y)
 	{
-		for (x = 0; x<width; ++x)
+		for (x = 2; x < width; ++x)
 		{
 			int p = y*width + x;
 			ray_t ry;

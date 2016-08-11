@@ -146,7 +146,36 @@ world_cornell()
   v3_set_xyz(&light->position, 0.0f, 6.0f, 0.0f);
   list_append(world->lights, light);
 
-  const struct aiScene *scene = NULL;//aiImportFile("../models/sphere.dae",0);
+  
+
+  return world;
+}
+
+world_t*
+world_from_model(const char *file)
+{
+  world_t *world;
+  triangle_t *triangle;
+
+  world = (world_t*) malloc(sizeof(world_t));
+
+  world->camera = camera_new();
+
+  world->materials = list_new();
+
+  material_t *white = material_new();
+  color_set_argb(&white->color, 1.0f, 1.0f, 1.0f, 1.0f);
+  list_append(world->materials, white);
+
+  world->lights = list_new();
+  point_light_t *light = point_light_new();
+  v3_set_xyz(&light->position, 0.0f, 0.0f, -100.0f);
+  list_append(world->lights, light);
+
+  world->triangles = list_new();
+
+
+  const struct aiScene *scene = aiImportFile(file, 0);
 
   if(scene) {
     /*
@@ -171,7 +200,7 @@ world_cornell()
         v3_set_xyz(&triangle->pt2, v2.x, v2.y, v2.z);
         v3_set_xyz(&triangle->pt3, v3.x, v3.y, v3.z);
         triangle->material = white;
-        //triangle_scale_uni(triangle, 0.025f);
+        triangle_scale_uni(triangle, 100.0f);
         triangle_update(triangle);
         list_append(world->triangles, triangle);
         if(v1.y > minz) minz = v1.y;
@@ -184,7 +213,7 @@ world_cornell()
     aiReleaseImport(scene);
   }
   else
-    printf("Error loading model!");
+    printf("Error loading model!\n");
 
   return world;
 }

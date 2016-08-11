@@ -16,8 +16,11 @@ typedef struct
 world_t*
   world_new();
 
-world_t *
+world_t*
   world_cornell();
+
+world_t*
+  world_from_model(const char *file);
 
 void
   world_destroy(world_t **world);
