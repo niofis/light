@@ -78,9 +78,13 @@ v3_dot(const v3_t *v1, const v3_t *v2)
 void
 v3_cross(v3_t *res, const v3_t *v1, const v3_t *v2)
 {
-	res->x = v1->y * v2->z - v1->z*v2->y;
-	res->y = v1->z * v2->x - v1->x*v2->z;
-	res->z = v1->x * v2->y - v1->y*v2->x;
+	float x = v1->y * v2->z - v1->z * v2->y;
+	float y = v1->z * v2->x - v1->x * v2->z;
+	float z = v1->x * v2->y - v1->y * v2->x;
+
+    res->x = x;
+    res->y = y;
+    res->z = z;
 }
 
 float

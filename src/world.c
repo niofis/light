@@ -10,6 +10,8 @@
 #include "triangle.h"
 #include "triangle_list.h"
 
+
+
 world_t*
 world_cornell()
 {
@@ -21,10 +23,10 @@ world_cornell()
   world->camera = camera_new();
 
   //Camera
-  //world->camera->left_bottom.z = 0.0f;
-  //world->camera->left_top.z = 0.0f;
-  //world->camera->right_top.z = 0.0f;
-  //world->camera->eye.z = -50.0f;
+  world->camera->left_bottom.z = 0.0f;
+  world->camera->left_top.z = 0.0f;
+  world->camera->right_top.z = 0.0f;
+  world->camera->eye.z = -50.0f;
 
 
   //Materials
@@ -198,24 +200,24 @@ world_new()
 
   scn->materials = list_new();
 
-  material_t *green = material_new();
-  color_set_argb(&green->color, 1.0f, 0.0f, 1.0f, 0.0f);
-  list_append(scn->materials, green);
+  material_t *red = material_new();
+  color_set_argb(&red->color, 1.0f, 1.0f, 0.0f, 0.0f);
+  list_append(scn->materials, red);
 
   scn->triangles = list_new();
 
   triangle_t *triangle = triangle_new();
-  v3_set_xyz(&triangle->pt1, 4.0f, 0.0f, 0.10f);
-  v3_set_xyz(&triangle->pt2, 5.0f, 2.0f, 0.10f);
-  v3_set_xyz(&triangle->pt3, 6.0f, 0.0f, 0.10f);
-  triangle->material = green;
+  v3_set_xyz(&triangle->pt1, -6.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->pt2, 0.0f, 8.0f, 0.0f);
+  v3_set_xyz(&triangle->pt3, 6.0f, 0.0f, 0.0f);
+  triangle->material = red;
   triangle_update(triangle);
   list_append(scn->triangles, triangle);
 
 
   scn->lights = list_new();
   point_light_t *light = point_light_new();
-  v3_set_xyz(&light->position, 0.0f, 8.0f, 0.0f);
+  v3_set_xyz(&light->position, 0.0f, 8.0f, -10.0f);
   list_append(scn->lights, light);
 
   return scn;

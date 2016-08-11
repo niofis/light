@@ -37,7 +37,7 @@ int gui_init()
     return 1;
   }
 
-  window = SDL_CreateWindow("Light", 100, 100, 1280, 720, SDL_WINDOW_SHOWN);
+  window = SDL_CreateWindow("Light", 100, 100, job->width, job->height, SDL_WINDOW_SHOWN);
   if (window == NULL)
   {
 	  printf("SDL_CreateWindow failed: %s\n", SDL_GetError());
