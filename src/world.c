@@ -160,6 +160,14 @@ world_from_model(const char *file)
   world = (world_t*) malloc(sizeof(world_t));
 
   world->camera = camera_new();
+  world->camera->eye.y += 4.0f;
+  world->camera->eye.z = 75.0f;
+  world->camera->left_top.y += 4.0f;
+  world->camera->left_top.z = 50.0f;
+  world->camera->right_top.y += 4.0f;
+  world->camera->right_top.z = 50.0f;
+  world->camera->left_bottom.y += 4.0f;
+  world->camera->left_bottom.z = 50.0f;
 
   world->materials = list_new();
 
@@ -169,7 +177,7 @@ world_from_model(const char *file)
 
   world->lights = list_new();
   point_light_t *light = point_light_new();
-  v3_set_xyz(&light->position, 0.0f, 0.0f, -100.0f);
+  v3_set_xyz(&light->position, 0.0f, 0.0f, 100.0f);
   list_append(world->lights, light);
 
   world->triangles = list_new();
