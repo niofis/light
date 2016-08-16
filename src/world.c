@@ -52,17 +52,17 @@ world_cornell()
   //left wall
 
   triangle = triangle_new();
-  v3_set_xyz(&triangle->pt1, -8.0f, 0.0f, 0.0f);
-  v3_set_xyz(&triangle->pt2, -8.0f, 9.0f, 0.0f);
-  v3_set_xyz(&triangle->pt3, -8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->v0, -8.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->v1, -8.0f, 9.0f, 0.0f);
+  v3_set_xyz(&triangle->v2, -8.0f, 9.0f, 5.0f);
   triangle->material = red;
   triangle_update(triangle);
   list_append(world->triangles, triangle);
 
   triangle = triangle_new();
-  v3_set_xyz(&triangle->pt1, -8.0f, 0.0f, 0.0f);
-  v3_set_xyz(&triangle->pt2, -8.0f, 9.0f, 5.0f);
-  v3_set_xyz(&triangle->pt3, -8.0f, 0.0f, 5.0f);
+  v3_set_xyz(&triangle->v0, -8.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->v1, -8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->v2, -8.0f, 0.0f, 5.0f);
   triangle->material = red;
   triangle_update(triangle);
   list_append(world->triangles, triangle);
@@ -70,17 +70,17 @@ world_cornell()
   //right wall
 
   triangle = triangle_new();
-  v3_set_xyz(&triangle->pt1, 8.0f, 0.0f, 0.0f);
-  v3_set_xyz(&triangle->pt2, 8.0f, 9.0f, 5.0f);
-  v3_set_xyz(&triangle->pt3, 8.0f, 9.0f, 0.0f);
+  v3_set_xyz(&triangle->v0, 8.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->v1, 8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->v2, 8.0f, 9.0f, 0.0f);
   triangle->material = green;
   triangle_update(triangle);
   list_append(world->triangles, triangle);
 
   triangle = triangle_new();
-  v3_set_xyz(&triangle->pt1, 8.0f, 0.0f, 0.0f);
-  v3_set_xyz(&triangle->pt2, 8.0f, 0.0f, 5.0f);
-  v3_set_xyz(&triangle->pt3, 8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->v0, 8.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->v1, 8.0f, 0.0f, 5.0f);
+  v3_set_xyz(&triangle->v2, 8.0f, 9.0f, 5.0f);
   triangle->material = green;
   triangle_update(triangle);
   list_append(world->triangles, triangle);
@@ -88,17 +88,17 @@ world_cornell()
   //back wall
 
   triangle = triangle_new();
-  v3_set_xyz(&triangle->pt1, -8.0f, 9.0f, 5.0f);
-  v3_set_xyz(&triangle->pt2, 8.0f, 0.0f, 5.0f);
-  v3_set_xyz(&triangle->pt3, -8.0f, 0.0f, 5.0f);
+  v3_set_xyz(&triangle->v0, -8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->v1, 8.0f, 0.0f, 5.0f);
+  v3_set_xyz(&triangle->v2, -8.0f, 0.0f, 5.0f);
   triangle->material = white;
   triangle_update(triangle);
   list_append(world->triangles, triangle);
 
   triangle = triangle_new();
-  v3_set_xyz(&triangle->pt1, -8.0f, 9.0f, 5.0f);
-  v3_set_xyz(&triangle->pt2, 8.0f, 9.0f, 5.0f);
-  v3_set_xyz(&triangle->pt3, 8.0f, 0.0f, 5.0f);
+  v3_set_xyz(&triangle->v0, -8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->v1, 8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->v2, 8.0f, 0.0f, 5.0f);
   triangle->material = white;
   triangle_update(triangle);
   list_append(world->triangles, triangle);
@@ -106,17 +106,17 @@ world_cornell()
   //ceiling
 
   triangle = triangle_new();
-  v3_set_xyz(&triangle->pt1, -8.0f, 9.0f, 5.0f);
-  v3_set_xyz(&triangle->pt2, -8.0f, 9.0f, 0.0f);
-  v3_set_xyz(&triangle->pt3, 8.0f, 9.0f, 0.0f);
+  v3_set_xyz(&triangle->v0, -8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->v1, -8.0f, 9.0f, 0.0f);
+  v3_set_xyz(&triangle->v2, 8.0f, 9.0f, 0.0f);
   triangle->material = white;
   triangle_update(triangle);
   list_append(world->triangles, triangle);
 
   triangle = triangle_new();
-  v3_set_xyz(&triangle->pt1, 8.0f, 9.0f, 0.0f);
-  v3_set_xyz(&triangle->pt2, 8.0f, 9.0f, 5.0f);
-  v3_set_xyz(&triangle->pt3, -8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->v0, 8.0f, 9.0f, 0.0f);
+  v3_set_xyz(&triangle->v1, 8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->v2, -8.0f, 9.0f, 5.0f);
   triangle->material = white;
   triangle_update(triangle);
   list_append(world->triangles, triangle);
@@ -124,17 +124,17 @@ world_cornell()
   //floor
 
   triangle = triangle_new();
-  v3_set_xyz(&triangle->pt1, -8.0f, 0.0f, 5.0f);
-  v3_set_xyz(&triangle->pt2, 8.0f, 0.0f, 0.0f);
-  v3_set_xyz(&triangle->pt3, -8.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->v0, -8.0f, 0.0f, 5.0f);
+  v3_set_xyz(&triangle->v1, 8.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->v2, -8.0f, 0.0f, 0.0f);
   triangle->material = white;
   triangle_update(triangle);
   list_append(world->triangles, triangle);
 
   triangle = triangle_new();
-  v3_set_xyz(&triangle->pt1, 8.0f, 0.0f, 0.0f);
-  v3_set_xyz(&triangle->pt2, -8.0f, 0.0f, 5.0f);
-  v3_set_xyz(&triangle->pt3, 8.0f, 0.0f, 5.0f);
+  v3_set_xyz(&triangle->v0, 8.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->v1, -8.0f, 0.0f, 5.0f);
+  v3_set_xyz(&triangle->v2, 8.0f, 0.0f, 5.0f);
   triangle->material = white;
   triangle_update(triangle);
   list_append(world->triangles, triangle);	
@@ -204,9 +204,9 @@ world_from_model(const char *file)
         struct aiVector3D v2 = mesh->mVertices[face.mIndices[1]];
         struct aiVector3D v3 = mesh->mVertices[face.mIndices[2]];
         triangle = triangle_new();
-        v3_set_xyz(&triangle->pt1, v1.x, v1.y, v1.z);
-        v3_set_xyz(&triangle->pt2, v2.x, v2.y, v2.z);
-        v3_set_xyz(&triangle->pt3, v3.x, v3.y, v3.z);
+        v3_set_xyz(&triangle->v0, v1.x, v1.y, v1.z);
+        v3_set_xyz(&triangle->v1, v2.x, v2.y, v2.z);
+        v3_set_xyz(&triangle->v2, v3.x, v3.y, v3.z);
         triangle->material = white;
         triangle_scale_uni(triangle, 100.0f);
         triangle_update(triangle);
@@ -244,9 +244,9 @@ world_new()
   scn->triangles = list_new();
 
   triangle_t *triangle = triangle_new();
-  v3_set_xyz(&triangle->pt1, -6.0f, 0.0f, 0.0f);
-  v3_set_xyz(&triangle->pt2, 0.0f, 8.0f, 0.0f);
-  v3_set_xyz(&triangle->pt3, 6.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->v0, -6.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->v1, 0.0f, 8.0f, 0.0f);
+  v3_set_xyz(&triangle->v2, 6.0f, 0.0f, 0.0f);
   triangle->material = red;
   triangle_update(triangle);
   list_append(scn->triangles, triangle);

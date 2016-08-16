@@ -25,8 +25,8 @@ triangle_destroy(triangle_t **triangle)
 void
 triangle_update(triangle_t* triangle)
 {
-	v3_sub(&triangle->edge1, &triangle->pt2, &triangle->pt1);
-	v3_sub(&triangle->edge2, &triangle->pt3, &triangle->pt1);
+	v3_sub(&triangle->edge1, &triangle->v1, &triangle->v0);
+	v3_sub(&triangle->edge2, &triangle->v2, &triangle->v0);
 	v3_cross(&triangle->normal, &triangle->edge1, &triangle->edge2);
 	v3_normalize(&triangle->normal);
 }
@@ -61,7 +61,7 @@ triangle_intersects(const triangle_t *triangle, const ray_t *ray, intersection_t
 
 	inv_det = 1.0f / det;
 
-	v3_sub(&tvec, &ray->origin, &triangle->pt1);
+	v3_sub(&tvec, &ray->origin, &triangle->v0);
 
 	u = v3_dot(&tvec, &pvec) * inv_det;
 	if(u < 0.0f || u > 1.0f)
@@ -94,7 +94,7 @@ triangle_intersects(const triangle_t *triangle, const ray_t *ray, intersection_t
 void
 triangle_scale_uni(triangle_t *tr, float scale)
 {
-  v3_mul_scalar(&tr->pt1, &tr->pt1, scale);
-  v3_mul_scalar(&tr->pt2, &tr->pt2, scale);
-  v3_mul_scalar(&tr->pt3, &tr->pt3, scale);
+  v3_mul_scalar(&tr->v0, &tr->v0, scale);
+  v3_mul_scalar(&tr->v1, &tr->v1, scale);
+  v3_mul_scalar(&tr->v2, &tr->v2, scale);
 }
