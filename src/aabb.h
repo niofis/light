@@ -12,8 +12,11 @@ typedef struct {
 aabb_t*
   aabb_from_triangle(triangle_t* triangle);
 
-aabb_t*
-  aabb_add(aabb_t *dest, aabb_t *bb1, aabb_t *bb2);
+void
+  aabb_combine(aabb_t *dest, aabb_t *bb1, aabb_t *bb2);
+
+void
+  aabb_update_centroid(aabb_t *bb);
 
 void
   aabb_destroy(aabb_t **bb);
