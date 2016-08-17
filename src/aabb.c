@@ -16,7 +16,7 @@ aabb_update_centroid(aabb_t *bb)
 }
 
 aabb_t*
-aabb_from_triangle(triangle_t* triangle)
+aabb_new_from_triangle(triangle_t* triangle)
 {
   aabb_t *bb = (aabb_t*) malloc(sizeof(aabb_t));
 
@@ -31,6 +31,20 @@ aabb_from_triangle(triangle_t* triangle)
   aabb_update_centroid(bb);
   
   return bb;
+}
+
+void
+aabb_fit_triangle(aabb_t *bb, triangle_t *triangle)
+{
+  bb->min.x = min3(triangle->v0.x, triangle->v1.x, triangle->v2.x);
+  bb->min.y = min3(triangle->v0.y, triangle->v1.y, triangle->v2.y);
+  bb->min.z = min3(triangle->v0.z, triangle->v1.z, triangle->v2.z);
+
+  bb->max.x = max3(triangle->v0.x, triangle->v1.x, triangle->v2.x);
+  bb->max.y = max3(triangle->v0.y, triangle->v1.y, triangle->v2.y);
+  bb->max.z = max3(triangle->v0.z, triangle->v1.z, triangle->v2.z);
+
+  aabb_update_centroid(bb);
 }
 
 void

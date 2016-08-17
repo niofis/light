@@ -10,7 +10,10 @@ typedef struct {
 } aabb_t;
 
 aabb_t*
-  aabb_from_triangle(triangle_t* triangle);
+  aabb_new_from_triangle(triangle_t* triangle);
+
+void
+  aabb_fit_triangle(aabb_t *bb, triangle_t* triangle);
 
 void
   aabb_combine(aabb_t *dest, aabb_t *bb1, aabb_t *bb2);
