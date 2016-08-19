@@ -21,9 +21,24 @@ bvh_build(bvhnode_t *leaves, size_t start, size_t end)
 
   //TODO:
   //find the biggest axis and sort the leaves using that
+  float x_length = bnode->bounding_box.max.x - bnode->bounding_box.min.x;
+  float y_length = bnode->bounding_box.max.y - bnode->bounding_box.min.y;
+  float z_length = bnode->boinding_box.max.z - bnode->bounding_box.min.z;
+  
+  axis_t axis = x_length < y_length?
+    (x_length < z_length?X_AXIS:Z_AXIS):
+      (y_length < z_length?Y_AXIS:Z_AXIS);
+
+  bvhnode_t temp;
+
+
   //create the left and right branches
 
-  return NULL;
+  size_t half = end >> 1;
+  bnode->left = bvh_build(leaves, start, half);
+  bnode->right = bvh_build(leaves, half + 1, end);
+
+  return bnode;
 }
 
 bvh_t*
