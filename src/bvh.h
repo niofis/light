@@ -5,7 +5,7 @@
 #include "list.h"
 
 typedef struct _bvhnode_t {
-  aabb_t *bounding_box;
+  aabb_t bounding_box;
   triangle_t *triangle;
   struct _bvhnode_t *left;
   struct _bvhnode_t *right;
