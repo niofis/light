@@ -4,6 +4,7 @@
 #include "sphere.h"
 #include "point_light.h"
 #include "list.h"
+#include "bvh.h"
 
 typedef struct
 {
@@ -11,6 +12,7 @@ typedef struct
 	list_t *triangles;
 	list_t *lights;
 	list_t *materials;
+    bvh_t *bvh;
 } world_t;
 
 world_t*

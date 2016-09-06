@@ -223,6 +223,8 @@ world_from_model(const char *file)
   else
     printf("Error loading model!\n");
 
+  world->bvh = bvh_new(world->triangles);
+
   return world;
 }
 

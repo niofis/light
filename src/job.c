@@ -12,7 +12,7 @@ job_new()
 	job->height = 360;// 720;
 	job->buffer = (int*) malloc(sizeof(int) * job->width * job->height);
 	//job->world = world_cornell();
-    job->world = world_from_model("../models/bunny.ply");
+    job->world = world_from_model("../models/bunny_low_res.ply");
 
 	return job;
 }
