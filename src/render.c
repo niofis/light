@@ -117,16 +117,43 @@ shading(world_t *world, intersection_t *trace, color_t *color)
 	color_mul(color, &(trace->material->color), &light);
 }
 
+void
+bvh_traverse(ray_t* ray, bvhnode_t* bvh_node, intersection_t* closest)
+{
+  if(aabb_intersect(&bvh_node->bounding_box, ray)) {
+    if(bvh_node->triangle != NULL) {
+      triangle_t *triangle = bvh_node->triangle;
+      intersection_t its;
+      triangle_intersects(triangle, ray, &its);
+      if(its.hit && its.distance > 0.001f && its.distance < closest->distance) {
+        v3_copy(&its.normal, &triangle->normal);
+
+        v3_mul_scalar(&its.hit_point, &ray->direction, its.distance);
+        v3_add(&its.hit_point, &its.hit_point, &ray->origin);
+
+        memcpy(closest, &its, sizeof(intersection_t));
+        closest->material = triangle->material;
+      }
+    }
+
+    if(bvh_node->left)
+      bvh_traverse(ray, bvh_node->left, closest);
+    if(bvh_node->right)
+      bvh_traverse(ray, bvh_node->right, closest);
+  }
+}
 
 int
-find_closest(ray_t* ray, world_t* world, float max_distance, intersection_t* result)
+find_closest(ray_t* ray, world_t* world, float max_distance, intersection_t* closest)
 {
-	triangle_t *triangle;
-	intersection_t its;
-	intersection_t closest;
+	//triangle_t *triangle;
+	//intersection_t its;
+	//intersection_t closest;
 
-	closest.hit = 0;
+	closest->hit = 0;
+    closest->distance = 1e16f;
 
+    /*
     node_t * node = list_head(world->triangles);
 	while(node) {
 		triangle = (triangle_t*) node->item;
@@ -144,10 +171,15 @@ find_closest(ray_t* ray, world_t* world, float max_distance, intersection_t* res
 		}
         node = list_next(node);
 	}
+    */
 
-	memcpy(result, &closest, sizeof(intersection_t));
+
+	//memcpy(result, &closest, sizeof(intersection_t));
+
+    bvh_traverse(ray, world->bvh->root, closest);
+
 	
-	return closest.hit;
+	return closest->hit;
 }
 
 void

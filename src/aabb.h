@@ -1,7 +1,9 @@
 #pragma once
 
+#include <stdbool.h>
 #include "vector3.h"
 #include "triangle.h"
+#include "ray.h"
 
 typedef struct {
   v3_t min;
@@ -23,3 +25,6 @@ void
 
 void
   aabb_destroy(aabb_t **bb);
+
+int
+  aabb_intersect(aabb_t *bb, ray_t *ray);

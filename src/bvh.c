@@ -30,6 +30,7 @@ bvh_build(bvhnode_t *leaves, size_t start, size_t end)
     return &leaves[start];
 
   bvhnode_t *bnode = (bvhnode_t*)malloc(sizeof(bvhnode_t));
+  bnode->triangle = NULL;
 
   //aabb_fit_triangle(&(bnode->bounding_box), leaves[start].triangle);
   aabb_combine(&bnode->bounding_box, &leaves[start].bounding_box, &leaves[end].bounding_box);
@@ -83,3 +84,5 @@ bvh_new(const list_t *triangles)
 
   return bvh;
 }
+
+
