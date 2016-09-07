@@ -146,7 +146,7 @@ world_cornell()
   v3_set_xyz(&light->position, 0.0f, 6.0f, 0.0f);
   list_append(world->lights, light);
 
-  
+  printf("Number of triangles: %zu\n", world->triangles->length);
 
   return world;
 }
@@ -216,8 +216,6 @@ world_from_model(const char *file)
     }
 
     printf("Total triangles: %zu\n", world->triangles->length);
-    printf("Min z: %f\n", minz);
-
     aiReleaseImport(scene);
   }
   else
@@ -231,19 +229,19 @@ world_from_model(const char *file)
 world_t*
 world_new()
 {
-  world_t *scn;
+  world_t *world;
 
-  scn = (world_t*) malloc(sizeof(world_t));
+  world = (world_t*) malloc(sizeof(world_t));
 
-  scn->camera = camera_new();
+  world->camera = camera_new();
 
-  scn->materials = list_new();
+  world->materials = list_new();
 
   material_t *red = material_new();
   color_set_argb(&red->color, 1.0f, 1.0f, 0.0f, 0.0f);
-  list_append(scn->materials, red);
+  list_append(world->materials, red);
 
-  scn->triangles = list_new();
+  world->triangles = list_new();
 
   triangle_t *triangle = triangle_new();
   v3_set_xyz(&triangle->v0, -6.0f, 0.0f, 0.0f);
@@ -251,15 +249,26 @@ world_new()
   v3_set_xyz(&triangle->v2, 6.0f, 0.0f, 0.0f);
   triangle->material = red;
   triangle_update(triangle);
-  list_append(scn->triangles, triangle);
+  list_append(world->triangles, triangle);
 
 
-  scn->lights = list_new();
+  triangle = triangle_new();
+  v3_set_xyz(&triangle->v0, -6.0f, -1.0f, -1.0f);
+  v3_set_xyz(&triangle->v1, 0.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->v2, 1.0f, -1.0f, -1.0f);
+  triangle->material = red;
+  triangle_update(triangle);
+  list_append(world->triangles, triangle);
+
+
+  world->lights = list_new();
   point_light_t *light = point_light_new();
   v3_set_xyz(&light->position, 0.0f, 8.0f, -10.0f);
-  list_append(scn->lights, light);
+  list_append(world->lights, light);
 
-  return scn;
+  world->bvh = bvh_new(world->triangles);
+
+  return world;
 }
 
 void

@@ -4,33 +4,17 @@
 
 typedef enum {X_AXIS, Y_AXIS, Z_AXIS} axis_t;
 
-//https://tavianator.com/fast-branchless-raybounding-box-intersections/
-/*
-   bool intersection(box b, ray r) {
-    double tx1 = (b.min.x - r.x0.x)*r.n_inv.x;
-    double tx2 = (b.max.x - r.x0.x)*r.n_inv.x;
- 
-    double tmin = min(tx1, tx2);
-    double tmax = max(tx1, tx2);
- 
-    double ty1 = (b.min.y - r.x0.y)*r.n_inv.y;
-    double ty2 = (b.max.y - r.x0.y)*r.n_inv.y;
- 
-    tmin = max(tmin, min(ty1, ty2));
-    tmax = min(tmax, max(ty1, ty2));
- 
-    return tmax >= tmin;
-}
-*/
-
 bvhnode_t *
 bvh_build(bvhnode_t *leaves, size_t start, size_t end)
 {
+
   if(start >= end)
     return &leaves[start];
 
   bvhnode_t *bnode = (bvhnode_t*)malloc(sizeof(bvhnode_t));
   bnode->triangle = NULL;
+  bnode->left = NULL;
+  bnode->right = NULL;
 
   //aabb_fit_triangle(&(bnode->bounding_box), leaves[start].triangle);
   aabb_combine(&bnode->bounding_box, &leaves[start].bounding_box, &leaves[end].bounding_box);
@@ -71,9 +55,9 @@ bvh_new(const list_t *triangles)
   while(node) {
     bvhnode_t *leave = &leaves[idx];
     aabb_fit_triangle(&(leave->bounding_box), node->item);
-    leaves->triangle = node->item;
-    leaves->left = NULL;
-    leaves->right = NULL;
+    leave->triangle = node->item;
+    leave->left = NULL;
+    leave->right = NULL;
 
     ++idx;
     node = list_next(node);

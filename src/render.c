@@ -124,6 +124,7 @@ bvh_traverse(ray_t* ray, bvhnode_t* bvh_node, intersection_t* closest)
     if(bvh_node->triangle != NULL) {
       triangle_t *triangle = bvh_node->triangle;
       intersection_t its;
+      its.hit = 0;
       triangle_intersects(triangle, ray, &its);
       if(its.hit && its.distance > 0.001f && its.distance < closest->distance) {
         v3_copy(&its.normal, &triangle->normal);
@@ -144,16 +145,16 @@ bvh_traverse(ray_t* ray, bvhnode_t* bvh_node, intersection_t* closest)
 }
 
 int
-find_closest(ray_t* ray, world_t* world, float max_distance, intersection_t* closest)
+find_closest(ray_t* ray, world_t* world, float max_distance, intersection_t* result)
 {
-	//triangle_t *triangle;
-	//intersection_t its;
-	//intersection_t closest;
+	triangle_t *triangle;
+	intersection_t its;
+	intersection_t closest;
 
-	closest->hit = 0;
-    closest->distance = 1e16f;
+	closest.hit = 0;
+    closest.distance = 1e16f;
 
-    /*
+   /*
     node_t * node = list_head(world->triangles);
 	while(node) {
 		triangle = (triangle_t*) node->item;
@@ -173,13 +174,13 @@ find_closest(ray_t* ray, world_t* world, float max_distance, intersection_t* clo
 	}
     */
 
+    bvh_traverse(ray, world->bvh->root, &closest);
 
-	//memcpy(result, &closest, sizeof(intersection_t));
+	memcpy(result, &closest, sizeof(intersection_t));
 
-    bvh_traverse(ray, world->bvh->root, closest);
 
 	
-	return closest->hit;
+	return closest.hit;
 }
 
 void
