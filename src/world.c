@@ -195,7 +195,6 @@ world_from_model(const char *file)
     struct aiVector3D vertex = mesh->mVertices[face.mIndices[0]];
     printf("first vertex: (%f, %f, %f)\n", vertex.x, vertex.y, vertex.z);
     */
-    float minz = 0;
     for(int mesh_idx = 0; mesh_idx < scene->mNumMeshes; mesh_idx++) {
       struct aiMesh *mesh = scene->mMeshes[mesh_idx];
       for(int face_idx = 0; face_idx < mesh->mNumFaces; face_idx++) {
@@ -211,7 +210,6 @@ world_from_model(const char *file)
         triangle_scale_uni(triangle, 100.0f);
         triangle_update(triangle);
         list_append(world->triangles, triangle);
-        if(v1.y > minz) minz = v1.y;
       }
     }
 

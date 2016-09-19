@@ -4,6 +4,33 @@
 
 typedef enum {X_AXIS, Y_AXIS, Z_AXIS} axis_t;
 
+
+void sort_leaves(bvhnode_t* leaves, size_t start, size_t end, axis_t axis)
+{
+  size_t a;
+  size_t b;
+  bvhnode_t temp;
+  //insertion sort
+  for(a = start + 1; a <= end; a++) {
+    temp = leaves[a];
+    for(b = a; b > start; b--) {
+      if (axis == X_AXIS &&
+          leaves[b-1].bounding_box.centroid.x > temp.bounding_box.centroid.x) {
+        leaves[b] = leaves[b-1];
+      } if (axis == Y_AXIS &&
+          leaves[b-1].bounding_box.centroid.y > temp.bounding_box.centroid.y) {
+        leaves[b] = leaves[b-1];
+      } if (axis == Z_AXIS &&
+          leaves[b-1].bounding_box.centroid.z > temp.bounding_box.centroid.z) {
+        leaves[b] = leaves[b-1];
+      } else {
+        break;
+      }
+    }
+    leaves[b] = temp;
+  }
+}
+
 bvhnode_t *
 bvh_build(bvhnode_t *leaves, size_t start, size_t end)
 {
@@ -36,7 +63,9 @@ bvh_build(bvhnode_t *leaves, size_t start, size_t end)
       (y_length < z_length?Y_AXIS:Z_AXIS);
 
   //create the left and right branches
-
+  //printf("axis: %u\n", (unsigned int)axis);
+  sort_leaves(leaves, start, end, axis);
+  
   size_t half = (start + end) >> 1;
 
   bnode->left = bvh_build(leaves, start, half);
@@ -66,6 +95,11 @@ bvh_new(const list_t *triangles)
   bvh_t *bvh = (bvh_t*)malloc(sizeof(bvh_t));
   bvh->root = bvh_build(leaves, 0, triangles->length - 1);
 
+  v3_t min = bvh->root->bounding_box.min;
+  v3_t max = bvh->root->bounding_box.max;
+  printf("min(%f, %f, %f) max(%f,%f,%f)\n",
+      min.x,min.y,min.z,
+      max.x,max.y,max.z);
   return bvh;
 }
 
