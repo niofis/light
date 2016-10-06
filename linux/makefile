@@ -1,6 +1,6 @@
 CC=gcc
 RM=rm -f
-CFLAGS=-d -Wall -std=c99 -O3 -I../src -I/usr/local/include #$(shell root-config --cflags)
+CFLAGS=-std=c99 -O3 -I../src -I/usr/local/include #$(shell root-config --cflags)
 LDFLAGS= #$(shell root-config --ldflags)
 LDLIBS=-lm -L/usr/local/lib -lSDL2 -lassimp#$(shell root-config --libs)
 VPATH=../src

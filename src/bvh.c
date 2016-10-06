@@ -95,11 +95,11 @@ bvh_new(const list_t *triangles)
   bvh_t *bvh = (bvh_t*)malloc(sizeof(bvh_t));
   bvh->root = bvh_build(leaves, 0, triangles->length - 1);
 
-  v3_t min = bvh->root->bounding_box.min;
-  v3_t max = bvh->root->bounding_box.max;
-  printf("min(%f, %f, %f) max(%f,%f,%f)\n",
-      min.x,min.y,min.z,
-      max.x,max.y,max.z);
+  //v3_t min = bvh->root->bounding_box.min;
+  //v3_t max = bvh->root->bounding_box.max;
+  //printf("min(%f, %f, %f) max(%f,%f,%f)\n",
+  //    min.x,min.y,min.z,
+  //    max.x,max.y,max.z);
   return bvh;
 }
 

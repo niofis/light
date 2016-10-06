@@ -146,7 +146,9 @@ world_cornell()
   v3_set_xyz(&light->position, 0.0f, 6.0f, 0.0f);
   list_append(world->lights, light);
 
-  printf("Number of triangles: %zu\n", world->triangles->length);
+  //printf("Number of triangles: %zu\n", world->triangles->length);
+
+  world->bvh = bvh_new(world->triangles);
 
   return world;
 }
@@ -248,16 +250,6 @@ world_new()
   triangle->material = red;
   triangle_update(triangle);
   list_append(world->triangles, triangle);
-
-
-  triangle = triangle_new();
-  v3_set_xyz(&triangle->v0, -6.0f, -1.0f, -1.0f);
-  v3_set_xyz(&triangle->v1, 0.0f, 0.0f, 0.0f);
-  v3_set_xyz(&triangle->v2, 1.0f, -1.0f, -1.0f);
-  triangle->material = red;
-  triangle_update(triangle);
-  list_append(world->triangles, triangle);
-
 
   world->lights = list_new();
   point_light_t *light = point_light_new();

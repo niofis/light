@@ -8,11 +8,11 @@ job_new()
 
 	job = (job_t*) malloc(sizeof(job_t));
 
-	job->width = 640; //1280;
-	job->height = 360;// 720;
+	job->width = 480;//640; //1280;
+	job->height = 272;//360;// 720;
 	job->buffer = (int*) malloc(sizeof(int) * job->width * job->height);
-	//job->world = world_cornell();
-    job->world = world_from_model("../models/bunny_low_res.ply");
+	job->world = world_cornell();
+    //job->world = world_from_model("../models/bunny_low_res.ply");
     //job->world = world_new();
 
 	return job;

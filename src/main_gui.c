@@ -37,12 +37,17 @@ int gui_init()
     return 1;
   }
 
-  window = SDL_CreateWindow("Light", 100, 100, job->width, job->height, SDL_WINDOW_SHOWN);
+  window = SDL_CreateWindow("Light", 0, 0, job->width, job->height, SDL_WINDOW_SHOWN);
   if (window == NULL)
   {
 	  printf("SDL_CreateWindow failed: %s\n", SDL_GetError());
 	  SDL_Quit();
 	  return 1;
+  }
+
+  if (SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN) != 0) {
+    printf("SDL_SetWindowFullscreen failed: %s\n", SDL_GetError());
+    return 1;
   }
 
   renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
@@ -67,8 +72,7 @@ int gui_init()
   render(job);
   timer_stop(&timer);
 
-  printf("Render time = %fs\n", timer.elapsed);
-
+  //printf("Render time = %fs\n", timer.elapsed);
 
   SDL_UpdateTexture(texture, NULL, job->buffer, job->width * sizeof(Uint32));
   SDL_RenderClear(renderer);
