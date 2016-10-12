@@ -1,10 +1,5 @@
 #pragma once
-
-#include "camera.h"
-#include "sphere.h"
-#include "point_light.h"
-#include "list.h"
-#include "bvh.h"
+#include "includes.h"
 
 typedef struct
 {

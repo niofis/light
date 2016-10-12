@@ -1,6 +1,4 @@
-#include <stdlib.h>
-#include "camera.h"
-
+#include "includes.h"
 
 camera_t*
 camera_new()

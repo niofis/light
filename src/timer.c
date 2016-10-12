@@ -1,4 +1,4 @@
-#include "timer.h"
+#include "includes.h"
 
 void timer_start(struct timer* timer)
 {

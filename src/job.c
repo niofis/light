@@ -1,14 +1,16 @@
-#include <stdlib.h>
-#include "job.h"
+#include "includes.h"
 
 job_t*
 job_new()
 {
 	job_t *job;
 
+    printf("aki1!\n");
 	job = (job_t*) malloc(sizeof(job_t));
+    printf("aki2!\n");
 
 	job->width = 480;//640; //1280;
+    printf("aki3!\n");
 	job->height = 272;//360;// 720;
 	job->buffer = (int*) malloc(sizeof(int) * job->width * job->height);
 	job->world = world_cornell();

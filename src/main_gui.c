@@ -1,22 +1,10 @@
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <SDL2/SDL.h>
+#include "includes.h"
 
 #if !defined(byte)
   #define byte unsigned char
 #endif
 
-#ifdef int32_t
-  #define int int32_t
-#endif
-
 #define BPP 4
-
-#include "timer.h"
-#include "ppm.h"
-#include "job.h"
-#include "render.h"
 
 int gui_init()
 {

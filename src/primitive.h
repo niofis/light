@@ -3,7 +3,7 @@
 #define SPHERE      1
 #define TRIANGLE    2
 
-#include "triangle.h"
+#include "includes.h"
 
 struct primitive
 {

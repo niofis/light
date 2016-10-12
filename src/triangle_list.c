@@ -1,5 +1,4 @@
-#include <stdlib.h>
-#include "triangle_list.h"
+#include "includes.h"
 
 triangle_list_t*
 triangle_list_new()

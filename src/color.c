@@ -1,4 +1,4 @@
-#include "color.h"
+#include "includes.h"
 
 int
 color_to_argb(color_t *color)

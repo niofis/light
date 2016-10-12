@@ -1,9 +1,4 @@
-#include "ppm.h"
-#include <stdio.h>
-#include <stdlib.h>
-
-
-
+#include "includes.h"
 
 int ppm_create(char* filename, int width, int height, short max_color,int format, int* data)
 {

@@ -1,6 +1,4 @@
-#include <stdlib.h>
-#include <math.h>
-#include "triangle.h"
+#include "includes.h"
 #define EPSILON 0.000005f
 
 triangle_t*

@@ -1,16 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <assimp/cimport.h>
-#include <assimp/scene.h>
-#include "world.h"
-#include "material.h"
-#include "camera.h"
-#include "sphere.h"
-#include "point_light.h"
-#include "triangle.h"
-#include "triangle_list.h"
-
-
+#include "includes.h"
 
 world_t*
 world_cornell()

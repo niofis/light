@@ -1,8 +1,5 @@
 #pragma once
-
-#include "aabb.h"
-#include "triangle.h"
-#include "list.h"
+#include "includes.h"
 
 typedef struct _bvhnode_t {
   aabb_t bounding_box;

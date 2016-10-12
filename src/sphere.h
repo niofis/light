@@ -1,8 +1,5 @@
 #pragma once
-#include "vector3.h"
-#include "ray.h"
-#include "material.h"
-#include "intersection.h"
+#include "includes.h"
 
 typedef struct
 {

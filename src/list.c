@@ -1,5 +1,4 @@
-#include <stdlib.h>
-#include "list.h"
+#include "includes.h"
 
 list_t*
 list_new()

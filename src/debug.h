@@ -1,11 +1,12 @@
-#ifdef DEBUG
-#ifndef DEBUG_H
-#include <stdio.h>
-#include "vector3.h"
+#pragma once
+#include "includes.h"
+#undef malloc
+#undef free
+#define malloc(a) malloc_debug(__FILE__, __LINE__, a)
+#define free(a) free_debug(a)
+
 
 void debug_nl();
 void debug_pause();
-void v3_dump(struct vector3* v3);
-void ray_dump(struct ray* ray);
-#endif
-#endif
+//void v3_dump(struct vector3* v3);
+//void ray_dump(struct ray* ray);

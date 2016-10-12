@@ -1,17 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "material.h"
-#include "vector3.h"
-#include "job.h"
-#include "render.h"
-#include "ray.h"
-#include "world.h"
-#include "camera.h"
-#include "triangle.h"
-#include "point_light.h"
-#include "intersection.h"
-
+#include "includes.h"
 //not thread safe :(
 v3_t vdu;
 v3_t vdv;

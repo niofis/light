@@ -1,6 +1,6 @@
 #pragma once
 
-#include "triangle.h"
+#include "includes.h"
 
 typedef struct _trnode {
   triangle_t *triangle;

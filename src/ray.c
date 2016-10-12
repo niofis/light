@@ -1,5 +1,4 @@
-#include <stdlib.h>
-#include "ray.h"
+#include "includes.h"
 
 ray_t*
 ray_new()

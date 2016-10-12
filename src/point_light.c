@@ -1,7 +1,4 @@
-#include <stdlib.h>
-#include "point_light.h"
-#include "vector3.h"
-#include "color.h"
+#include "includes.h"
 
 point_light_t*
 point_light_new()

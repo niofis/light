@@ -1,7 +1,5 @@
-#ifndef PRIMITIVES_LIST
-#define PRIMITIVES_LIST
-
-#include "primitive.h"
+#pragma once
+#include "includes.h"
 
 struct prm_list 
 {
@@ -23,5 +21,3 @@ struct prm_it* prm_it_new(struct prm_list* list);
 void prm_it_del(struct prm_it* it);
 struct primitive* prm_it_next(struct prm_it* it);
 
-
-#endif

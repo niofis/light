@@ -1,10 +1,4 @@
-#include <stdlib.h>
-#include <math.h>
-#include "vector3.h"
-
-#ifdef DEBUG
-#include "debug.h"
-#endif
+#include "includes.h"
 
 v3_t*
 v3_new()

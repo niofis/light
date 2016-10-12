@@ -1,8 +1,4 @@
-#include <stdlib.h>
-#include <math.h>
-#include "sphere.h"
-#include "ray.h"
-#include "render.h"
+#include "includes.h"
 
 sphere_t*
 sphere_new(int count)

@@ -1,10 +1,10 @@
 CC=gcc
 RM=rm -f
-CFLAGS=-Wall -std=c99 -O2 #$(shell root-config --cflags)
+CFLAGS=-Wall -std=c99 -O2 -E #$(shell root-config --cflags)
 LDFLAGS= #$(shell root-config --ldflags)
 LDLIBS=-lm #$(shell root-config --libs)
 
-SRCS=camera.c color.c debug.c job.c main.c sphere.c point_light.c ppm.c ray.c render.c world.c vector3.c material.c timer.c triangle.c
+SRCS=camera.c color.c job.c main.c sphere.c point_light.c ppm.c ray.c render.c world.c vector3.c material.c timer.c triangle.c debug.c 
 OBJS=$(subst .c,.o,$(SRCS))
 
 all: light

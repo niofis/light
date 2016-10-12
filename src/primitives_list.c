@@ -1,5 +1,4 @@
-#include <stdlib.h>
-#include "primitives_list.h"
+#include "includes.h"
 
 struct prm_list* prm_list_new()
 {

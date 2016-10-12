@@ -1,6 +1,4 @@
-#include <stdlib.h>
-#include "list.h"
-#include "bvh.h"
+#include "includes.h"
 
 typedef enum {X_AXIS, Y_AXIS, Z_AXIS} axis_t;
 

@@ -1,5 +1,4 @@
-#include <stdlib.h>
-#include "material.h"
+#include "includes.h"
 
 material_t*
 material_new()

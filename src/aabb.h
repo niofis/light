@@ -1,9 +1,5 @@
 #pragma once
-
-#include <stdbool.h>
-#include "vector3.h"
-#include "triangle.h"
-#include "ray.h"
+#include "includes.h"
 
 typedef struct {
   v3_t min;

@@ -1,5 +1,4 @@
-#include <stdlib.h>
-#include "primitive.h"
+#include "includes.h"
 
 int prm_intersect(struct primitive* prm, struct ray* ray, struct intersection* result);
 
