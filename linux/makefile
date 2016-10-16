@@ -4,7 +4,7 @@ CFLAGS=-std=c99 -O3 -I../src -I/usr/local/include #$(shell root-config --cflags)
 LDFLAGS= #$(shell root-config --ldflags)
 LDLIBS=-lm -L/usr/local/lib -lSDL2 -lassimp#$(shell root-config --libs)
 VPATH=../src
-SRCS=camera.c color.c job.c main_gui.c point_light.c ray.c render.c world.c vector3.c material.c timer.c triangle.c list.c aabb.c bvh.c
+SRCS=camera.c color.c bvh.c world.c job.c main_gui.c point_light.c ray.c render.c vector3.c material.c timer.c triangle.c list.c aabb.c debug.c
 OPATH=../obj
 
 #%.o : %.c

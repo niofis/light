@@ -12,7 +12,11 @@ struct primitive
 	void* obj;
 	struct primitive* next;
 };
+typedef struct primitive primitive_t;
 
 
-int prm_intersect(struct primitive* prm, struct ray* ray, struct intersection* result);
-void prm_del(struct primitive* prm);
+int 
+  prm_intersect(primitive_t *prm, ray_t *ray, intersection_t *result);
+
+void
+  prm_destory(primitive_t **prm);

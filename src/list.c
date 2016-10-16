@@ -13,10 +13,19 @@ list_new()
 void
 list_destroy(list_t **list)
 {
-  (*list)->head = NULL;
-  (*list)->tail = NULL;
-  free(*list);
-  *list = NULL;
+  list_t *l = *list;
+  node_t *node = l->head;
+  node_t *tmp;
+  while(node) {
+    tmp = node->next;
+    free(node);
+    node = tmp;
+  }
+
+  l->head = NULL;
+  l->tail = NULL;
+  free(l);
+  l = NULL;
 }
 
 node_t*

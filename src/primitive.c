@@ -1,21 +1,24 @@
 #include "includes.h"
 
-int prm_intersect(struct primitive* prm, struct ray* ray, struct intersection* result);
-
-void prm_del(struct primitive* prm)
+int 
+prm_intersect(primitive_t *prm, ray_t *ray, intersection_t *result)
 {
-    if(prm != 0)
-    {
-        if(prm->type == TRIANGLE)
-        {
-            triangle_del(prm->obj);
-        }
-        else
-        {
-            free(prm->obj);
-        }
+  return 0;
+}
 
-        free(prm);
+void
+prm_destroy(primitive_t **pprm)
+{
+  primitive_t *prm = *prm;
+  if(prm != 0) {
+    if(prm->type == TRIANGLE) {
+      triangle_del(prm->obj);
     }
+    else {
+      free(prm->obj);
+    }
+    free(prm);
+  }
+  *pprm = NULL;
 }
 

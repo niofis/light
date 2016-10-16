@@ -14,7 +14,7 @@ world_cornell()
   world->camera->left_bottom.z = 0.0f;
   world->camera->left_top.z = 0.0f;
   world->camera->right_top.z = 0.0f;
-  world->camera->eye.z = -50.0f;
+  world->camera->eye.z = -5.0f;
 
 
   //Materials
@@ -267,7 +267,7 @@ world_destroy(world_t **world)
       triangle_destroy((triangle_t**)&node->item);
       node = list_next(node);
     }
-    scn->triangles = NULL;
+    list_destroy(&(scn->triangles));
   }
 
   if (scn->lights) {
@@ -276,7 +276,7 @@ world_destroy(world_t **world)
       point_light_destroy((point_light_t**)&node->item);
       node = list_next(node);
     }
-    scn->lights = NULL;
+    list_destroy(&(scn->lights));
   }
 
   if(scn->materials) {
@@ -285,8 +285,13 @@ world_destroy(world_t **world)
       material_destroy((material_t**)&node->item);
       node = list_next(node);
     }
-    scn->materials = NULL;
+    list_destroy(&(scn->materials));
   }
 
+  if(scn->bvh) {
+    bvh_destroy(&(scn->bvh));
+  }
+
+  free(*world);
   *world = NULL;
 }

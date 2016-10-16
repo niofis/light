@@ -12,7 +12,7 @@
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 
-#include "debug.h"
+//#include "debug.h"
 #include "list.h"
 #include "vector3.h"
 #include "color.h"

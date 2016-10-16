@@ -80,7 +80,7 @@ bvh_new(const list_t *triangles)
   node_t *node = list_head(triangles);
   
   while(node) {
-    bvhnode_t *leave = &leaves[idx];
+    bvhnode_t *leave = &(leaves[idx]);
     aabb_fit_triangle(&(leave->bounding_box), node->item);
     leave->triangle = node->item;
     leave->left = NULL;
@@ -92,6 +92,7 @@ bvh_new(const list_t *triangles)
 
   bvh_t *bvh = (bvh_t*)malloc(sizeof(bvh_t));
   bvh->root = bvh_build(leaves, 0, triangles->length - 1);
+  bvh->leaves = leaves;
 
   //v3_t min = bvh->root->bounding_box.min;
   //v3_t max = bvh->root->bounding_box.max;
@@ -101,4 +102,27 @@ bvh_new(const list_t *triangles)
   return bvh;
 }
 
+void
+bvh_destroy_children(bvhnode_t **node)
+{
+  bvhnode_t *n = *node;
+  //Its a leaf, ignore
+  if(!n || (n->left == NULL & n->right == NULL))
+    return;
+  if(n->left)
+    bvh_destroy_children(&(n->left));
+  if(n->right)
+    bvh_destroy_children(&(n->right));
+  free(*node);
+  *node = NULL;
+}
 
+void
+bvh_destroy(bvh_t **bvh)
+{
+  bvh_t *b = *bvh;
+  bvh_destroy_children(&(b->root));
+  free(b->leaves);
+  free(*bvh);
+  *bvh = NULL;
+}

@@ -102,5 +102,7 @@ int main(int argc, char **argv)
 {
   gui_init();
 
+  debug_end();
+
   return 0;
 }
