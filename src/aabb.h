@@ -10,6 +10,12 @@ typedef struct {
 aabb_t*
   aabb_new_from_triangle(triangle_t* triangle);
 
+aabb_t*
+  aabb_new_from_sphere(sphere_t* sphere);
+
+aabb_t*
+  aabb_new_from_primitive(primitive_t *prm);
+
 void
   aabb_fit_triangle(aabb_t *bb, triangle_t* triangle);
 

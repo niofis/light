@@ -33,6 +33,34 @@ aabb_new_from_triangle(triangle_t* triangle)
   return bb;
 }
 
+aabb_t*
+aabb_new_from_sphere(sphere_t *sphere)
+{
+  aabb_t *bb = (aabb_t*) malloc(sizeof(aabb_t));
+  
+  bb->min.x = sphere->center.x - sphere->radius;
+  bb->min.y = sphere->center.y - sphere->radius;
+  bb->min.z = sphere->center.z - sphere->radius;
+
+  bb->max.x = sphere->center.x + sphere->radius;
+  bb->max.y = sphere->center.y + sphere->radius;
+  bb->max.z = sphere->center.z + sphere->radius;
+
+  return bb;
+}
+
+aabb_t*
+aabb_new_from_primitive(primitive_t *prm)
+{
+  if(!prm)
+    return NULL;
+  if(prm->type == TRIANGLE)
+    return aabb_new_from_triangle((triangle_t*) prm->obj);
+  if(prm->type == SPHERE)
+    return aabb_new_from_sphere((sphere_t*) prm->obj);
+  return NULL;
+}
+
 void
 aabb_fit_triangle(aabb_t *bb, triangle_t *triangle)
 {
