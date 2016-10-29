@@ -1,16 +1,26 @@
 #pragma once
 #include "includes.h"
 
+typedef struct _prmnode {
+  primitive_t *primitive;
+  struct _prmnode *next;
+} prmnode_t;
+
 typedef struct
 {
-	int count;
-	primitive_t* first;
-	primitive_t* last;
+  size_t length;
+  prmnode_t *head;
+  prmnode_t *tail;
 } prmlist_t;
 
 prmlist_t*
   prmlist_new();
 
-//prm_list_del will dispose of individual elements
 void
   prmlist_destroy(prmlist_t **list);
+
+prmnode_t*
+  prmlist_head(prmlist_t *list);
+
+void
+  prmlist_append(prmlist_t *list, primitive_t *prm);

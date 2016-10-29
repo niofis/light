@@ -5,18 +5,23 @@
 
 #include "includes.h"
 
-struct primitive
+typedef struct primitive_t
 {
 
 	int type;
 	void* obj;
-	struct primitive* next;
 };
-typedef struct primitive primitive_t;
-
 
 int 
   prm_intersect(primitive_t *prm, ray_t *ray, intersection_t *result);
 
 void
   prm_destory(primitive_t **prm);
+
+primitive_t*
+  prm_from_triangle(triangle_t *triangel);
+
+primitive_t*
+  prm_from_sphere(sphere_t *sphere);
+
+

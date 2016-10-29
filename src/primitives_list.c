@@ -1,62 +1,47 @@
 #include "includes.h"
 
-struct prm_list* prm_list_new()
+prmlist_t*
+prmlist_new()
 {
-    struct prm_list* lst = (struct prm_list*) malloc(sizeof(struct prm_list));
-    return lst;
+  rmlist_t *lst = (prmlist_t*) malloc(sizeof(prmlist_t));
+  return lst;
 }
 
-//prm_list_del will dispose of individual elements
-void prm_list_del(struct prm_list* list)
+void
+prmlist_destroy(prmlist_t **list)
 {
-    struct prm_it* it;
-    struct primitive* prm;
+  prmnode_t *node = (*list)->head;
+  prmnode_t *tmp;
+  while(node)
+  {
+    tmp = node->next;
+    free(node);
+    node = tmp;
+  }
 
-    it = prm_it_new(list);
-
-    prm = prm_it_next(it);
-
-    while(prm != 0)
-    {
-        prm_del(prm);
-        prm = prm_it_next(it);
-    }
-
-    prm_it_del(it);
-        
-}
-
-struct prm_it* prm_it_new(struct prm_list* list)
-{
-    struct prm_it* it;
-    
-    it = (struct prm_it*) malloc(sizeof(struct prm_it));
-
-    it->current = list->first;
-
-    return it;
+  (*list)->head = NULL;
+  (*list)->tail = NULL;
+  free(*list);
+  *list = NULL;
 
 }
 
-void prm_it_del(struct  prm_it* it)
+prmnode_t*
+prmlist_head(prmlist_t *list)
 {
-    if(it != 0)
-    {
-        free(it);
-    }
+  return list->head;
 }
 
-
-struct primitive* prm_it_next(struct prm_it* it)
+void
+prmlist_append(prmlist_t *list, primitive_t *prm)
 {
-    struct primitive* prm = 0;
-    if(it != 0)
-    {
-        prm = it->current;
-        if(prm != 0)
-        {
-            it->current = prm->next;
-        }
-    }
-    return prm;
+  prmnode_t *nnode = (prmnode_t*) malloc(sizeof(prmnode_t));
+  nnode->primitive = prm;
+  nnode->next = NULL;
+  
+  list->tail->next = nnode;
+  list->tail = nnode;
+
+  if (!list->head)
+    list->head = nnode;
 }

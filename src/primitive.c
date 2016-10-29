@@ -30,3 +30,25 @@ prm_destroy(primitive_t **pprm)
   }
   *pprm = NULL;
 }
+
+primitive_t*
+prm_from_triangle(triangle_t *triangle)
+{
+  primitive_t *prm = (primitive_t*) malloc(sizeof(primitive_t));
+  
+  prm->type = TRIANGLE;
+  prm->obj = triangle;
+  
+  return prm;
+}
+
+primitive_t*
+prm_from_sphere(sphere_t *sphere)
+{
+  primitive_t *prm = (primitive_t*) malloc(sizeof(primitive_t));
+  
+  prm->type = SPHERE;
+  prm->obj = sphere;
+
+  return prm;
+}

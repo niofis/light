@@ -4,7 +4,7 @@
 typedef struct
 {
 	camera_t *camera;
-	list_t *triangles;
+	list_t *primitives;
 	list_t *lights;
 	list_t *materials;
     bvh_t *bvh;
