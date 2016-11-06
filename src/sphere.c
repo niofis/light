@@ -1,15 +1,11 @@
 #include "includes.h"
 
 sphere_t*
-sphere_new(int count)
+sphere_new()
 {
 	sphere_t* spheres;
-	spheres = (sphere_t*) malloc(count * sizeof(sphere_t));
+	spheres = (sphere_t*) malloc(sizeof(sphere_t));
 	
-	for(int i = 0; i < count; ++i) {
-		spheres[i].material = 0;
-	}
-
 	return spheres;
 }
 

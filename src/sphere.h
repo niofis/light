@@ -9,7 +9,7 @@ typedef struct
 } sphere_t;
 
 sphere_t*
-  sphere_new(int count);
+  sphere_new();
 
 void
   sphere_destroy(sphere_t **sphere);

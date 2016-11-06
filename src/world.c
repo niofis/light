@@ -132,10 +132,10 @@ world_cornell()
   list_append(world->primitives, prm_from_triangle(triangle));
 
   //Sphere
-  sphere = sphere_new();
+  sphere_t *sphere = sphere_new();
   v3_set_xyz(&sphere->center, 0.0f, 0.0f, 0.0f);
   sphere->material = blue;
-  list_append(world-primitives, prm_from_sphere(sphere));
+  list_append(world->primitives, prm_from_sphere(sphere));
 
   //Lights
   

@@ -5,12 +5,12 @@
 
 #include "includes.h"
 
-typedef struct primitive_t
+typedef struct
 {
 
 	int type;
 	void* obj;
-};
+} primitive_t;
 
 int 
   prm_intersect(primitive_t *prm, ray_t *ray, intersection_t *result);
