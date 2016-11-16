@@ -275,7 +275,7 @@ world_destroy(world_t **world)
   if(scn->primitives) {
     node = list_head(scn->primitives);
     while(node) {
-      triangle_destroy((triangle_t**)&node->item);
+      prm_destroy((triangle_t**)&node->item);
       node = list_next(node);
     }
     list_destroy(&(scn->primitives));
