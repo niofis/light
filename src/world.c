@@ -133,7 +133,8 @@ world_cornell()
 
   //Sphere
   sphere_t *sphere = sphere_new();
-  v3_set_xyz(&sphere->center, 0.0f, 0.0f, 0.0f);
+  sphere->radius = 1.0f;
+  v3_set_xyz(&sphere->center, 0.0f, 2.0f, 0.0f);
   sphere->material = blue;
   list_append(world->primitives, prm_from_sphere(sphere));
 

@@ -15,13 +15,13 @@ prm_intersect(primitive_t *prm, ray_t *ray, intersection_t *result)
 void
 prm_destroy(primitive_t **pprm)
 {
-  primitive_t *prm = *prm;
+  primitive_t *prm = *pprm;
   if(prm != 0) {
     if(prm->type == TRIANGLE) {
-      triangle_del(&prm->obj);
+      triangle_destroy(&prm->obj);
     }
     if(prm->type == SPHERE) {
-      sphere_del(&prm->obj);
+      sphere_destroy(&prm->obj);
     }
     else {
       free(prm->obj);

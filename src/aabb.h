@@ -20,6 +20,12 @@ void
   aabb_fit_triangle(aabb_t *bb, triangle_t* triangle);
 
 void
+  aabb_fit_sphere(aabb_t *bb, sphere_t *sphere);
+
+void
+  aabb_fit_primitive(aabb_t *bb, primitive_t* primitive);
+
+void
   aabb_combine(aabb_t *dest, aabb_t *bb1, aabb_t *bb2);
 
 void

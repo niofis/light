@@ -53,10 +53,11 @@ find_any(ray_t *ray, world_t *world, float max_distance, intersection_t *result)
 	its.hit = 0;
 
 	if(its.hit == 0) {
-        node_t *node = list_head(world->triangles);
+        node_t *node = list_head(world->primitives);
         while(node) {
-			tr = (triangle_t*) node->item;
-			triangle_intersects(tr, ray, &its);
+			//tr = (triangle_t*) node->item;
+			//triangle_intersects(tr, ray, &its);
+            prm_intersect(node->item, ray, &its);
 			if(its.hit && its.distance < max_distance && its.distance > 0.001f)
 				break;
 			its.hit = 0;
@@ -108,19 +109,28 @@ void
 bvh_traverse(ray_t* ray, bvhnode_t* bvh_node, intersection_t* closest)
 {
   if(aabb_intersect(&bvh_node->bounding_box, ray)) {
-    if(bvh_node->triangle != NULL) {
-      triangle_t *triangle = bvh_node->triangle;
+    if(bvh_node->primitive != NULL) {
+      primitive_t *primitive = bvh_node->primitive;
       intersection_t its;
       its.hit = 0;
-      triangle_intersects(triangle, ray, &its);
+      prm_intersect(primitive, ray, &its);
       if(its.hit && its.distance > 0.001f && its.distance < closest->distance) {
-        v3_copy(&its.normal, &triangle->normal);
-
         v3_mul_scalar(&its.hit_point, &ray->direction, its.distance);
         v3_add(&its.hit_point, &its.hit_point, &ray->origin);
 
+
+        if(primitive->type == TRIANGLE) {
+          triangle_t *triangle = primitive->obj;
+          v3_copy(&its.normal, &triangle->normal);
+          its.material = triangle->material;
+        }
+        else if(primitive->type == SPHERE) {
+          sphere_t *sphere = primitive->obj;
+          v3_sub(&its.normal, &its.hit_point, &sphere->center);
+          v3_normalize(&its.normal);
+          its.material = sphere->material;
+        }
         memcpy(closest, &its, sizeof(intersection_t));
-        closest->material = triangle->material;
       }
     }
 

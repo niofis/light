@@ -20,6 +20,9 @@ aabb_new_from_triangle(triangle_t* triangle)
 {
   aabb_t *bb = (aabb_t*) malloc(sizeof(aabb_t));
 
+  aabb_fit_triangle(bb, triangle);
+  /*
+
   bb->min.x = min3(triangle->v0.x, triangle->v1.x, triangle->v2.x);
   bb->min.y = min3(triangle->v0.y, triangle->v1.y, triangle->v2.y);
   bb->min.z = min3(triangle->v0.z, triangle->v1.z, triangle->v2.z);
@@ -29,7 +32,7 @@ aabb_new_from_triangle(triangle_t* triangle)
   bb->max.z = max3(triangle->v0.z, triangle->v1.z, triangle->v2.z);
 
   aabb_update_centroid(bb);
-
+*/
   return bb;
 }
 
@@ -37,6 +40,10 @@ aabb_t*
 aabb_new_from_sphere(sphere_t *sphere)
 {
   aabb_t *bb = (aabb_t*) malloc(sizeof(aabb_t));
+
+  aabb_fit_sphere(bb, sphere);
+
+  /*
   
   bb->min.x = sphere->center.x - sphere->radius;
   bb->min.y = sphere->center.y - sphere->radius;
@@ -45,7 +52,7 @@ aabb_new_from_sphere(sphere_t *sphere)
   bb->max.x = sphere->center.x + sphere->radius;
   bb->max.y = sphere->center.y + sphere->radius;
   bb->max.z = sphere->center.z + sphere->radius;
-
+*/
   return bb;
 }
 
@@ -73,6 +80,32 @@ aabb_fit_triangle(aabb_t *bb, triangle_t *triangle)
   bb->max.z = max3(triangle->v0.z, triangle->v1.z, triangle->v2.z);
 
   aabb_update_centroid(bb);
+}
+
+void
+aabb_fit_sphere(aabb_t *bb, sphere_t *sphere)
+{
+   
+  bb->min.x = sphere->center.x - sphere->radius;
+  bb->min.y = sphere->center.y - sphere->radius;
+  bb->min.z = sphere->center.z - sphere->radius;
+
+  bb->max.x = sphere->center.x + sphere->radius;
+  bb->max.y = sphere->center.y + sphere->radius;
+  bb->max.z = sphere->center.z + sphere->radius;
+
+  aabb_update_centroid(bb);
+}
+
+void
+aabb_fit_primitive(aabb_t *bb, primitive_t *primitive)
+{
+  if (primitive->type == SPHERE) {
+    aabb_fit_sphere(bb, primitive->obj);
+  }
+  else if(primitive->type == TRIANGLE) {
+    aabb_fit_triangle(bb, primitive->obj);
+  }
 }
 
 void

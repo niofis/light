@@ -37,7 +37,7 @@ bvh_build(bvhnode_t *leaves, size_t start, size_t end)
     return &leaves[start];
 
   bvhnode_t *bnode = (bvhnode_t*)malloc(sizeof(bvhnode_t));
-  bnode->triangle = NULL;
+  bnode->primitive = NULL;
   bnode->left = NULL;
   bnode->right = NULL;
 
@@ -73,16 +73,16 @@ bvh_build(bvhnode_t *leaves, size_t start, size_t end)
 }
 
 bvh_t*
-bvh_new(const list_t *triangles)
+bvh_new(const list_t *primitives)
 {
-  bvhnode_t *leaves = (bvhnode_t*)malloc(sizeof(bvhnode_t) * triangles->length);
+  bvhnode_t *leaves = (bvhnode_t*)malloc(sizeof(bvhnode_t) * primitives->length);
   size_t idx = 0;
-  node_t *node = list_head(triangles);
+  node_t *node = list_head(primitives);
   
   while(node) {
     bvhnode_t *leave = &(leaves[idx]);
-    aabb_fit_triangle(&(leave->bounding_box), node->item);
-    leave->triangle = node->item;
+    aabb_fit_primitive(&(leave->bounding_box), node->item);
+    leave->primitive = node->item;
     leave->left = NULL;
     leave->right = NULL;
 
@@ -91,7 +91,7 @@ bvh_new(const list_t *triangles)
   }
 
   bvh_t *bvh = (bvh_t*)malloc(sizeof(bvh_t));
-  bvh->root = bvh_build(leaves, 0, triangles->length - 1);
+  bvh->root = bvh_build(leaves, 0, primitives->length - 1);
   bvh->leaves = leaves;
 
   //v3_t min = bvh->root->bounding_box.min;

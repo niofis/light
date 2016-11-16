@@ -3,7 +3,7 @@
 
 typedef struct _bvhnode_t {
   aabb_t bounding_box;
-  triangle_t *triangle;
+  primitive_t *primitive;
   struct _bvhnode_t *left;
   struct _bvhnode_t *right;
 } bvhnode_t;
