@@ -34,8 +34,11 @@ world_cornell()
   list_append(world->materials, white);
 
   material_t *blue = material_new();
-  color_set_argb(&blue->color, 0.0f, 0.0f, 1.0f, 1.0f);
+  color_set_argb(&blue->color, 1.0f, 0.0f, 0.0f, 1.0f);
   list_append(world->materials, blue);
+
+  material_t *yellow = material_new();
+  color_set_argb(&yellow->color, 1.0f, 1.0f, 1.0f, 0.0f);
 
 
   //Triangles
@@ -136,6 +139,12 @@ world_cornell()
   sphere->radius = 1.0f;
   v3_set_xyz(&sphere->center, 0.0f, 2.0f, 0.0f);
   sphere->material = blue;
+  list_append(world->primitives, prm_from_sphere(sphere));
+
+  sphere = sphere_new();
+  sphere->radius = 0.5f;
+  v3_set_xyz(&sphere->center, -2.0f, 2.0f, 2.0f);
+  sphere->material = yellow;
   list_append(world->primitives, prm_from_sphere(sphere));
 
   //Lights

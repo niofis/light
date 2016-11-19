@@ -65,6 +65,11 @@ int gui_init()
   SDL_UpdateTexture(texture, NULL, job->buffer, job->width * sizeof(Uint32));
   SDL_RenderClear(renderer);
   SDL_RenderCopy(renderer, texture, NULL, NULL);
+ 
+  char buffer[256];
+  sprintf(buffer, "Render time = %fs", timer.elapsed);
+  stringRGBA(renderer, 0, 0, buffer, 0,0,0,255);
+
   SDL_RenderPresent(renderer);
 
   while (running)
