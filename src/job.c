@@ -1,14 +1,14 @@
 #include "includes.h"
 
 job_t*
-job_new()
+job_new(int width, int height)
 {
 	job_t *job;
 
 	job = (job_t*) malloc(sizeof(job_t));
 
-	job->width = 480;//640; //1280;
-	job->height = 272;//360;// 720;
+	job->width = width;//480;//640; //1280;
+	job->height = height;//272;//360;// 720;
 	job->buffer = (int*) malloc(sizeof(int) * job->width * job->height);
 	job->world = world_cornell();
     //job->world = world_from_model("../models/bunny_low_res.ply");

@@ -10,7 +10,7 @@ typedef struct
 } job_t;
 
 job_t*
-  job_new();
+  job_new(int width, int height);
 
 void
   job_destroy(job_t **job);
