@@ -2,8 +2,11 @@
 
 typedef enum {X_AXIS, Y_AXIS, Z_AXIS} axis_t;
 
+void
+bvh_make_heap
 
-void sort_leaves(bvhnode_t* leaves, size_t start, size_t end, axis_t axis)
+void
+sort_leaves(bvhnode_t* leaves, size_t start, size_t end, axis_t axis)
 {
   size_t a;
   size_t b;

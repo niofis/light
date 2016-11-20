@@ -15,3 +15,6 @@ camera_t*
 
 void
   camera_destroy(camera_t **camera);
+
+void
+  camera_rotate(float rx, float ry, float rz);

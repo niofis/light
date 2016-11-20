@@ -18,16 +18,14 @@ int gui_init(int width, int height, bool fullscreen)
 
   job = job_new(width, height);
   
-  if (SDL_Init(SDL_INIT_VIDEO) != 0)
-  {
+  if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     printf("SDL_Init failed: %s\n", SDL_GetError());
 	SDL_Quit();
     return 1;
   }
 
   window = SDL_CreateWindow("Light", 0, 0, job->width, job->height, SDL_WINDOW_SHOWN);
-  if (window == NULL)
-  {
+  if (window == NULL) {
 	  printf("SDL_CreateWindow failed: %s\n", SDL_GetError());
 	  SDL_Quit();
 	  return 1;
@@ -39,8 +37,7 @@ int gui_init(int width, int height, bool fullscreen)
   }
 
   renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-  if (renderer == NULL)
-  {
+  if (renderer == NULL) {
 	  SDL_DestroyWindow(window);
 	  printf("SLD_CreateRenderer failed: %s\n", SDL_GetError());
 	  SDL_Quit();
@@ -48,8 +45,7 @@ int gui_init(int width, int height, bool fullscreen)
   }
 
   texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, job->width, job->height);
-  if (texture == NULL)
-  {
+  if (texture == NULL) {
 	  SDL_DestroyRenderer(renderer);
 	  SDL_DestroyWindow(window);
 	  printf("SDL_CreateTexture failed: %s\n", SDL_GetError());
@@ -72,16 +68,12 @@ int gui_init(int width, int height, bool fullscreen)
 
   SDL_RenderPresent(renderer);
 
-  while (running)
-  {
-    if (SDL_PollEvent(&event))
-    {
-      switch (event.type)
-      {
+  while (running) {
+    if (SDL_PollEvent(&event)) {
+      switch (event.type) {
         case SDL_KEYDOWN:
 
-          if (event.key.keysym.sym == SDLK_ESCAPE)
-          {
+          if (event.key.keysym.sym == SDLK_ESCAPE) {
             running = 0;
           }
           
