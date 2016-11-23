@@ -3,7 +3,48 @@
 typedef enum {X_AXIS, Y_AXIS, Z_AXIS} axis_t;
 
 void
-bvh_make_heap
+bvh_mkh_helper(bvh_heap_t *heap, bvhnode_t *node, size_t idx)
+{
+  heap->min_x[idx] = node->bb.min.x;
+  heap->min_y[idx] = node->bb.min.y;
+  heap->min_z[idx] = node->bb.min.z;
+
+  heap->max_x[idx] = node->bb.max.x;
+  heap->max_y[idx] = node->bb.max.y;
+  heap->max_z[idx] = node->bb.max.z;
+  heap->primitives[idx] = node->primitive;
+
+  if(node->left)
+    bvh_mkh_helper(heap, node->left, (idx * 2) + 1);
+  if(node->right)
+    bvh_mkh_helper(heap, node->right, (idx * 2) + 2);
+}
+
+void
+bvh_make_heap(bvh_t *bvh)
+{
+  bvh_heap_t *heap = (bvh_heap_t*) malloc(sizeof(bvh_heap_t));
+  size_t count = (size_t) pow(2,ceil(log2(bvh->length)));
+  count += count - 1;
+  heap->min_x = (float*) malloc(sizeof(float) * count);
+  heap->min_y = (float*) malloc(sizeof(float) * count);
+  heap->min_z = (float*) malloc(sizeof(float) * count);
+  heap->max_x = (float*) malloc(sizeof(float) * count);
+  heap->max_y = (float*) malloc(sizeof(float) * count);
+  heap->max_z = (float*) malloc(sizeof(float) * count);
+  heap->primitives = (primitive_t**) malloc(sizeof(primitive_t*) * count);
+  heap->length = count;
+
+  bvh->heap = heap;
+
+  bvh_mkh_helper(heap, bvh->root, 0);
+
+  /*
+  for(int i = 0; i < count; i++) {
+    printf("min(%f, %f, %f) max(%f, %f, %f) %X (%i)\n",heap->min_x[i], heap->min_y[i], heap->min_z[i], heap->max_x[i], heap->max_y[i], heap->max_z[i], heap->primitives[i],i);
+  }
+  */
+}
 
 void
 sort_leaves(bvhnode_t* leaves, size_t start, size_t end, axis_t axis)
@@ -16,13 +57,13 @@ sort_leaves(bvhnode_t* leaves, size_t start, size_t end, axis_t axis)
     temp = leaves[a];
     for(b = a; b > start; b--) {
       if (axis == X_AXIS &&
-          leaves[b-1].bounding_box.centroid.x > temp.bounding_box.centroid.x) {
+          leaves[b-1].bb.centroid.x > temp.bb.centroid.x) {
         leaves[b] = leaves[b-1];
       } if (axis == Y_AXIS &&
-          leaves[b-1].bounding_box.centroid.y > temp.bounding_box.centroid.y) {
+          leaves[b-1].bb.centroid.y > temp.bb.centroid.y) {
         leaves[b] = leaves[b-1];
       } if (axis == Z_AXIS &&
-          leaves[b-1].bounding_box.centroid.z > temp.bounding_box.centroid.z) {
+          leaves[b-1].bb.centroid.z > temp.bb.centroid.z) {
         leaves[b] = leaves[b-1];
       } else {
         break;
@@ -33,31 +74,33 @@ sort_leaves(bvhnode_t* leaves, size_t start, size_t end, axis_t axis)
 }
 
 bvhnode_t *
-bvh_build(bvhnode_t *leaves, size_t start, size_t end)
+bvh_build(bvh_t *bvh, size_t start, size_t end)
 {
 
   if(start >= end)
-    return &leaves[start];
+    return &(bvh->leaves[start]);
 
   bvhnode_t *bnode = (bvhnode_t*)malloc(sizeof(bvhnode_t));
   bnode->primitive = NULL;
   bnode->left = NULL;
   bnode->right = NULL;
+  v3_copy(&bnode->bb.min, &bvh->leaves[start].bb.min);
+  v3_copy(&bnode->bb.max, &bvh->leaves[start].bb.max);
 
-  //aabb_fit_triangle(&(bnode->bounding_box), leaves[start].triangle);
-  aabb_combine(&bnode->bounding_box, &leaves[start].bounding_box, &leaves[end].bounding_box);
+  //aabb_fit_triangle(&(bnode->bb), leaves[start].triangle);
+  //aabb_combine(&bnode->bb, &(bvh->leaves[start].bb), &(bvh->leaves[end].bb));
 
   
   for(size_t idx = start + 1; idx <= end; ++idx) {
-    bvhnode_t node = leaves[idx];
-    aabb_combine(&bnode->bounding_box, &bnode->bounding_box, &node.bounding_box);
+    bvhnode_t *node = &bvh->leaves[idx];
+    aabb_combine(&bnode->bb, &bnode->bb, &node->bb);
   }
 
   //TODO:
   //find the biggest axis and sort the leaves using that
-  float x_length = bnode->bounding_box.max.x - bnode->bounding_box.min.x;
-  float y_length = bnode->bounding_box.max.y - bnode->bounding_box.min.y;
-  float z_length = bnode->bounding_box.max.z - bnode->bounding_box.min.z;
+  float x_length = bnode->bb.max.x - bnode->bb.min.x;
+  float y_length = bnode->bb.max.y - bnode->bb.min.y;
+  float z_length = bnode->bb.max.z - bnode->bb.min.z;
   
   axis_t axis = x_length < y_length?
     (x_length < z_length?X_AXIS:Z_AXIS):
@@ -65,12 +108,13 @@ bvh_build(bvhnode_t *leaves, size_t start, size_t end)
 
   //create the left and right branches
   //printf("axis: %u\n", (unsigned int)axis);
-  sort_leaves(leaves, start, end, axis);
+  sort_leaves(bvh->leaves, start, end, axis);
   
   size_t half = (start + end) >> 1;
 
-  bnode->left = bvh_build(leaves, start, half);
-  bnode->right = bvh_build(leaves, half + 1, end);
+  bnode->left = bvh_build(bvh, start, half);
+  bnode->right = bvh_build(bvh, half + 1, end);
+
 
   return bnode;
 }
@@ -84,24 +128,32 @@ bvh_new(const list_t *primitives)
   
   while(node) {
     bvhnode_t *leave = &(leaves[idx]);
-    aabb_fit_primitive(&(leave->bounding_box), node->item);
+    aabb_fit_primitive(&(leave->bb), node->item);
     leave->primitive = node->item;
     leave->left = NULL;
     leave->right = NULL;
+/*
+    printf("min: %f\n", min3(1.0f,2.0f,3.0f));
+    printf("min: %f\n", min3(2.0f,1.0f,3.0f));
+    printf("min: %f\n", min3(2.0f,3.0f,1.0f));
+    printf("max: %f\n", max3(1.0f,2.0f,3.0f));
+    printf("max: %f\n", max3(2.0f,1.0f,3.0f));
+    printf("max: %f\n", max3(2.0f,3.0f,1.0f));
+    */
+    //printf("min(%f, %f, %f) max(%f, %f, %f)\n", leave->bb.min.x, leave->bb.min.y, leave->bb.min.z,leave->bb.max.x, leave->bb.max.y, leave->bb.max.z);
+
+
 
     ++idx;
     node = list_next(node);
   }
 
   bvh_t *bvh = (bvh_t*)malloc(sizeof(bvh_t));
-  bvh->root = bvh_build(leaves, 0, primitives->length - 1);
   bvh->leaves = leaves;
+  bvh->length = idx;
+  bvh->root = bvh_build(bvh, 0, primitives->length - 1);
+  bvh_make_heap(bvh);
 
-  //v3_t min = bvh->root->bounding_box.min;
-  //v3_t max = bvh->root->bounding_box.max;
-  //printf("min(%f, %f, %f) max(%f,%f,%f)\n",
-  //    min.x,min.y,min.z,
-  //    max.x,max.y,max.z);
   return bvh;
 }
 
@@ -121,10 +173,29 @@ bvh_destroy_children(bvhnode_t **node)
 }
 
 void
+bvh_destroy_heap(bvh_heap_t **heap)
+{
+  bvh_heap_t *hp = *heap;
+  free(hp->min_x);
+  free(hp->min_y);
+  free(hp->min_z);
+
+  free(hp->max_x);
+  free(hp->max_y);
+  free(hp->max_z);
+
+  free(hp->primitives);
+
+  free(hp);
+  hp = NULL;
+}
+
+void
 bvh_destroy(bvh_t **bvh)
 {
   bvh_t *b = *bvh;
   bvh_destroy_children(&(b->root));
+  bvh_destroy_heap(&(b->heap));
   free(b->leaves);
   free(*bvh);
   *bvh = NULL;

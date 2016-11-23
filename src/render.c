@@ -15,7 +15,6 @@ init_delta_vectors(job_t *job)
 
 	v3_div_scalar(&vdu, &vdu, (float) job->width);
 	v3_div_scalar(&vdv, &vdv, (float) job->height);
-
 }
 
 void
@@ -47,7 +46,6 @@ int
 find_any(ray_t *ray, world_t *world, float max_distance, intersection_t *result)
 {
 
-	triangle_t *tr;
 	intersection_t its;
 
 	its.hit = 0;
@@ -65,9 +63,92 @@ find_any(ray_t *ray, world_t *world, float max_distance, intersection_t *result)
 		}
 	}
 
-	memcpy(result, &its, sizeof(intersection_t));
+	//memcpy(result, &its, sizeof(intersection_t));
+
+    result->hit = its.hit;
 
 	return its.hit;
+}
+
+int
+bvh_find_any_heap(ray_t* ray, bvh_heap_t *heap, size_t idx, float max_distance, intersection_t* result)
+{
+  result->hit = 0;
+  float dxi = 1.0f / ray->direction.x;
+  float dyi = 1.0f / ray->direction.y;
+  float dzi = 1.0f / ray->direction.z;
+  float min[3] = {heap->min_x[idx], heap->min_y[idx], heap->min_z[idx]};
+  float max[3] = {heap->max_x[idx], heap->max_y[idx], heap->max_z[idx]};
+  int sign[3] = {dxi<0,dyi<0,dzi<0};
+  float *params[2] = {min, max};
+
+  float tmin = (params[sign[0]][0] - ray->origin.x) * dxi;
+  float tmax = (params[1 - sign[0]][0] - ray->origin.x) * dxi;
+  float tymin = (params[sign[1]][1] - ray->origin.y) * dyi;
+  float tymax = (params[1- sign[1]][1] - ray->origin.y) * dyi;
+  if(tmin > tymax || tymin > tmax)
+    return 0;
+  if(tymin > tmin)
+    tmin = tymin;
+  if(tymax < tmax)
+    tmax = tymax;
+  float tzmin = (params[sign[2]][2] - ray->origin.z) * dzi;
+  float tzmax = (params[1 - sign[2]][2] - ray->origin.z) * dzi;
+  if(tmin > tzmax || tzmin > tmax)
+    return 0;
+
+  primitive_t *primitive = heap->primitives[idx];
+  if(primitive != NULL) {
+    //Only leaves have primitives
+    intersection_t its;
+    its.hit = 0;
+    prm_intersect(primitive, ray, &its);
+    if(its.hit && its.distance > 0.001f && its.distance < max_distance) {
+      result->hit = 1;
+      return 1;
+    }
+  }
+  else {
+    //Not a leaf
+    int id_l = (idx) * 2 + 1;
+    int id_r = (idx) * 2 + 2;
+    if(id_l < heap->length)
+      bvh_find_any_heap(ray, heap, id_l, max_distance, result);
+    if(id_r < heap->length && result->hit == 0)
+      bvh_find_any_heap(ray, heap, id_r, max_distance, result);
+  }
+
+  return 0;
+}
+
+int
+bvh_find_any(ray_t *ray, bvhnode_t *node, float max_distance, intersection_t *result)
+{
+  result->hit = 0;
+  if(!aabb_intersect(&node->bb, ray))
+    return 0;
+
+  
+  primitive_t *primitive = node->primitive;
+  if(primitive != NULL) {
+    //Only leaves have primitives
+    intersection_t its;
+    its.hit = 0;
+    prm_intersect(primitive, ray, &its);
+    if(its.hit && its.distance > 0.001f && its.distance < max_distance) {
+      result->hit = 1;
+      return 1;
+    }
+  }
+  else {
+    //Not a leaf
+    if(node->left)
+      bvh_find_any(ray, node->left, max_distance, result);
+    if(node->right && result->hit == 0)
+      bvh_find_any(ray, node->right, max_distance, result);
+  }
+
+  return 0;
 }
 
 void
@@ -80,7 +161,6 @@ shading(world_t *world, intersection_t *trace, color_t *color)
 	color_t light_temp;
 	float light_distance = 0.0f;
 
-	result.hit = 0;
 	color_set_argb(&light, 1.0f, 0.0f, 0.0f, 0.0f);
 
 	v3_copy(&light_ray.origin, &trace->hit_point);
@@ -91,7 +171,10 @@ shading(world_t *world, intersection_t *trace, color_t *color)
 		light_distance = v3_norm(&light_ray.direction);
 		v3_normalize(&light_ray.direction);
 	
-		find_any(&light_ray, world, light_distance, &result);
+	    result.hit = 0;
+		//find_any(&light_ray, world, light_distance, &result);
+        bvh_find_any(&light_ray, world->bvh->root, light_distance, &result);
+        //bvh_find_any_heap(&light_ray, world->bvh->heap, 0, light_distance, &result);
 
 		if (result.hit == 0) {
 			float s = v3_dot(&trace->normal, &light_ray.direction);
@@ -106,18 +189,133 @@ shading(world_t *world, intersection_t *trace, color_t *color)
 }
 
 void
-bvh_traverse(ray_t* ray, bvhnode_t* bvh_node, intersection_t* closest)
+bvh_traverse_heap(ray_t* ray, bvh_heap_t *heap, size_t idx, intersection_t* closest)
 {
-  if(aabb_intersect(&bvh_node->bounding_box, ray)) {
-    if(bvh_node->primitive != NULL) {
-      primitive_t *primitive = bvh_node->primitive;
-      intersection_t its;
-      its.hit = 0;
-      prm_intersect(primitive, ray, &its);
-      if(its.hit && its.distance > 0.001f && its.distance < closest->distance) {
+ 
+  float dxi = 1.0f / ray->direction.x;
+  float dyi = 1.0f / ray->direction.y;
+  float dzi = 1.0f / ray->direction.z;
+  float min[3] = {heap->min_x[idx], heap->min_y[idx], heap->min_z[idx]};
+  float max[3] = {heap->max_x[idx], heap->max_y[idx], heap->max_z[idx]};
+  int sign[3] = {dxi<0,dyi<0,dzi<0};
+  float *params[2] = {min, max};
+
+  float tmin = (params[sign[0]][0] - ray->origin.x) * dxi;
+  float tmax = (params[1 - sign[0]][0] - ray->origin.x) * dxi;
+  float tymin = (params[sign[1]][1] - ray->origin.y) * dyi;
+  float tymax = (params[1- sign[1]][1] - ray->origin.y) * dyi;
+  if(tmin > tymax || tymin > tmax)
+    return;
+  if(tymin > tmin)
+    tmin = tymin;
+  if(tymax < tmax)
+    tmax = tymax;
+  float tzmin = (params[sign[2]][2] - ray->origin.z) * dzi;
+  float tzmax = (params[1 - sign[2]][2] - ray->origin.z) * dzi;
+  if(tmin > tzmax || tzmin > tmax)
+    return;
+
+  primitive_t *primitive = heap->primitives[idx];
+  if(primitive != NULL) {
+    //Only leaves have primitives
+    intersection_t its;
+    its.hit = 0;
+    prm_intersect(primitive, ray, &its);
+    if(its.hit && its.distance > 0.001f && its.distance < closest->distance) {
+      v3_mul_scalar(&its.hit_point, &ray->direction, its.distance);
+      v3_add(&its.hit_point, &its.hit_point, &ray->origin);
+
+      if(primitive->type == TRIANGLE) {
+        triangle_t *triangle = primitive->obj;
+        v3_copy(&its.normal, &triangle->normal);
+        its.material = triangle->material;
+      }
+      else if(primitive->type == SPHERE) {
+        sphere_t *sphere = primitive->obj;
+        v3_sub(&its.normal, &its.hit_point, &sphere->center);
+        v3_normalize(&its.normal);
+        its.material = sphere->material;
+      }
+      //memcpy(closest, &its, sizeof(intersection_t));
+
+      v3_copy(&closest->hit_point, &its.hit_point);
+      v3_copy(&closest->normal, &its.normal);
+      closest->material = its.material;
+      closest->distance = its.distance;
+      closest->hit = its.hit;
+
+    }
+  }
+  else {
+    //Not a leaf
+    int id_l = (idx) * 2 + 1;
+    int id_r = (idx) * 2 + 2;
+    if(id_l < heap->length)
+      bvh_traverse_heap(ray, heap, id_l, closest);
+    if(id_r < heap->length)
+      bvh_traverse_heap(ray, heap, id_r, closest);
+  }
+}
+
+void
+bvh_traverse(ray_t *ray, bvhnode_t *node, intersection_t *closest)
+{
+  if(!aabb_intersect(&node->bb, ray))
+    return;
+
+  primitive_t *primitive = node->primitive;
+  if(primitive != NULL) {
+    //Only leaves have primitives
+    intersection_t its;
+    its.hit = 0;
+    prm_intersect(primitive, ray, &its);
+    if(its.hit && its.distance > 0.001f && its.distance < closest->distance) {
+      v3_mul_scalar(&its.hit_point, &ray->direction, its.distance);
+      v3_add(&its.hit_point, &its.hit_point, &ray->origin);
+
+      if(primitive->type == TRIANGLE) {
+        triangle_t *triangle = primitive->obj;
+        v3_copy(&its.normal, &triangle->normal);
+        its.material = triangle->material;
+      }
+      else if(primitive->type == SPHERE) {
+        sphere_t *sphere = primitive->obj;
+        v3_sub(&its.normal, &its.hit_point, &sphere->center);
+        v3_normalize(&its.normal);
+        its.material = sphere->material;
+      }
+      //memcpy(closest, &its, sizeof(intersection_t));
+
+      v3_copy(&closest->hit_point, &its.hit_point);
+      v3_copy(&closest->normal, &its.normal);
+      closest->material = its.material;
+      closest->distance = its.distance;
+      closest->hit = its.hit;
+
+    }
+  }
+  else {
+    //Not a leaf
+    if(node->left)
+      bvh_traverse(ray, node->left, closest);
+    if(node->right)
+      bvh_traverse(ray, node->right, closest);
+  }
+}
+
+void
+simple_traverse(ray_t *ray, list_t *primitives, intersection_t *closest)
+{
+  primitive_t *primitive;
+  intersection_t its;
+  node_t * node = list_head(primitives);
+  while(node) {
+    primitive = (primitive_t*) node->item;
+    prm_intersect(primitive, ray, &its);
+    if(its.hit && its.distance > 0.001f) {
+      if (closest->hit == 0 || its.distance < closest->distance) {
         v3_mul_scalar(&its.hit_point, &ray->direction, its.distance);
         v3_add(&its.hit_point, &its.hit_point, &ray->origin);
-
 
         if(primitive->type == TRIANGLE) {
           triangle_t *triangle = primitive->obj;
@@ -130,52 +328,34 @@ bvh_traverse(ray_t* ray, bvhnode_t* bvh_node, intersection_t* closest)
           v3_normalize(&its.normal);
           its.material = sphere->material;
         }
-        memcpy(closest, &its, sizeof(intersection_t));
-      }
-    }
 
-    if(bvh_node->left)
-      bvh_traverse(ray, bvh_node->left, closest);
-    if(bvh_node->right)
-      bvh_traverse(ray, bvh_node->right, closest);
+        v3_copy(&closest->hit_point, &its.hit_point);
+        v3_copy(&closest->normal, &its.normal);
+        closest->material = its.material;
+        closest->distance = its.distance;
+        closest->hit = its.hit;
+      }			
+    }
+    node = list_next(node);
   }
 }
 
 int
 find_closest(ray_t* ray, world_t* world, float max_distance, intersection_t* result)
 {
-	triangle_t *triangle;
-	intersection_t its;
 	intersection_t closest;
 
 	closest.hit = 0;
     closest.distance = 1e16f;
 
-   /*
-    node_t * node = list_head(world->triangles);
-	while(node) {
-		triangle = (triangle_t*) node->item;
-		triangle_intersects(triangle, ray, &its);
-		if(its.hit && its.distance > 0.001f) {
-			if (closest.hit == 0 || its.distance < closest.distance) {
-				v3_copy(&its.normal, &triangle->normal);
-
-				v3_mul_scalar(&its.hit_point, &ray->direction, its.distance);
-				v3_add(&its.hit_point, &its.hit_point, &ray->origin);
-
-				memcpy(&closest, &its, sizeof(intersection_t));
-				closest.material = triangle->material;
-			}			
-		}
-        node = list_next(node);
-	}
-    */
-
+    int hits = 0;
+    //simple_traverse(ray, world->primitives, &closest);
     bvh_traverse(ray, world->bvh->root, &closest);
+    //bvh_traverse_heap(ray, world->bvh->heap, 0, &closest);
+    //if(hits)
+    //printf("hits: %i\n", hits);
 
 	memcpy(result, &closest, sizeof(intersection_t));
-
-
 	
 	return closest.hit;
 }
@@ -185,7 +365,6 @@ traceray(ray_t *ray, world_t *world, color_t *color)
 {
 	intersection_t result;
 	float max_distance = 1000.0f;
-
 
 	find_closest(ray, world, max_distance, &result);
 	if (result.hit) {

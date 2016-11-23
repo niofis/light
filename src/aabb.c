@@ -1,12 +1,5 @@
 #include "includes.h"
 
-#define min(a,b) (a<b?a:b)
-#define max(a,b) (a>b?a:b)
-//#define min3(a,b,c) (a<b?(a<c?a:c):(b<c?b:c))
-//#define max3(a,b,c) (a>b?(a>c?a:c):(b>c?b:c))
-#define min3(a,b,c) min(min(a,b),c)
-#define max3(a,b,c) max(max(a,b),c)
-
 void
 aabb_update_centroid(aabb_t *bb)
 {
@@ -21,18 +14,7 @@ aabb_new_from_triangle(triangle_t* triangle)
   aabb_t *bb = (aabb_t*) malloc(sizeof(aabb_t));
 
   aabb_fit_triangle(bb, triangle);
-  /*
 
-  bb->min.x = min3(triangle->v0.x, triangle->v1.x, triangle->v2.x);
-  bb->min.y = min3(triangle->v0.y, triangle->v1.y, triangle->v2.y);
-  bb->min.z = min3(triangle->v0.z, triangle->v1.z, triangle->v2.z);
-
-  bb->max.x = max3(triangle->v0.x, triangle->v1.x, triangle->v2.x);
-  bb->max.y = max3(triangle->v0.y, triangle->v1.y, triangle->v2.y);
-  bb->max.z = max3(triangle->v0.z, triangle->v1.z, triangle->v2.z);
-
-  aabb_update_centroid(bb);
-*/
   return bb;
 }
 
@@ -43,16 +25,6 @@ aabb_new_from_sphere(sphere_t *sphere)
 
   aabb_fit_sphere(bb, sphere);
 
-  /*
-  
-  bb->min.x = sphere->center.x - sphere->radius;
-  bb->min.y = sphere->center.y - sphere->radius;
-  bb->min.z = sphere->center.z - sphere->radius;
-
-  bb->max.x = sphere->center.x + sphere->radius;
-  bb->max.y = sphere->center.y + sphere->radius;
-  bb->max.z = sphere->center.z + sphere->radius;
-*/
   return bb;
 }
 
@@ -79,6 +51,15 @@ aabb_fit_triangle(aabb_t *bb, triangle_t *triangle)
   bb->max.y = max3(triangle->v0.y, triangle->v1.y, triangle->v2.y);
   bb->max.z = max3(triangle->v0.z, triangle->v1.z, triangle->v2.z);
 
+  /*
+  printf("Triangle (%f, %f, %f) (%f, %f, %f) (%f, %f, %f)\nBB: min(%f, %f, %f) max(%f, %f, %f)\n",
+      triangle->v0.x,triangle->v0.y,triangle->v0.z,
+      triangle->v1.x,triangle->v1.y,triangle->v1.z,
+      triangle->v2.x,triangle->v2.y,triangle->v2.z,
+      bb->min.x, bb->min.y, bb->min.z,
+      bb->max.x, bb->max.y, bb->max.z);
+      */
+
   aabb_update_centroid(bb);
 }
 
@@ -93,6 +74,13 @@ aabb_fit_sphere(aabb_t *bb, sphere_t *sphere)
   bb->max.x = sphere->center.x + sphere->radius;
   bb->max.y = sphere->center.y + sphere->radius;
   bb->max.z = sphere->center.z + sphere->radius;
+
+  /*
+  printf("Sphere (%f, %f, %f) (%f)\nBB: min(%f, %f, %f) max(%f, %f, %f)\n",
+      sphere->center.x,sphere->center.y,sphere->center.z,sphere->radius,
+      bb->min.x, bb->min.y, bb->min.z,
+      bb->max.x, bb->max.y, bb->max.z);
+      */
 
   aabb_update_centroid(bb);
 }
@@ -134,7 +122,7 @@ aabb_destroy(aabb_t **bb)
 int 
 aabb_intersect(aabb_t *bb, ray_t *ray)
 {
-  float tmin = -1e16f, tmax = 1e16;
+  //float tmin = -1e16f, tmax = 1e16;
 
   /*
      for (int i = 0; i < 3; ++i) {
@@ -149,27 +137,44 @@ aabb_intersect(aabb_t *bb, ray_t *ray)
      }
      }
      */
-
-  if (ray->direction.x != 0.0f) {
+/*
     float t1 = (bb->min.x - ray->origin.x) / ray->direction.x;
     float t2 = (bb->max.x - ray->origin.x) / ray->direction.x;
-    tmin = min3(tmin,t1,t2);
-    tmax = max3(tmax,t1,t2);
-  }
+    tmin = max(tmin,min(t1,t2));
+    tmax = min(tmax,max(t1,t2));
 
-  if (ray->direction.y != 0.0f) {
-    float t1 = (bb->min.y - ray->origin.y) / ray->direction.y;
-    float t2 = (bb->max.y - ray->origin.y) / ray->direction.y;
-    tmin = min3(tmin,t1,t2);
-    tmax = max3(tmax,t1,t2);
-  }
+    t1 = (bb->min.y - ray->origin.y) / ray->direction.y;
+    t2 = (bb->max.y - ray->origin.y) / ray->direction.y;
+    tmin = max(tmin,min(t1,t2));
+    tmax = min(tmax,max(t1,t2));
 
-  if (ray->direction.z != 0.0f) {
-    float t1 = (bb->min.z - ray->origin.z) / ray->direction.z;
-    float t2 = (bb->max.z - ray->origin.z) / ray->direction.z;
-    tmin = min3(tmin,t1,t2);
-    tmax = max3(tmax,t1,t2);
-  }
+    t1 = (bb->min.z - ray->origin.z) / ray->direction.z;
+    t2 = (bb->max.z - ray->origin.z) / ray->direction.z;
+    tmin = max(tmin,min(t1,t2));
+    tmax = min(tmax,max(t1,t2));
 
   return tmax > tmin && tmax > 0.0;
+  */
+  float dxi = 1.0f / ray->direction.x;
+  float dyi = 1.0f / ray->direction.y;
+  float dzi = 1.0f / ray->direction.z;
+
+  int sign[3] = {dxi<0,dyi<0,dzi<0};
+  v3_t params[2] = {bb->min,bb->max};
+
+  float tmin = (params[sign[0]].x - ray->origin.x) * dxi;
+  float tmax = (params[1 - sign[0]].x - ray->origin.x) * dxi;
+  float tymin = (params[sign[1]].y - ray->origin.y) * dyi;
+  float tymax = (params[1- sign[1]].y - ray->origin.y) * dyi;
+  if(tmin > tymax || tymin > tmax)
+    return false;
+  if(tymin > tmin)
+    tmin = tymin;
+  if(tymax < tmax)
+    tmax = tymax;
+  float tzmin = (params[sign[2]].z - ray->origin.z) * dzi;
+  float tzmax = (params[1 - sign[2]].z - ray->origin.z) * dzi;
+  if(tmin > tzmax || tzmin > tmax)
+    return false;
+  return true;
 }

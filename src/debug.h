@@ -4,6 +4,7 @@
 #undef free
 #define malloc(a) malloc_debug(__FILE__, __LINE__, a)
 #define free(a) free_debug(__FILE__, __LINE__, a)
+#define DEBUG
 
 void
   debug_init();

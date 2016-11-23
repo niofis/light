@@ -7,6 +7,13 @@ typedef struct {
   v3_t centroid;
 } aabb_t;
 
+#define min(a,b) (a<b?a:b)
+#define max(a,b) (a>b?a:b)
+#define min3(a,b,c) (a<b?(a<c?a:c):(b<c?b:c))
+#define max3(a,b,c) (a>b?(a>c?a:c):(b>c?b:c))
+//#define min3(a,b,c) min(min(a,b),c)
+//#define max3(a,b,c) max(max(a,b),c)
+
 aabb_t*
   aabb_new_from_triangle(triangle_t* triangle);
 

@@ -56,7 +56,7 @@ int gui_init(int width, int height, bool fullscreen)
   render(job);
   timer_stop(&timer);
 
-  //printf("Render time = %fs\n", timer.elapsed);
+  printf("Render time = %fs\n", timer.elapsed);
 
   SDL_UpdateTexture(texture, NULL, job->buffer, job->width * sizeof(Uint32));
   SDL_RenderClear(renderer);
@@ -64,7 +64,7 @@ int gui_init(int width, int height, bool fullscreen)
  
   char buffer[256];
   sprintf(buffer, "Render time = %fs", timer.elapsed);
-  stringRGBA(renderer, 0, 0, buffer, 0,0,0,255);
+  stringRGBA(renderer, 0, 0, buffer, 255,255,255,255);
 
   SDL_RenderPresent(renderer);
 
@@ -114,7 +114,10 @@ int main(int argc, char **argv)
   }
   
   gui_init(width, height, fullscreen);
+
+#ifdef DEBUG
   debug_end();
+#endif
 
   return 0;
 }

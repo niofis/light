@@ -39,6 +39,7 @@ world_cornell()
 
   material_t *yellow = material_new();
   color_set_argb(&yellow->color, 1.0f, 1.0f, 1.0f, 0.0f);
+  list_append(world->materials, yellow);
 
 
   //Triangles
