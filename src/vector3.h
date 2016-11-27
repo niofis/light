@@ -45,3 +45,7 @@ void
 
 void
   v3_div_scalar(v3_t *dest, const v3_t *v1, float f);
+
+void
+  v3_rotate_xyz(v3_t *v, float rx, float ry, float rz);
+

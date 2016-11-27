@@ -27,6 +27,15 @@ camera_new()
 }
 
 void
+camera_rotate_xyz(camera_t *camera, float rx, float ry, float rz)
+{
+  v3_rotate_xyz(&camera->left_top, rx, ry, rz);
+  v3_rotate_xyz(&camera->right_top, rx, ry, rz);
+  v3_rotate_xyz(&camera->left_bottom, rx, ry, rz);
+  v3_rotate_xyz(&camera->eye, rx, ry, rz);
+}
+
+void
 camera_destroy(camera_t **camera)
 {
 	if (*camera)

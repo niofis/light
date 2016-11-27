@@ -116,6 +116,33 @@ v3_div_scalar(v3_t *dest, const v3_t *v1, float f)
 	dest->z = v1->z / f;
 }
 
+void
+v3_rotate_xyz(v3_t *v, float rx, float ry, float rz)
+{
+  float x = v->x;
+  float y = v->y;
+  float z = v->z;
+
+  if(rx != 0.0f) {
+    y = v->y*cos(rx) + v->z*sin(rx);
+    z = v->z*cos(rx) - v->y*sin(rx);
+  }
+
+  if(ry != 0.0f) {
+    x = v->x*cos(ry) - v->z*sin(ry);
+    z = v->x*sin(ry) + v->z*cos(ry);
+  }
+
+  if(rz != 0.0f) {
+    x = v->x*cos(rz) + v->y*sin(rz);
+    y = v->y*cos(rz) - v->x*sin(rz);
+  }
+
+  v->x = x;
+  v->y = y;
+  v->z = z;
+}
+
 #ifdef DEBUG
 void
 v3_dump(v3_t *v3)

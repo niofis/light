@@ -270,6 +270,73 @@ world_new()
   return world;
 }
 
+world_t*
+world_demo()
+{
+  world_t *world;
+
+  world = (world_t*) malloc(sizeof(world_t));
+
+  world->camera = camera_new();
+
+  world->materials = list_new();
+
+  material_t *white = material_new();
+  color_set_argb(&white->color, 1.0f, 1.0f, 1.0f, 1.0f);
+  list_append(world->materials, white);
+
+  material_t *red = material_new();
+  color_set_argb(&red->color, 1.0f, 1.0f, 0.0f, 0.0f);
+  list_append(world->materials, red);
+
+  material_t *green = material_new();
+  color_set_argb(&green->color, 1.0f, 0.0f, 1.0f, 0.0f);
+  list_append(world->materials, green);
+
+  material_t *blue = material_new();
+  color_set_argb(&blue->color, 1.0f, 0.0f, 0.0f, 1.0f);
+  list_append(world->materials, blue);
+
+
+
+  world->primitives = list_new();
+
+  triangle_t *triangle = triangle_new();
+  v3_set_xyz(&triangle->v0, -1000.0f, -1.0f, -1000.0f);
+  v3_set_xyz(&triangle->v1, 0.0f, -1.0f, 1000.0f);
+  v3_set_xyz(&triangle->v2, 1000.0f, -1.0f, -1000.0f);
+  triangle->material = white;
+  triangle_update(triangle);
+  list_append(world->primitives, prm_from_triangle(triangle));
+
+  sphere_t *sphere = sphere_new();
+  sphere->radius = 3.0f;
+  v3_set_xyz(&sphere->center, -6.5f, 2.0f, 0.0f);
+  sphere->material = red;
+  list_append(world->primitives, prm_from_sphere(sphere));
+
+  sphere = sphere_new();
+  sphere->radius = 3.0f;
+  v3_set_xyz(&sphere->center, 0.0f, 2.0f, 0.0f);
+  sphere->material = green;
+  list_append(world->primitives, prm_from_sphere(sphere));
+
+  sphere = sphere_new();
+  sphere->radius = 3.0f;
+  v3_set_xyz(&sphere->center, 6.5f, 2.0f, 0.0f);
+  sphere->material = blue;
+  list_append(world->primitives, prm_from_sphere(sphere));
+
+  world->lights = list_new();
+  point_light_t *light = point_light_new();
+  v3_set_xyz(&light->position, 0.0f, 12.0f, -10.0f);
+  list_append(world->lights, light);
+
+  world->bvh = bvh_new(world->primitives);
+
+  return world;
+}
+
 void
 world_destroy(world_t **world)
 {

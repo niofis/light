@@ -51,23 +51,9 @@ int gui_init(int width, int height, bool fullscreen)
 	  printf("SDL_CreateTexture failed: %s\n", SDL_GetError());
 	  return 1;
   }
-
-  timer_start(&timer);
-  render(job);
-  timer_stop(&timer);
-
-  printf("Render time = %fs\n", timer.elapsed);
-
-  SDL_UpdateTexture(texture, NULL, job->buffer, job->width * sizeof(Uint32));
-  SDL_RenderClear(renderer);
-  SDL_RenderCopy(renderer, texture, NULL, NULL);
- 
+  
   char buffer[256];
-  sprintf(buffer, "Render time = %fs", timer.elapsed);
-  stringRGBA(renderer, 0, 0, buffer, 255,255,255,255);
-
-  SDL_RenderPresent(renderer);
-
+  
   while (running) {
     if (SDL_PollEvent(&event)) {
       switch (event.type) {
@@ -81,7 +67,24 @@ int gui_init(int width, int height, bool fullscreen)
       }
     }
 
-    usleep(1000);
+    timer_start(&timer);
+    render(job);
+    timer_stop(&timer);
+
+    //printf("Render time = %fs\n", timer.elapsed);
+
+    SDL_UpdateTexture(texture, NULL, job->buffer, job->width * sizeof(Uint32));
+    //SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, texture, NULL, NULL);
+
+    sprintf(buffer, "Render time = %fs", timer.elapsed);
+    stringRGBA(renderer, 0, 0, buffer, 255,255,255,255);
+
+    SDL_RenderPresent(renderer);
+
+    camera_rotate_xyz(job->world->camera, 0, 0.1f, 0);
+
+    usleep(10);
   }
 
   SDL_DestroyTexture(texture);

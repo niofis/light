@@ -17,6 +17,9 @@ world_t*
   world_cornell();
 
 world_t*
+  world_demo();
+
+world_t*
   world_from_model(const char *file);
 
 void

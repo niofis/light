@@ -14,7 +14,7 @@ camera_t*
   camera_new();
 
 void
-  camera_destroy(camera_t **camera);
+  camera_rotate_xyz(camera_t *camera, float rx, float ry, float rz);
 
 void
-  camera_rotate(float rx, float ry, float rz);
+  camera_destroy(camera_t **camera);
