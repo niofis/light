@@ -122,7 +122,6 @@ aabb_destroy(aabb_t **bb)
 int 
 aabb_intersect(aabb_t *bb, ray_t *ray)
 {
-  //float tmin = -1e16f, tmax = 1e16;
 
   /*
      for (int i = 0; i < 3; ++i) {
@@ -137,24 +136,27 @@ aabb_intersect(aabb_t *bb, ray_t *ray)
      }
      }
      */
-/*
-    float t1 = (bb->min.x - ray->origin.x) / ray->direction.x;
-    float t2 = (bb->max.x - ray->origin.x) / ray->direction.x;
-    tmin = max(tmin,min(t1,t2));
-    tmax = min(tmax,max(t1,t2));
+   
+  //float tmin = -1e16f, tmax = 1e16;
+  /*
+  float t1 = (bb->min.x - ray->origin.x) / ray->direction.x;
+  float t2 = (bb->max.x - ray->origin.x) / ray->direction.x;
+  float tmin = min(t1,t2);
+  float tmax = max(t1,t2);
 
-    t1 = (bb->min.y - ray->origin.y) / ray->direction.y;
-    t2 = (bb->max.y - ray->origin.y) / ray->direction.y;
-    tmin = max(tmin,min(t1,t2));
-    tmax = min(tmax,max(t1,t2));
+  t1 = (bb->min.y - ray->origin.y) / ray->direction.y;
+  t2 = (bb->max.y - ray->origin.y) / ray->direction.y;
+  tmin = max(tmin,min(t1,t2));
+  tmax = min(tmax,max(t1,t2));
 
-    t1 = (bb->min.z - ray->origin.z) / ray->direction.z;
-    t2 = (bb->max.z - ray->origin.z) / ray->direction.z;
-    tmin = max(tmin,min(t1,t2));
-    tmax = min(tmax,max(t1,t2));
+  t1 = (bb->min.z - ray->origin.z) / ray->direction.z;
+  t2 = (bb->max.z - ray->origin.z) / ray->direction.z;
+  tmin = max(tmin,min(t1,t2));
+  tmax = min(tmax,max(t1,t2));
 
-  return tmax > tmin && tmax > 0.0;
+  return tmax >= tmin && tmax > 0.0;
   */
+ 
   float dxi = 1.0f / ray->direction.x;
   float dyi = 1.0f / ray->direction.y;
   float dzi = 1.0f / ray->direction.z;
@@ -177,4 +179,5 @@ aabb_intersect(aabb_t *bb, ray_t *ray)
   if(tmin > tzmax || tzmin > tmax)
     return false;
   return true;
+  
 }
