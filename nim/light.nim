@@ -1,4 +1,3 @@
 import nimrb
 
-echo "nim test"
-nimrb.render()
+echo nimrb.render()
