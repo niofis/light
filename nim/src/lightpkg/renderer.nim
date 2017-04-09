@@ -2,32 +2,8 @@ import strutils
 import math
 import random
 
-import  vector,
-        ray,
-        camera,
-        color,
-        material,
-        sphere,
-        ray,
-        hit,
-        world
-
-export  vector,
-        ray,
-        camera,
-        color,
-        material,
-        sphere,
-        ray,
-        hit,
-        world
- 
-const 
-  WIDTH = 640
-  HEIGHT = 360
-  SAMPLES = 5
-  MAXDEPTH = 5
-
+import  vector, ray, camera, color, material, sphere, ray, hit, world
+export  vector, ray, camera, color, material, sphere, ray, hit, world
 
 proc rnd2(): float32 = float32(2'f32 * random(1'f32)) - 1'f32
 
@@ -68,18 +44,6 @@ proc trace(w: World, r: Ray, depth: int): Color =
     out_color = color.Black
 
   return out_color
-
-proc writePPM(data: seq[seq[Color]]) =
-  let ppm = open("nimrb.ppm", fmWrite)
-  ppm.write(format("P3\n$# $#\n255\n",WIDTH, HEIGHT))
-  for row in data:
-    for c in row:
-      ppm.write(format("$# $# $# ",
-        int(floor(c.r * 255.99'f32)),
-        int(floor(c.g * 255.99'f32)),
-        int(floor(c.b * 255.99'f32))))
-    ppm.write("\n")
-  ppm.close()
 
 proc render*(): seq[seq[Color]] =
   var data = newSeq[seq[Color]]()
