@@ -1,3 +1,3 @@
-import lightpkg/nimrb
+import lightpkg/renderer
 
-echo nimrb.render()
+echo render()

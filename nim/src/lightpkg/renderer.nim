@@ -2,6 +2,14 @@ import strutils
 import math
 import random
 
+const 
+  WIDTH = 640
+  HEIGHT = 360
+  SAMPLES = 5
+  MAXDEPTH = 5
+
+
+
 import  vector, ray, camera, color, material, sphere, ray, hit, world
 export  vector, ray, camera, color, material, sphere, ray, hit, world
 
