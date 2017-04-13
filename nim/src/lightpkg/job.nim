@@ -9,6 +9,6 @@ type
     resolution: Resolution
     section: Section
 
-proc newJob*(world: ref World = nil, resolution: Resolution = (0,0), section: Section = (0,0,0,0))
-  return Job(world, resolution, section)
+proc newJob*(world: World = newWorld(), resolution: Resolution = (0,0), section: Section = (0,0,0,0)): Job =
+  return Job(world: world, resolution: resolution, section: section)
 

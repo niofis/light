@@ -10,8 +10,8 @@ const
 
 
 
-import  vector, ray, camera, color, material, sphere, ray, hit, world
-export  vector, ray, camera, color, material, sphere, ray, hit, world
+import  vector, ray, camera, color, material, sphere, ray, hit, world, job
+export  vector, ray, camera, color, material, sphere, ray, hit, world, job
 
 proc rnd2(): float32 = float32(2'f32 * random(1'f32)) - 1'f32
 
@@ -53,9 +53,9 @@ proc trace(w: World, r: Ray, depth: int): Color =
 
   return out_color
 
-proc render*(): seq[seq[Color]] =
+proc render*(job: Job): seq[seq[Color]] =
   var data = newSeq[seq[Color]]()
-  let world = newWorld()
+  let world = job.world
   let vdu = (world.camera.rt - world.camera.lt) / float32(WIDTH)
   let vdv = (world.camera.lb - world.camera.lt) / float32(HEIGHT)
 

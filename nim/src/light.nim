@@ -1,5 +1,5 @@
 import lightpkg/renderer, lightpkg/job
 
-let job = newJob()
+let jb = newJob()
 
-echo render()
+echo render(jb)
