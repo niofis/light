@@ -1,6 +1,8 @@
-proc writePPM(data: seq[seq[Color]]) =
-  let ppm = open("nimrb.ppm", fmWrite)
-  ppm.write(format("P3\n$# $#\n255\n",WIDTH, HEIGHT))
+import math, strutils, sequtils, color
+
+proc savePPM*(filename: string, data: seq[seq[Color]]) =
+  let ppm = open(filename, fmWrite)
+  ppm.write(format("P3\n$# $#\n255\n",data[0].len, data.len))
   for row in data:
     for c in row:
       ppm.write(format("$# $# $# ",

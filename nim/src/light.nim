@@ -1,5 +1,6 @@
-import lightpkg/renderer, lightpkg/job
+import lightpkg/renderer, lightpkg/job, lightpkg/image
 
 let jb = newJob()
 
-echo render(jb)
+let res = render(jb)
+savePPM("image.ppm", res)
