@@ -2,16 +2,10 @@ import strutils
 import math
 import random
 
-const 
-  WIDTH = 640
-  HEIGHT = 360
-  SAMPLES = 5
-  MAXDEPTH = 5
-
-
-
 import  vector, ray, camera, color, material, sphere, ray, hit, world, job
 export  vector, ray, camera, color, material, sphere, ray, hit, world, job
+
+const MAXDEPTH = 5
 
 proc rnd2(): float32 = float32(2'f32 * random(1'f32)) - 1'f32
 
@@ -56,26 +50,26 @@ proc trace(w: World, r: Ray, depth: int): Color =
 proc render*(job: Job): seq[seq[Color]] =
   var data = newSeq[seq[Color]]()
   let world = job.world
-  let vdu = (world.camera.rt - world.camera.lt) / float32(WIDTH)
-  let vdv = (world.camera.lb - world.camera.lt) / float32(HEIGHT)
+  let vdu = (world.camera.rt - world.camera.lt) / float32(job.resolution.width)
+  let vdv = (world.camera.lb - world.camera.lt) / float32(job.resolution.height)
 
   randomize()
   
-  for y in 0..(HEIGHT-1):
+  for y in 0..<job.resolution.height:
     var row = newSeq[Color]()
-    for x in 0..(WIDTH-1):
+    for x in 0..<job.resolution.width:
       var color = color.Black
       var ray:Ray
 
       ray.origin = world.camera.eye
 
-      for i in 1..SAMPLES:
+      for i in 1..job.samples:
         ray.direction = ((world.camera.lt + (vdu * (float32(x) + float32(random(1'f32))) +
                         vdv * (float32(y) + float32(random(1'f32))))) -
                         world.camera.eye).unit
         color = color + trace(world, ray, 0)
 
-      color = color / float32(SAMPLES)
+      color = color / float32(job.samples)
       row.add(color)
     data.add(row)
-    return data
+  return data

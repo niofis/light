@@ -15,29 +15,34 @@ proc newWorld*(): World =
 
   world.spheres = newSeq[Sphere]()
   
+  #Floor
   world.spheres.add((center: (0'f32, -10002'f32, 0'f32), radius: 9999'f32,
-                      material: Red, is_light: false))
+                      material: material.White, is_light: false))
 
+  #Left wall
   world.spheres.add((center: (-10012'f32, 0'f32, 0'f32), radius: 9999'f32,
-                      material: Red, is_light: false))
+                      material: material.Red, is_light: false))
 
+  #Right wall
   world.spheres.add((center: (10012'f32, 0'f32, 0'f32), radius: 9999'f32,
-                      material: Red, is_light: false))
+                      material: material.Green, is_light: false))
 
+  #Back wall
   world.spheres.add((center: (0'f32, 0'f32, -10012'f32), radius: 9999'f32,
-                      material: Red, is_light: false))
+                      material: material.White, is_light: false))
 
+  #Ceiling
   world.spheres.add((center: (0'f32, 10012'f32, 0'f32), radius: 9999'f32,
-                      material: White, is_light: true))
+                      material: material.White, is_light: true))
 
   world.spheres.add((center: (-5'f32, 0'f32, 2'f32), radius: 2'f32,
-                      material: Red, is_light: false))
+                      material: material.Blue, is_light: false))
 
   world.spheres.add((center: (0'f32, 5'f32, -1'f32), radius: 4'f32,
-                      material: Red, is_light: false))
+                      material: material.Yellow, is_light: false))
 
   world.spheres.add((center: (8'f32, 5'f32, -1'f32), radius: 2'f32,
-                      material: Red, is_light: false))
+                      material: material.Magenta, is_light: false))
   return world
 
 
