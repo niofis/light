@@ -1,11 +1,17 @@
-import strutils
-import math
-import random
+import  strutils,
+        math,
+        random,
+        pmap,
+        sequtils,
+        pmap,
+        threadpool
 
 import  vector, ray, camera, color, material, sphere, ray, hit, world, job
 export  vector, ray, camera, color, material, sphere, ray, hit, world, job
 
 const MAXDEPTH = 5
+
+randomize()
 
 proc rnd2(): float32 = float32(2'f32 * random(1'f32)) - 1'f32
 
@@ -34,7 +40,7 @@ proc trace(w: World, r: Ray, depth: int): Color =
       did_hit = true
       out_color = s.material.color
       hit = lh
-
+  
   if did_hit == true and depth < MAXDEPTH:
     if sp.is_light == false:
       let nray = (origin: hit.point, direction: rnd_dome(hit.normal))
@@ -47,18 +53,30 @@ proc trace(w: World, r: Ray, depth: int): Color =
 
   return out_color
 
-proc render*(job: Job): seq[seq[Color]] =
-  var data = newSeq[seq[Color]]()
-  let world = job.world
-  let vdu = (world.camera.rt - world.camera.lt) / float32(job.resolution.width)
-  let vdv = (world.camera.lb - world.camera.lt) / float32(job.resolution.height)
+proc render*(job: Job): seq[Color] =
+  let
+    world = job.world
+    vdu = (world.camera.rt - world.camera.lt) / float32(job.resolution.width)
+    vdv = (world.camera.lb - world.camera.lt) / float32(job.resolution.height)
+    width = job.resolution.width
+    height = job.resolution.height
+    samples = job.samples.float32
+    ps = toSeq(0..<width * height)
+    hs = toSeq(0..<height)
+    ws = toSeq(0..<width)
 
-  randomize()
-  
-  for y in 0..<job.resolution.height:
-    var row = newSeq[Color]()
-    for x in 0..<job.resolution.width:
-      var color = color.Black
+  ps.pmap(proc (p:int): auto =
+    #ws.map(proc (x:int): auto =
+      let x = p mod width
+      let y = p / width
+      var clr = color.Black
+      #trace(world, (
+      #    world.camera.eye,
+      #    ((world.camera.lt + (vdu * (float32(x) + random(1.0)) +
+      #                  vdv * (float32(y) + random(1.0)))) -
+      #                  world.camera.eye).unit
+      #    ), 0)
+
       var ray:Ray
 
       ray.origin = world.camera.eye
@@ -67,9 +85,8 @@ proc render*(job: Job): seq[seq[Color]] =
         ray.direction = ((world.camera.lt + (vdu * (float32(x) + float32(random(1'f32))) +
                         vdv * (float32(y) + float32(random(1'f32))))) -
                         world.camera.eye).unit
-        color = color + trace(world, ray, 0)
+        clr = clr + trace(world, ray, 0)
 
-      color = color / float32(job.samples)
-      row.add(color)
-    data.add(row)
-  return data
+      clr / samples
+    #)
+  )
