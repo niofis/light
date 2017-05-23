@@ -79,6 +79,8 @@ int gui_init(int width, int height, bool fullscreen)
 
     sprintf(buffer, "Render time = %fs", timer.elapsed);
     stringRGBA(renderer, 0, 0, buffer, 255,255,255,255);
+    sprintf(buffer, "FPS = %f", 1.0/timer.elapsed);
+    stringRGBA(renderer, 0, 8, buffer, 255,255,255,255);
 
     SDL_RenderPresent(renderer);
 
