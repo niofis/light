@@ -2,10 +2,12 @@ import  math,
         vector,
         ray,
         hit,
-        material
+        material,
+        solid
 
-type Sphere* = tuple[center: Vector3, radius: float32, material: Material, is_light: bool]
-
+type Sphere* = ref object of Solid
+  center*: Vector3
+  radius*: float32
 
 proc hit*(sp: Sphere, ray: Ray): Hit =
   let oc = ray.origin - sp.center

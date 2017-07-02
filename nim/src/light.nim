@@ -11,7 +11,7 @@ import  lightpkg/renderer,
 
 const
   Title = "Light"
-  ScreenW = 320
+  ScreenW = 800
   ScreenH = ((ScreenW / 16) * 9).int
   WindowFlags = 0
   RendererFlags = sdl.RendererAccelerated
@@ -98,11 +98,9 @@ proc main() =
 
   while not done:
     let start = epochTime()
+
     #do the rendering
-
-    let res = render(jb)
-
-
+    let res = render(jb, RayTracing)
 
     for p in 0..<ScreenH * ScreenW:
           pixels[p] = res[p].toARGB()

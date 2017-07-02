@@ -11,6 +11,9 @@ export  vector, ray, camera, color, material, sphere, ray, hit, world, job
 
 const MAXDEPTH = 5
 
+type RenderMethod* = enum
+  RayTracing, PathTracing, NullTracing
+
 randomize()
 
 proc rnd2(): float32 = float32(2'f32 * random(1'f32)) - 1'f32
@@ -26,7 +29,7 @@ proc rndDome(normal: Vector3): Vector3 =
     d = p.dot(normal)
   return p
 
-proc trace(w: World, r: Ray, depth: int): Color =
+proc pathTrace(w: World, r: Ray, depth: int): Color =
   var did_hit = false
   var hit = nohit
   var out_color = color.Black
@@ -44,7 +47,7 @@ proc trace(w: World, r: Ray, depth: int): Color =
   if did_hit == true and depth < MAXDEPTH:
     if sp.is_light == false:
       let nray = (origin: hit.point, direction: rnd_dome(hit.normal))
-      let ncolor = trace(w, nray, depth + 1)
+      let ncolor = pathTrace(w, nray, depth + 1)
       let at = nray.direction.dot(hit.normal)
       out_color = out_color * (ncolor * at)
 
@@ -53,7 +56,21 @@ proc trace(w: World, r: Ray, depth: int): Color =
 
   return out_color
 
-proc render*(job: Job): seq[Color] =
+proc rayTrace(w: World, r: Ray, depth: int): Color =
+  let hit =
+    w.spheres
+      .mapIt((obj: it, ht: it.hit(r)))
+      .filterIt(it.ht != nohit)
+      .foldl(if a.ht.distance < b.ht.distance: a else: b)
+  return hit.obj.material.color
+
+proc nullTrace(w:World, r:Ray, depth: int): Color = color.Black
+
+proc getPrimaryRays(camera: Camera): seq[Ray] =
+  var rays = newSeq(Ray);
+  return rays
+
+proc render*(job: Job, algorithm: RenderMethod): seq[Color] =
   let
     world = job.world
     vdu = (world.camera.rt - world.camera.lt) / float32(job.resolution.width)
@@ -64,19 +81,15 @@ proc render*(job: Job): seq[Color] =
     ps = toSeq(0..<width * height)
     hs = toSeq(0..<height)
     ws = toSeq(0..<width)
+    trace = case algorithm
+      of PathTracing: pathTrace
+      of RayTracing: rayTrace
+      else: nullTrace
 
   ps.pmap(proc (p:int): auto =
-    #ws.map(proc (x:int): auto =
       let x = p mod width
       let y = p / width
       var clr = color.Black
-      #trace(world, (
-      #    world.camera.eye,
-      #    ((world.camera.lt + (vdu * (float32(x) + random(1.0)) +
-      #                  vdv * (float32(y) + random(1.0)))) -
-      #                  world.camera.eye).unit
-      #    ), 0)
-
       var ray:Ray
 
       ray.origin = world.camera.eye
@@ -88,5 +101,4 @@ proc render*(job: Job): seq[Color] =
         clr = clr + trace(world, ray, 0)
 
       clr / samples
-    #)
   )
