@@ -45,7 +45,7 @@ proc pathTrace(w: World, r: Ray, depth: int): Color =
       hit = lh
   
   if did_hit == true and depth < MAXDEPTH:
-    if sp.is_light == false:
+    if sp.isLight == false:
       let nray = (origin: hit.point, direction: rnd_dome(hit.normal))
       let ncolor = pathTrace(w, nray, depth + 1)
       let at = nray.direction.dot(hit.normal)
@@ -67,7 +67,7 @@ proc rayTrace(w: World, r: Ray, depth: int): Color =
 proc nullTrace(w:World, r:Ray, depth: int): Color = color.Black
 
 proc getPrimaryRays(camera: Camera): seq[Ray] =
-  var rays = newSeq(Ray);
+  var rays = newSeq[Ray]();
   return rays
 
 proc render*(job: Job, algorithm: RenderMethod): seq[Color] =

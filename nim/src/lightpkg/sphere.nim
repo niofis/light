@@ -9,6 +9,13 @@ type Sphere* = ref object of Solid
   center*: Vector3
   radius*: float32
 
+
+proc newSphere*(center: Vector3 = zero, radius: float32 = 1'f32, material: Material = White, isLight: bool = false): Sphere =
+  var sp = Sphere(center: center, radius: radius)
+  sp.material = material
+  sp.isLight = isLight
+  return sp
+
 proc hit*(sp: Sphere, ray: Ray): Hit =
   let oc = ray.origin - sp.center
   let a = dot(ray.direction, ray.direction)

@@ -100,7 +100,8 @@ proc main() =
     let start = epochTime()
 
     #do the rendering
-    let res = render(jb, RayTracing)
+    #let res = render(jb, RayTracing)
+    let res = render(jb, NullTracing)
 
     for p in 0..<ScreenH * ScreenW:
           pixels[p] = res[p].toARGB()
