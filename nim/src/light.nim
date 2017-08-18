@@ -10,15 +10,18 @@ const
   ScreenW = 800
   ScreenH = ((ScreenW / 16) * 9).int
 
-proc update() =
-  #do the rendering
-  #let res = render(jb, RayTracing)
-  #let res = render(jb, NullTracing)
-  #for p in 0..<ScreenH * ScreenW:
-  #  pixels[p] = res[p].toARGB()
-  echo "updating view"
-
 proc main() =
+  let jb = newJob(resolution = (ScreenW, ScreenH))
+
+  proc update(pixels: var openArray[uint32]) =
+    #do the rendering
+    let res = render(jb, RayTracing)
+    #let res = render(jb, NullTracing)
+    for p in 0..<ScreenH * ScreenW:
+      pixels[p] = res[p].toARGB()
+
+
+
   var view = newView(Title, ScreenW, ScreenH, update)
 
   if view.init() == false:
@@ -26,7 +29,7 @@ proc main() =
 
   view.start()
 
-  #let jb = newJob(resolution = (ScreenW, ScreenH))
+  echo "Done"
 
 main()
 

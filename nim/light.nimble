@@ -12,3 +12,4 @@ bin           = @["light"]
 
 requires "nim >= 0.16.0"
 
+skipFiles = @["how.nim"]
