@@ -10,6 +10,6 @@ type
     section*: Section
     samples*: int
 
-proc newJob*(world: World = newWorld(), resolution: Resolution = (480,272), section: Section = (0,0,480,272), samples: int = 1): Job =
+proc newJob*(world: World = newWorld(), resolution: Resolution = (480,272), section: Section = (0,0,480,272), samples: int = 5): Job =
   return Job(world: world, resolution: resolution, section: section, samples: samples)
 
