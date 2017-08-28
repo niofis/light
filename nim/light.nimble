@@ -10,6 +10,7 @@ bin           = @["light"]
 
 # Dependencies
 
-requires "nim >= 0.16.0"
+requires "nim >= 0.16.0", "sdl2_nim >= 2.0.5.0"
 
 skipFiles = @["how.nim"]
+skipDirs = @["sdl2/private"]

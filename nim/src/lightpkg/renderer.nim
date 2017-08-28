@@ -6,8 +6,8 @@ import  strutils,
         pmap,
         threadpool
 
-import  vector, ray, camera, color, material, sphere, ray, hit, world, job
-export  vector, ray, camera, color, material, sphere, ray, hit, world, job
+import  vector, ray, camera, color, material, sphere, ray, hit, world, job, solid
+export  vector, ray, camera, color, material, sphere, ray, hit, world, job, solid
 
 const MAXDEPTH = 5
 
@@ -16,13 +16,13 @@ type RenderMethod* = enum
 
 randomize()
 
-proc rnd2(): float32 = float32(2'f32 * random(1'f32)) - 1'f32
+proc rnd2(): float32 = (2.0 * random(1.0)) - 1.0
 
 proc rndDome(normal: Vector3): Vector3 =
   var d:float32
   var p:Vector3
 
-  d = -1'f32
+  d = -1.0
 
   while d < 0:
     p = ((rnd2(), rnd2(), rnd2())).unit
@@ -33,9 +33,9 @@ proc pathTrace(w: World, r: Ray, depth: int): Color =
   var did_hit = false
   var hit = nohit
   var out_color = color.Black
-  var sp:Sphere
+  var sp:Solid
 
-  for s in w.spheres:
+  for s in w.objects:
     let lh = s.hit(r)
     
     if lh.distance < hit.distance:
@@ -58,7 +58,7 @@ proc pathTrace(w: World, r: Ray, depth: int): Color =
 
 proc rayTrace(w: World, r: Ray, depth: int): Color =
   let hit =
-    w.spheres
+    w.objects
       .mapIt((obj: it, ht: it.hit(r)))
       .filterIt(it.ht != nohit)
       .foldl(if a.ht.distance < b.ht.distance: a else: b)
@@ -95,8 +95,8 @@ proc render*(job: Job, algorithm: RenderMethod): seq[Color] =
       ray.origin = world.camera.eye
 
       for i in 1..job.samples:
-        ray.direction = ((world.camera.lt + (vdu * (float32(x) + float32(random(1'f32))) +
-                        vdv * (float32(y) + float32(random(1'f32))))) -
+        ray.direction = ((world.camera.lt + (vdu * (float32(x) + float32(random(1.0))) +
+                        vdv * (float32(y) + float32(random(1.0))))) -
                         world.camera.eye).unit
         clr = clr + trace(world, ray, 0)
 

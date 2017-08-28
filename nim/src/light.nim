@@ -10,25 +10,23 @@ const
   ScreenW = 800
   ScreenH = ((ScreenW / 16) * 9).int
 
-proc main() =
-  let jb = newJob(resolution = (ScreenW, ScreenH))
-
-  proc update(pixels: var openArray[uint32]) =
+proc update(job: Job): auto =
+  result = proc (pixels: var openArray[uint32]) =
     #do the rendering
-    let res = render(jb, PathTracing)
-    #let res = render(jb, RayTracing)
-    #let res = render(jb, NullTracing)
+    let res = render(job, PathTracing)
+    #let res = render(job, RayTracing)
+    #let res = render(job, NullTracing)
     for p in 0..<ScreenH * ScreenW:
       pixels[p] = res[p].toARGB()
 
-  var view = newView(Title, ScreenW, ScreenH, update)
+proc main() =
+  let jb = newJob(resolution = (ScreenW, ScreenH))
+  let view = newView(Title, ScreenW, ScreenH, update(jb))
 
   if view.init() == false:
     return
 
   view.start()
-
-  echo "Done"
 
 main()
 
