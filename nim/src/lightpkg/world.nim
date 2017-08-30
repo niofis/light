@@ -46,6 +46,10 @@ proc newWorld*(): World =
 
   world.objects.add(newSphere((8'f32, 5'f32, -1'f32), 2'f32,
                       material.Magenta, false))
+
+  world.objects.add(newTriangle((-1'f32, 0'f32, 0'f32),
+                                (0'f32, 1'f32, 0'f32),
+                                (1'f32, 0'f32, 0'f32), material.Blue, false))
   return world
 
 
