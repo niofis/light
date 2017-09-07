@@ -94,11 +94,12 @@ proc render*(job: Job, algorithm: RenderMethod): seq[Color] =
 
       ray.origin = world.camera.eye
 
-      for i in 1..job.samples:
-        ray.direction = ((world.camera.lt + (vdu * (float32(x) + float32(random(1.0))) +
+      #for i in 1..job.samples:
+      ray.direction = ((world.camera.lt + (vdu * (float32(x) + float32(random(1.0))) +
                         vdv * (float32(y) + float32(random(1.0))))) -
                         world.camera.eye).unit
-        clr = clr + trace(world, ray, 0)
+      clr = clr + trace(world, ray, 0)
 
-      clr / samples
+      return clr
+      #clr / samples
   )
