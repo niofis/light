@@ -9,6 +9,8 @@ const
   Title = "Light"
   ScreenW = 800
   ScreenH = ((ScreenW / 16) * 9).int
+  
+var imgBuffer = newImage(ScreenW, ScreenH)
 
 proc update(job: Job): auto =
   result = proc (pixels: var openArray[uint32]) =
@@ -16,8 +18,10 @@ proc update(job: Job): auto =
     let res = render(job, PathTracing)
     #let res = render(job, RayTracing)
     #let res = render(job, NullTracing)
+    imgBuffer.add(res)
+    
     for p in 0..<ScreenH * ScreenW:
-      pixels[p] = res[p].toARGB()
+      pixels[p] = (imgBuffer.pixels[p] / imgBuffer.count.float32).toARGB()
 
 proc main() =
   let jb = newJob(resolution = (ScreenW, ScreenH))
