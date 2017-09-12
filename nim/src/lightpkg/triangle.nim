@@ -21,6 +21,7 @@ proc newTriangle*(v0: Vector3 = zero, v1: Vector3 = zero, v2: Vector3 = zero, ma
 method hit*(tr: Triangle, ray: Ray): Hit {.inline.} =
   let edge1 = tr.v1 - tr.v0
   let edge2 = tr.v2 - tr.v0
+  let normal = edge1.cross(edge2).unit
 
   let pvec = ray.direction.cross(edge2)
 
@@ -48,6 +49,6 @@ method hit*(tr: Triangle, ray: Ray): Hit {.inline.} =
   let t = edge2.dot(qvec) * inv_det
   if t > EPSILON:
     let pt = ray.point(t)
-    return (distance: t, point: pt, normal: zero)
+    return (distance: t, point: pt, normal: normal)
 
   return nohit
