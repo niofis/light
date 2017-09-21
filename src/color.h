@@ -22,3 +22,6 @@ void
 
 void
   color_mul(color_t *dest, const color_t *c1, const color_t *c2);
+
+void
+  color_copy(color_t *dest, const color_t *src);

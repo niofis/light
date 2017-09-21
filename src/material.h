@@ -4,6 +4,7 @@
 typedef struct
 {
 	color_t color;
+    int is_light;
 } material_t;
 
 material_t*

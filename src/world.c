@@ -282,6 +282,7 @@ world_demo()
   world->materials = list_new();
 
   material_t *white = material_new();
+  white->is_light = 1;
   color_set_argb(&white->color, 1.0f, 1.0f, 1.0f, 1.0f);
   list_append(world->materials, white);
 

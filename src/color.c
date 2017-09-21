@@ -49,3 +49,12 @@ color_mul(color_t *dest, const color_t *c1, const color_t *c2)
 	dest->g = c1->g * c2->g;
 	dest->b = c1->b * c2->b;
 }
+
+void
+color_copy(color_t *dest, const color_t *src)
+{
+  dest->a = src->a;
+  dest->r = src->r;
+  dest->g = src->g;
+  dest->b = src->b;
+}

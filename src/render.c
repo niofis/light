@@ -3,7 +3,7 @@
 v3_t vdu;
 v3_t vdv;
 
-  void
+void
 init_delta_vectors(job_t *job)
 {
   v3_sub(&vdu,
@@ -17,7 +17,7 @@ init_delta_vectors(job_t *job)
   v3_div_scalar(&vdv, &vdv, (float) job->height);
 }
 
-  void
+void
 getray(ray_t *ray, int x, int y, job_t *job)
 {
   v3_t u;
@@ -42,7 +42,7 @@ getray(ray_t *ray, int x, int y, job_t *job)
 
 }
 
-  int
+int
 find_any(ray_t *ray, world_t *world, float max_distance, intersection_t *result)
 {
 
@@ -70,7 +70,7 @@ find_any(ray_t *ray, world_t *world, float max_distance, intersection_t *result)
   return its.hit;
 }
 
-  int
+int
 bvh_find_any_heap(ray_t* ray, bvh_heap_t *heap, size_t idx, float max_distance, intersection_t* result)
 {
   result->hit = 0;
@@ -122,7 +122,7 @@ bvh_find_any_heap(ray_t* ray, bvh_heap_t *heap, size_t idx, float max_distance, 
   return 0;
 }
 
-  int
+int
 bvh_find_any(ray_t *ray, bvhnode_t *node, float max_distance, intersection_t *result)
 {
   result->hit = 0;
@@ -153,7 +153,7 @@ bvh_find_any(ray_t *ray, bvhnode_t *node, float max_distance, intersection_t *re
   return 0;
 }
 
-  void
+void
 shading(world_t *world, intersection_t *trace, color_t *color)
 {
   ray_t light_ray;
@@ -190,7 +190,7 @@ shading(world_t *world, intersection_t *trace, color_t *color)
   color_mul(color, &(trace->material->color), &light);
 }
 
-  void
+void
 bvh_traverse_heap(ray_t* ray, bvh_heap_t *heap, size_t idx, intersection_t* closest)
 {
 
@@ -259,7 +259,7 @@ bvh_traverse_heap(ray_t* ray, bvh_heap_t *heap, size_t idx, intersection_t* clos
   }
 }
 
-  void
+void
 bvh_traverse(ray_t *ray, bvhnode_t *node, intersection_t *closest)
 {
   if(!aabb_intersect(&node->bb, ray))
@@ -305,7 +305,7 @@ bvh_traverse(ray_t *ray, bvhnode_t *node, intersection_t *closest)
   }
 }
 
-  void
+void
 simple_traverse(ray_t *ray, list_t *primitives, intersection_t *closest)
 {
   primitive_t *primitive;
@@ -342,7 +342,7 @@ simple_traverse(ray_t *ray, list_t *primitives, intersection_t *closest)
   }
 }
 
-  int
+int
 find_closest(ray_t* ray, world_t* world, float max_distance, intersection_t* result)
 {
   intersection_t closest;
@@ -362,7 +362,7 @@ find_closest(ray_t* ray, world_t* world, float max_distance, intersection_t* res
   return closest.hit;
 }
 
-  void
+void
 traceray(ray_t *ray, world_t *world, color_t *color)
 {
   intersection_t result;
@@ -379,7 +379,61 @@ traceray(ray_t *ray, world_t *world, color_t *color)
   }
 }
 
-  int
+float randf()
+{
+  return (float)rand() / (float)RAND_MAX ;
+}
+
+v3_t
+rnd_dome(const v3_t* normal)
+{
+  v3_t p;
+  float d;
+  do
+  {
+    p.x = 2.0f * randf() - 1.0f;
+    p.y = 2.0f * randf() - 1.0f;
+    p.z = 2.0f * randf() - 1.0f;
+
+    v3_normalize(&p);
+
+    d = v3_dot(&p, normal);
+  } while(d <= 0);
+
+  return p;
+}
+
+color_t
+pathtrace(ray_t *ray, world_t *world,int depth)
+{
+  intersection_t result;
+  float max_distance = 1000.0f;
+  color_t color;
+  color_set_argb(&color, 1.0f, 0.0f, 0.0f, 0.0f);
+
+  find_closest(ray, world, max_distance, &result);
+  if (result.hit) {
+      color_copy(&color, &(result.material->color));
+  }
+  if (result.hit && depth < 10) {
+    if (!result.material->is_light) {
+      ray_t nray;
+      nray.origin = result.hit_point;
+      nray.direction = rnd_dome(&(result.normal));
+      color_t ncolor = pathtrace(&nray, world, depth + 1);
+      float at = v3_dot(&nray.direction, &(result.normal));
+      color_mul_scalar(&ncolor, &ncolor, at);
+      color_mul(&color, &color, &ncolor);
+    }
+    else
+    {
+      color_copy(&color, &(result.material->color));
+    }
+  }
+  return color;
+}
+
+int
 render(job_t *job)
 {
   int x = 0;
@@ -392,13 +446,14 @@ render(job_t *job)
 
   for (y = 0; y < height; ++y)
   {
-    for (x = 2; x < width; ++x)
+    for (x = 0; x < width; ++x)
     {
       int p = y*width + x;
       ray_t ry;
       color_t color;
       getray(&ry, x, y, job);
-      traceray(&ry, job->world, &color);
+      //traceray(&ry, job->world, &color);
+      color = pathtrace(&ry, job->world, 0);
       //ARGB
       buffer[p] = color_to_argb(&color);
     }
