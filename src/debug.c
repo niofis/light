@@ -107,7 +107,7 @@ debug_end()
   dbg_node_t *cur = dbg_head;
   dbg_node_t *tmp;
   while(cur) {
-    printf("%ub -> %s:%i\n", cur->size, cur->file, cur->line);
+    printf("%ub -> %s:%i\n", (unsigned int)cur->size, cur->file, cur->line);
     tmp = cur;
     cur = cur->next;
     free(tmp);

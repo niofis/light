@@ -187,7 +187,7 @@ shading(world_t *world, intersection_t *trace, color_t *color)
     }
     light_node = list_next(light_node);
   }
-  color_mul(color, &(trace->material->color), &light);
+  color_mul(color, &(trace->material.color), &light);
 }
 
 void
@@ -259,11 +259,12 @@ bvh_traverse_heap(ray_t* ray, bvh_heap_t *heap, size_t idx, intersection_t* clos
   }
 }
 
-void
-bvh_traverse(ray_t *ray, bvhnode_t *node, intersection_t *closest)
+intersection_t
+bvh_traverse(ray_t *ray, bvhnode_t *node)
 {
+  intersection_t closest = {.hit = 0};
   if(!aabb_intersect(&node->bb, ray))
-    return;
+    return closest;
 
   primitive_t *primitive = node->primitive;
   if(primitive != NULL) {
@@ -271,7 +272,7 @@ bvh_traverse(ray_t *ray, bvhnode_t *node, intersection_t *closest)
     intersection_t its;
     its.hit = 0;
     prm_intersect(primitive, ray, &its);
-    if(its.hit && its.distance > 0.001f && its.distance < closest->distance) {
+    if(its.hit && its.distance > 0.001f && its.distance < closest.distance) {
       v3_mul_scalar(&its.hit_point, &ray->direction, its.distance);
       v3_add(&its.hit_point, &its.hit_point, &ray->origin);
 
@@ -288,21 +289,23 @@ bvh_traverse(ray_t *ray, bvhnode_t *node, intersection_t *closest)
       }
       //memcpy(closest, &its, sizeof(intersection_t));
 
-      v3_copy(&closest->hit_point, &its.hit_point);
-      v3_copy(&closest->normal, &its.normal);
-      closest->material = its.material;
-      closest->distance = its.distance;
-      closest->hit = its.hit;
+      v3_copy(&closest.hit_point, &its.hit_point);
+      v3_copy(&closest.normal, &its.normal);
+      closest.material = its.material;
+      closest.distance = its.distance;
+      closest.hit = its.hit;
 
     }
   }
   else {
     //Not a leaf
     if(node->left)
-      bvh_traverse(ray, node->left, closest);
+      return bvh_traverse(ray, node->left);
     if(node->right)
-      bvh_traverse(ray, node->right, closest);
+      return bvh_traverse(ray, node->right);
   }
+
+  return closest;
 }
 
 void
@@ -342,36 +345,48 @@ simple_traverse(ray_t *ray, list_t *primitives, intersection_t *closest)
   }
 }
 
-int
-find_closest(ray_t* ray, world_t* world, float max_distance, intersection_t* result)
+intersection_t
+find_closest(ray_t* ray, world_t* world, float max_distance)
 {
   intersection_t closest;
 
   closest.hit = 0;
   closest.distance = 1e16f;
 
-  int hits = 0;
+  //int hits = 0;
   //simple_traverse(ray, world->primitives, &closest);
   //bvh_traverse(ray, world->bvh->root, &closest);
   bvh_traverse_heap(ray, world->bvh->heap, 0, &closest);
   //if(hits)
   //printf("hits: %i\n", hits);
 
-  memcpy(result, &closest, sizeof(intersection_t));
+  //memcpy(result, &closest, sizeof(intersection_t));
 
-  return closest.hit;
+  return closest;
 }
 
 void
 traceray(ray_t *ray, world_t *world, color_t *color)
 {
-  intersection_t result;
+  //intersection_t result;
   float max_distance = 1000.0f;
 
-  find_closest(ray, world, max_distance, &result);
+  intersection_t result = find_closest(ray, world, max_distance);
   if (result.hit) {
     //color_init(color, 1.0f, 1.0f, 1.0f, 0.0f);
-    shading(world, &result, color);
+    if(result.material.reflection > 0) {
+      ray_t rf_ray;
+      v3_t vtemp;
+      float t = v3_dot(&ray->direction, &result.normal) * 2;
+      v3_mul_scalar(&vtemp, &result.normal, t);
+      v3_sub(&rf_ray.direction, &ray->direction, &vtemp);
+      v3_normalize(&rf_ray.direction);
+      rf_ray.origin = result.hit_point;
+      traceray(&rf_ray, world, color);
+    }
+    else {
+      shading(world, &result, color);
+    }
   }
   else
   {
@@ -403,6 +418,7 @@ rnd_dome(const v3_t* normal)
   return p;
 }
 
+/*
 color_t
 pathtrace(ray_t *ray, world_t *world,int depth)
 {
@@ -431,7 +447,7 @@ pathtrace(ray_t *ray, world_t *world,int depth)
     }
   }
   return color;
-}
+}*/
 
 int
 render(job_t *job)
@@ -452,8 +468,8 @@ render(job_t *job)
       ray_t ry;
       color_t color;
       getray(&ry, x, y, job);
-      //traceray(&ry, job->world, &color);
-      color = pathtrace(&ry, job->world, 0);
+      traceray(&ry, job->world, &color);
+      //color = pathtrace(&ry, job->world, 0);
       //ARGB
       buffer[p] = color_to_argb(&color);
     }

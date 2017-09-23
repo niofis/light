@@ -3,13 +3,13 @@
 
 typedef struct
 {
-	v3_t v0;
-	v3_t v1;
-	v3_t v2;
-	v3_t edge1;
-	v3_t edge2;
-	v3_t normal;
-	material_t *material;
+  v3_t v0;
+  v3_t v1;
+  v3_t v2;
+  v3_t edge1;
+  v3_t edge2;
+  v3_t normal;
+  material_t material;
 } triangle_t;
 
 triangle_t*

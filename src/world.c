@@ -21,25 +21,10 @@ world_cornell()
 
   world->materials = list_new();
 
-  material_t *red = material_new();
-  color_set_argb(&red->color, 1.0f, 1.0f, 0.0f, 0.0f);
-  list_append(world->materials, red);
-
-  material_t *green = material_new();
-  color_set_argb(&green->color, 1.0f, 0.0f, 1.0f, 0.0f);
-  list_append(world->materials, green);
-
-  material_t *white = material_new();
-  color_set_argb(&white->color, 1.0f, 1.0f, 1.0f, 1.0f);
-  list_append(world->materials, white);
-
-  material_t *blue = material_new();
-  color_set_argb(&blue->color, 1.0f, 0.0f, 0.0f, 1.0f);
-  list_append(world->materials, blue);
-
-  material_t *yellow = material_new();
-  color_set_argb(&yellow->color, 1.0f, 1.0f, 1.0f, 0.0f);
-  list_append(world->materials, yellow);
+  //material_t red = material_new();
+  //red.color = c_red;
+  //color_set_argb(&red.color, 1.0f, 1.0f, 0.0f, 0.0f);
+  //list_append(world->materials, &red);
 
 
   //Triangles
@@ -51,7 +36,7 @@ world_cornell()
   v3_set_xyz(&triangle->v0, -8.0f, 0.0f, 0.0f);
   v3_set_xyz(&triangle->v1, -8.0f, 9.0f, 0.0f);
   v3_set_xyz(&triangle->v2, -8.0f, 9.0f, 5.0f);
-  triangle->material = red;
+  triangle->material = m_red;
   triangle_update(triangle);
   list_append(world->primitives, prm_from_triangle(triangle));
 
@@ -59,7 +44,7 @@ world_cornell()
   v3_set_xyz(&triangle->v0, -8.0f, 0.0f, 0.0f);
   v3_set_xyz(&triangle->v1, -8.0f, 9.0f, 5.0f);
   v3_set_xyz(&triangle->v2, -8.0f, 0.0f, 5.0f);
-  triangle->material = red;
+  triangle->material = m_red;
   triangle_update(triangle);
   list_append(world->primitives, prm_from_triangle(triangle));
 
@@ -69,7 +54,7 @@ world_cornell()
   v3_set_xyz(&triangle->v0, 8.0f, 0.0f, 0.0f);
   v3_set_xyz(&triangle->v1, 8.0f, 9.0f, 5.0f);
   v3_set_xyz(&triangle->v2, 8.0f, 9.0f, 0.0f);
-  triangle->material = green;
+  triangle->material = m_green;
   triangle_update(triangle);
   list_append(world->primitives, prm_from_triangle(triangle));
 
@@ -77,7 +62,7 @@ world_cornell()
   v3_set_xyz(&triangle->v0, 8.0f, 0.0f, 0.0f);
   v3_set_xyz(&triangle->v1, 8.0f, 0.0f, 5.0f);
   v3_set_xyz(&triangle->v2, 8.0f, 9.0f, 5.0f);
-  triangle->material = green;
+  triangle->material = m_green;
   triangle_update(triangle);
   list_append(world->primitives, prm_from_triangle(triangle));
 
@@ -87,7 +72,7 @@ world_cornell()
   v3_set_xyz(&triangle->v0, -8.0f, 9.0f, 5.0f);
   v3_set_xyz(&triangle->v1, 8.0f, 0.0f, 5.0f);
   v3_set_xyz(&triangle->v2, -8.0f, 0.0f, 5.0f);
-  triangle->material = white;
+  triangle->material = m_white;
   triangle_update(triangle);
   list_append(world->primitives, prm_from_triangle(triangle));
 
@@ -95,7 +80,7 @@ world_cornell()
   v3_set_xyz(&triangle->v0, -8.0f, 9.0f, 5.0f);
   v3_set_xyz(&triangle->v1, 8.0f, 9.0f, 5.0f);
   v3_set_xyz(&triangle->v2, 8.0f, 0.0f, 5.0f);
-  triangle->material = white;
+  triangle->material = m_white;
   triangle_update(triangle);
   list_append(world->primitives, prm_from_triangle(triangle));
 
@@ -105,7 +90,7 @@ world_cornell()
   v3_set_xyz(&triangle->v0, -8.0f, 9.0f, 5.0f);
   v3_set_xyz(&triangle->v1, -8.0f, 9.0f, 0.0f);
   v3_set_xyz(&triangle->v2, 8.0f, 9.0f, 0.0f);
-  triangle->material = white;
+  triangle->material = m_white;
   triangle_update(triangle);
   list_append(world->primitives, prm_from_triangle(triangle));
 
@@ -113,7 +98,7 @@ world_cornell()
   v3_set_xyz(&triangle->v0, 8.0f, 9.0f, 0.0f);
   v3_set_xyz(&triangle->v1, 8.0f, 9.0f, 5.0f);
   v3_set_xyz(&triangle->v2, -8.0f, 9.0f, 5.0f);
-  triangle->material = white;
+  triangle->material = m_white;
   triangle_update(triangle);
   list_append(world->primitives, prm_from_triangle(triangle));
 
@@ -123,7 +108,7 @@ world_cornell()
   v3_set_xyz(&triangle->v0, -8.0f, 0.0f, 5.0f);
   v3_set_xyz(&triangle->v1, 8.0f, 0.0f, 0.0f);
   v3_set_xyz(&triangle->v2, -8.0f, 0.0f, 0.0f);
-  triangle->material = white;
+  triangle->material = m_white;
   triangle_update(triangle);
   list_append(world->primitives, prm_from_triangle(triangle));
 
@@ -131,7 +116,7 @@ world_cornell()
   v3_set_xyz(&triangle->v0, 8.0f, 0.0f, 0.0f);
   v3_set_xyz(&triangle->v1, -8.0f, 0.0f, 5.0f);
   v3_set_xyz(&triangle->v2, 8.0f, 0.0f, 5.0f);
-  triangle->material = white;
+  triangle->material = m_white;
   triangle_update(triangle);
   list_append(world->primitives, prm_from_triangle(triangle));
 
@@ -139,13 +124,13 @@ world_cornell()
   sphere_t *sphere = sphere_new();
   sphere->radius = 1.0f;
   v3_set_xyz(&sphere->center, 0.0f, 2.0f, 0.0f);
-  sphere->material = blue;
+  sphere->material = m_blue;
   list_append(world->primitives, prm_from_sphere(sphere));
 
   sphere = sphere_new();
   sphere->radius = 0.5f;
   v3_set_xyz(&sphere->center, -2.0f, 2.0f, 2.0f);
-  sphere->material = yellow;
+  sphere->material = m_yellow;
   list_append(world->primitives, prm_from_sphere(sphere));
 
   //Lights
@@ -180,12 +165,6 @@ world_from_model(const char *file)
   world->camera->left_bottom.y += 4.0f;
   world->camera->left_bottom.z = 50.0f;
 
-  world->materials = list_new();
-
-  material_t *white = material_new();
-  color_set_argb(&white->color, 1.0f, 1.0f, 1.0f, 1.0f);
-  list_append(world->materials, white);
-
   world->lights = list_new();
   point_light_t *light = point_light_new();
   v3_set_xyz(&light->position, 0.0f, 0.0f, 100.0f);
@@ -217,7 +196,7 @@ world_from_model(const char *file)
         v3_set_xyz(&triangle->v0, v1.x, v1.y, v1.z);
         v3_set_xyz(&triangle->v1, v2.x, v2.y, v2.z);
         v3_set_xyz(&triangle->v2, v3.x, v3.y, v3.z);
-        triangle->material = white;
+        triangle->material = m_white;
         triangle_scale_uni(triangle, 100.0f);
         triangle_update(triangle);
         list_append(world->primitives, prm_from_triangle(triangle));
@@ -244,19 +223,13 @@ world_new()
 
   world->camera = camera_new();
 
-  world->materials = list_new();
-
-  material_t *red = material_new();
-  color_set_argb(&red->color, 1.0f, 1.0f, 0.0f, 0.0f);
-  list_append(world->materials, red);
-
   world->primitives = list_new();
 
   triangle_t *triangle = triangle_new();
   v3_set_xyz(&triangle->v0, -6.0f, 0.0f, 0.0f);
   v3_set_xyz(&triangle->v1, 0.0f, 8.0f, 0.0f);
   v3_set_xyz(&triangle->v2, 6.0f, 0.0f, 0.0f);
-  triangle->material = red;
+  triangle->material = m_red;
   triangle_update(triangle);
   list_append(world->primitives, prm_from_triangle(triangle));
 
@@ -279,53 +252,32 @@ world_demo()
 
   world->camera = camera_new();
 
-  world->materials = list_new();
-
-  material_t *white = material_new();
-  white->is_light = 1;
-  color_set_argb(&white->color, 1.0f, 1.0f, 1.0f, 1.0f);
-  list_append(world->materials, white);
-
-  material_t *red = material_new();
-  color_set_argb(&red->color, 1.0f, 1.0f, 0.0f, 0.0f);
-  list_append(world->materials, red);
-
-  material_t *green = material_new();
-  color_set_argb(&green->color, 1.0f, 0.0f, 1.0f, 0.0f);
-  list_append(world->materials, green);
-
-  material_t *blue = material_new();
-  color_set_argb(&blue->color, 1.0f, 0.0f, 0.0f, 1.0f);
-  list_append(world->materials, blue);
-
-
-
   world->primitives = list_new();
 
   triangle_t *triangle = triangle_new();
   v3_set_xyz(&triangle->v0, -1000.0f, -1.0f, -1000.0f);
   v3_set_xyz(&triangle->v1, 0.0f, -1.0f, 1000.0f);
   v3_set_xyz(&triangle->v2, 1000.0f, -1.0f, -1000.0f);
-  triangle->material = white;
+  triangle->material = m_white;
   triangle_update(triangle);
   list_append(world->primitives, prm_from_triangle(triangle));
 
   sphere_t *sphere = sphere_new();
   sphere->radius = 3.0f;
   v3_set_xyz(&sphere->center, -6.5f, 2.0f, 0.0f);
-  sphere->material = red;
+  sphere->material = m_red;
   list_append(world->primitives, prm_from_sphere(sphere));
 
   sphere = sphere_new();
   sphere->radius = 3.0f;
   v3_set_xyz(&sphere->center, 0.0f, 2.0f, 0.0f);
-  sphere->material = green;
+  sphere->material = m_steel;
   list_append(world->primitives, prm_from_sphere(sphere));
 
   sphere = sphere_new();
   sphere->radius = 3.0f;
   v3_set_xyz(&sphere->center, 6.5f, 2.0f, 0.0f);
-  sphere->material = blue;
+  sphere->material = m_blue;
   list_append(world->primitives, prm_from_sphere(sphere));
 
   world->lights = list_new();
@@ -353,7 +305,7 @@ world_destroy(world_t **world)
   if(scn->primitives) {
     node = list_head(scn->primitives);
     while(node) {
-      prm_destroy((triangle_t**)&node->item);
+      prm_destroy((primitive_t**)&node->item);
       node = list_next(node);
     }
     list_destroy(&(scn->primitives));

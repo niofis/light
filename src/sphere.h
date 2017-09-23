@@ -4,7 +4,7 @@
 typedef struct
 {
 	v3_t center;
-	material_t *material;
+	material_t material;
 	float radius;
 } sphere_t;
 

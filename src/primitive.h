@@ -16,7 +16,7 @@ int
   prm_intersect(primitive_t *prm, ray_t *ray, intersection_t *result);
 
 void
-  prm_destory(primitive_t **prm);
+  prm_destroy(primitive_t **prm);
 
 primitive_t*
   prm_from_triangle(triangle_t *triangel);

@@ -18,10 +18,10 @@ prm_destroy(primitive_t **pprm)
   primitive_t *prm = *pprm;
   if(prm != 0) {
     if(prm->type == TRIANGLE) {
-      triangle_destroy(&prm->obj);
+      triangle_destroy((triangle_t**)&prm->obj);
     }
     if(prm->type == SPHERE) {
-      sphere_destroy(&prm->obj);
+      sphere_destroy((sphere_t**)&prm->obj);
     }
     else {
       free(prm->obj);
