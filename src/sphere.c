@@ -19,8 +19,10 @@ sphere_destroy(sphere_t **sphere)
 }
 
 //from the book "Ray Tracing from the ground up"
-int sphere_intersects(sphere_t *sphere, ray_t *ray, intersection_t *result)
+intersection_t
+sphere_intersects(sphere_t *sphere, ray_t *ray)
 {
+  intersection_t result = {.hit = 0};
 	float t;
 	v3_t temp;
 	float a;
@@ -36,10 +38,8 @@ int sphere_intersects(sphere_t *sphere, ray_t *ray, intersection_t *result)
 	c = v3_dot(&temp, &temp) - (sphere->radius * sphere->radius);
 	disc = (b * b) - (4.0f * c);
 
-	result->hit = 0;
-
 	if (disc < 0.0) {
-		return 0;
+		return result;
 	}
 	else {
 		e = sqrtf(disc);
@@ -48,8 +48,8 @@ int sphere_intersects(sphere_t *sphere, ray_t *ray, intersection_t *result)
 
 		if (t > 0.007f) {
 			//tmin = t;
-			result->hit = 1;
-			result->distance = t;
+			result.hit = 1;
+			result.distance = t;
 /*
 			//local_hit_point = ray.origin + t * ray.direction;
 			v3_copy(&result->hit_point, &ray->direction);
@@ -63,14 +63,14 @@ int sphere_intersects(sphere_t *sphere, ray_t *ray, intersection_t *result)
 			v3_add(&result->normal, &result->normal, &temp);
 			v3_div_scalar(&result->normal, sphere->radius);
 */
-			return 1;
+			return result;
 		}
 
 		t = (b + e) / denom; //larger root
 		if (t > 0.007f) {
 			//tmin = t;
-			result->hit = 1;
-			result->distance = t;
+			result.hit = 1;
+			result.distance = t;
 /*
 			//local_hit_point = ray.origin + t * ray.direction;
 			v3_copy(&result->hit_point, &ray->direction);
@@ -84,9 +84,9 @@ int sphere_intersects(sphere_t *sphere, ray_t *ray, intersection_t *result)
 			v3_add(&result->normal, &result->normal, &temp);
 			v3_div_scalar(&result->normal, sphere->radius);
 */
-			return 1;
+			return result;
 		}
 
-		return 0;
+		return result;
 	}
 }

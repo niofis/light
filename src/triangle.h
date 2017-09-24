@@ -18,8 +18,8 @@ triangle_t*
 void
   triangle_destroy(triangle_t **triangle);
 
-int
-  triangle_intersects(const triangle_t *triangle, const ray_t *ray, intersection_t *result);
+intersection_t
+  triangle_intersects(const triangle_t *triangle, const ray_t *ray);
 
 void
   triangle_update(triangle_t *tr);

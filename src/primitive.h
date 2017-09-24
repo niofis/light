@@ -12,8 +12,8 @@ typedef struct
 	void* obj;
 } primitive_t;
 
-int 
-  prm_intersect(primitive_t *prm, ray_t *ray, intersection_t *result);
+intersection_t 
+  prm_intersect(primitive_t *prm, ray_t *ray);
 
 void
   prm_destroy(primitive_t **prm);

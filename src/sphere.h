@@ -14,5 +14,5 @@ sphere_t*
 void
   sphere_destroy(sphere_t **sphere);
 
-int
-  sphere_intersects(sphere_t *sphere, ray_t *ray, intersection_t *result);
+intersection_t
+  sphere_intersects(sphere_t *sphere, ray_t *ray);

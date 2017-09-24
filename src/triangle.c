@@ -29,9 +29,10 @@ triangle_update(triangle_t* triangle)
 	v3_normalize(&triangle->normal);
 }
 
-int
-triangle_intersects(const triangle_t *triangle, const ray_t *ray, intersection_t *result)
+intersection_t
+triangle_intersects(const triangle_t *triangle, const ray_t *ray)
 {
+  intersection_t result = {.hit = 0};
 	const v3_t* edge1;
     const v3_t* edge2;
 	v3_t tvec;
@@ -43,8 +44,6 @@ triangle_intersects(const triangle_t *triangle, const ray_t *ray, intersection_t
 	float u;
 	float v;
 
-	result->hit = 0;
-
 	//v3_sub(&edge1, &triangle->pt2, &triangle->pt1);
 	//v3_sub(&edge2, &triangle->pt3, &triangle->pt1);
 	edge1 = &triangle->edge1;
@@ -55,7 +54,7 @@ triangle_intersects(const triangle_t *triangle, const ray_t *ray, intersection_t
 	det = v3_dot(edge1, &pvec);
 	//No culling version
 	if(det > -EPSILON && det < EPSILON)
-		return 0;
+		return result;
 
 	inv_det = 1.0f / det;
 
@@ -63,21 +62,21 @@ triangle_intersects(const triangle_t *triangle, const ray_t *ray, intersection_t
 
 	u = v3_dot(&tvec, &pvec) * inv_det;
 	if(u < 0.0f || u > 1.0f)
-		return 0;
+		return result;
 
 
 	v3_cross(&qvec, &tvec, edge1);
 	
 	v = v3_dot(&ray->direction, &qvec) * inv_det;
 	if(v < 0.0f || u + v > 1.0f + EPSILON) //add EPSILON to offset small precision errors
-		return 0;
+		return result;
 
 	t = v3_dot(edge2, &qvec) * inv_det;
 
     if(t > EPSILON) {
-      result->hit = 1;
-      result->distance = t;
-      return 1;
+      result.hit = 1;
+      result.distance = t;
+      return result;
     }
 
 	/*
@@ -86,7 +85,7 @@ triangle_intersects(const triangle_t *triangle, const ray_t *ray, intersection_t
 	v3_mul_scalar(&result->hit_point, t);
 	v3_add(&result->hit_point, &result->hit_point, &r->origin);
 	*/
-	return 0;
+	return result;
 }
 
 void

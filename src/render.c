@@ -55,7 +55,7 @@ find_any(ray_t *ray, world_t *world, float max_distance, intersection_t *result)
     while(node) {
       //tr = (triangle_t*) node->item;
       //triangle_intersects(tr, ray, &its);
-      prm_intersect(node->item, ray, &its);
+      its = prm_intersect(node->item, ray);
       if(its.hit && its.distance < max_distance && its.distance > 0.001f)
         break;
       its.hit = 0;
@@ -79,7 +79,7 @@ bvh_find_any_heap(ray_t* ray, bvh_heap_t *heap, size_t idx, float max_distance, 
     //Only leaves have primitives
     intersection_t its;
     its.hit = 0;
-    prm_intersect(primitive, ray, &its);
+    its = prm_intersect(primitive, ray);
     if(its.hit && its.distance > 0.001f && its.distance < max_distance) {
       result->hit = 1;
       return 1;
@@ -130,9 +130,7 @@ bvh_find_any(ray_t *ray, bvhnode_t *node, float max_distance, intersection_t *re
   primitive_t *primitive = node->primitive;
   if(primitive != NULL) {
     //Only leaves have primitives
-    intersection_t its;
-    its.hit = 0;
-    prm_intersect(primitive, ray, &its);
+    intersection_t its = prm_intersect(primitive, ray);
     if(its.hit && its.distance > 0.001f && its.distance < max_distance) {
       result->hit = 1;
       return 1;
@@ -197,9 +195,7 @@ bvh_traverse_heap(ray_t* ray, bvh_heap_t *heap, size_t idx, intersection_t* clos
   primitive_t *primitive = heap->primitives[idx];
   if(primitive != NULL) {
     //Only leaves have primitives
-    intersection_t its;
-    its.hit = 0;
-    prm_intersect(primitive, ray, &its);
+    intersection_t its = prm_intersect(primitive, ray);
     if(its.hit && its.distance > 0.001f && its.distance < closest->distance) {
       v3_mul_scalar(&its.hit_point, &ray->direction, its.distance);
       v3_add(&its.hit_point, &its.hit_point, &ray->origin);
@@ -271,7 +267,7 @@ bvh_traverse(ray_t *ray, bvhnode_t *node)
     //Only leaves have primitives
     intersection_t its;
     its.hit = 0;
-    prm_intersect(primitive, ray, &its);
+    prm_intersect(primitive, ray);
     if(its.hit && its.distance > 0.001f && its.distance < closest.distance) {
       v3_mul_scalar(&its.hit_point, &ray->direction, its.distance);
       v3_add(&its.hit_point, &its.hit_point, &ray->origin);
@@ -316,7 +312,7 @@ simple_traverse(ray_t *ray, list_t *primitives, intersection_t *closest)
   node_t * node = list_head(primitives);
   while(node) {
     primitive = (primitive_t*) node->item;
-    prm_intersect(primitive, ray, &its);
+    its = prm_intersect(primitive, ray);
     if(its.hit && its.distance > 0.001f) {
       if (closest->hit == 0 || its.distance < closest->distance) {
         v3_mul_scalar(&its.hit_point, &ray->direction, its.distance);

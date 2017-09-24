@@ -1,15 +1,16 @@
 #include "includes.h"
 
-int 
-prm_intersect(primitive_t *prm, ray_t *ray, intersection_t *result)
+intersection_t
+prm_intersect(primitive_t *prm, ray_t *ray)
 {
+  intersection_t nohit;
   if(!prm)
-    return 0;
+    return nohit;
   if(prm->type == TRIANGLE)
-    return triangle_intersects((triangle_t*) prm->obj, ray, result);
+    return triangle_intersects((triangle_t*) prm->obj, ray);
   if(prm->type == SPHERE)
-    return sphere_intersects((sphere_t*) prm->obj, ray, result);
-  return 0;
+    return sphere_intersects((sphere_t*) prm->obj, ray);
+  return nohit;
 }
 
 void
