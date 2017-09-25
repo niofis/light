@@ -17,13 +17,14 @@ init_delta_vectors(job_t *job)
   v3_div_scalar(&vdv, &vdv, (float) job->height);
 }
 
-void
-getray(ray_t *ray, int x, int y, job_t *job)
+ray_t
+getray(int x, int y, job_t *job)
 {
+  ray_t ray;
   v3_t u;
   v3_t v;
 
-  v3_copy(&ray->origin, &job->world->camera->eye);
+  v3_copy(&ray.origin, &job->world->camera->eye);
 
   v3_copy(&u, &vdu);
   v3_copy(&v, &vdv);
@@ -31,14 +32,16 @@ getray(ray_t *ray, int x, int y, job_t *job)
   v3_mul_scalar(&u, &u, (float) x);
   v3_mul_scalar(&v, &v, (float) y);
 
-  v3_copy(&ray->direction, &job->world->camera->left_top);
+  v3_copy(&ray.direction, &job->world->camera->left_top);
 
-  v3_add(&ray->direction, &ray->direction, &u);
-  v3_add(&ray->direction, &ray->direction, &v);
+  v3_add(&ray.direction, &ray.direction, &u);
+  v3_add(&ray.direction, &ray.direction, &v);
 
-  v3_sub(&ray->direction, &ray->direction, &job->world->camera->eye);
+  v3_sub(&ray.direction, &ray.direction, &job->world->camera->eye);
 
-  v3_normalize(&ray->direction);
+  v3_normalize(&ray.direction);
+
+  return ray;
 
 }
 
@@ -173,8 +176,8 @@ shading(world_t *world, intersection_t *trace, color_t *color)
 
     result.hit = 0;
     //find_any(&light_ray, world, light_distance, &result);
-    //bvh_find_any(&light_ray, world->bvh->root, light_distance, &result);
-    bvh_find_any_heap(&light_ray, world->bvh->heap, 0, light_distance, &result);
+    bvh_find_any(&light_ray, world->bvh->root, light_distance, &result);
+    //bvh_find_any_heap(&light_ray, world->bvh->heap, 0, light_distance, &result);
 
     if (result.hit == 0) {
       float s = v3_dot(&trace->normal, &light_ray.direction);
@@ -460,10 +463,8 @@ render(job_t *job)
     for (x = 0; x < width; ++x)
     {
       int p = y*width + x;
-      ray_t ry;
-      color_t color;
-      getray(&ry, x, y, job);
-      color = traceray(&ry, job->world);
+      ray_t ry = getray(x, y, job);
+      color_t color = traceray(&ry, job->world);
       //color = pathtrace(&ry, job->world, 0);
       //ARGB
       buffer[p] = color_to_argb(&color);

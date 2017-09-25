@@ -156,6 +156,7 @@ world_from_model(const char *file)
   world = (world_t*) malloc(sizeof(world_t));
 
   world->camera = camera_new();
+  /*
   world->camera->eye.y += 4.0f;
   world->camera->eye.z = 75.0f;
   world->camera->left_top.y += 4.0f;
@@ -164,14 +165,108 @@ world_from_model(const char *file)
   world->camera->right_top.z = 50.0f;
   world->camera->left_bottom.y += 4.0f;
   world->camera->left_bottom.z = 50.0f;
+*/
+  world->camera->left_bottom.z = 0.0f;
+  world->camera->left_top.z = 0.0f;
+  world->camera->right_top.z = 0.0f;
+  world->camera->eye.z = -5.0f;
 
   world->lights = list_new();
   point_light_t *light = point_light_new();
-  v3_set_xyz(&light->position, 0.0f, 0.0f, 100.0f);
+  v3_set_xyz(&light->position, 0.0f, 7.0f, -3.0f);
   list_append(world->lights, light);
 
   world->primitives = list_new();
 
+  //left wall
+
+  triangle = triangle_new();
+  v3_set_xyz(&triangle->v0, -8.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->v1, -8.0f, 9.0f, 0.0f);
+  v3_set_xyz(&triangle->v2, -8.0f, 9.0f, 5.0f);
+  triangle->material = m_red;
+  triangle_update(triangle);
+  list_append(world->primitives, prm_from_triangle(triangle));
+
+  triangle = triangle_new();
+  v3_set_xyz(&triangle->v0, -8.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->v1, -8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->v2, -8.0f, 0.0f, 5.0f);
+  triangle->material = m_red;
+  triangle_update(triangle);
+  list_append(world->primitives, prm_from_triangle(triangle));
+
+  //right wall
+
+  triangle = triangle_new();
+  v3_set_xyz(&triangle->v0, 8.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->v1, 8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->v2, 8.0f, 9.0f, 0.0f);
+  triangle->material = m_green;
+  triangle_update(triangle);
+  list_append(world->primitives, prm_from_triangle(triangle));
+
+  triangle = triangle_new();
+  v3_set_xyz(&triangle->v0, 8.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->v1, 8.0f, 0.0f, 5.0f);
+  v3_set_xyz(&triangle->v2, 8.0f, 9.0f, 5.0f);
+  triangle->material = m_green;
+  triangle_update(triangle);
+  list_append(world->primitives, prm_from_triangle(triangle));
+
+  //back wall
+
+  triangle = triangle_new();
+  v3_set_xyz(&triangle->v0, -8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->v1, 8.0f, 0.0f, 5.0f);
+  v3_set_xyz(&triangle->v2, -8.0f, 0.0f, 5.0f);
+  triangle->material = m_white;
+  triangle_update(triangle);
+  list_append(world->primitives, prm_from_triangle(triangle));
+
+  triangle = triangle_new();
+  v3_set_xyz(&triangle->v0, -8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->v1, 8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->v2, 8.0f, 0.0f, 5.0f);
+  triangle->material = m_white;
+  triangle_update(triangle);
+  list_append(world->primitives, prm_from_triangle(triangle));
+
+  //ceiling
+
+  triangle = triangle_new();
+  v3_set_xyz(&triangle->v0, -8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->v1, -8.0f, 9.0f, 0.0f);
+  v3_set_xyz(&triangle->v2, 8.0f, 9.0f, 0.0f);
+  triangle->material = m_white;
+  triangle_update(triangle);
+  list_append(world->primitives, prm_from_triangle(triangle));
+
+  triangle = triangle_new();
+  v3_set_xyz(&triangle->v0, 8.0f, 9.0f, 0.0f);
+  v3_set_xyz(&triangle->v1, 8.0f, 9.0f, 5.0f);
+  v3_set_xyz(&triangle->v2, -8.0f, 9.0f, 5.0f);
+  triangle->material = m_white;
+  triangle_update(triangle);
+  list_append(world->primitives, prm_from_triangle(triangle));
+
+  //floor
+
+  triangle = triangle_new();
+  v3_set_xyz(&triangle->v0, -8.0f, 0.0f, 5.0f);
+  v3_set_xyz(&triangle->v1, 8.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->v2, -8.0f, 0.0f, 0.0f);
+  triangle->material = m_white;
+  triangle_update(triangle);
+  list_append(world->primitives, prm_from_triangle(triangle));
+
+  triangle = triangle_new();
+  v3_set_xyz(&triangle->v0, 8.0f, 0.0f, 0.0f);
+  v3_set_xyz(&triangle->v1, -8.0f, 0.0f, 5.0f);
+  v3_set_xyz(&triangle->v2, 8.0f, 0.0f, 5.0f);
+  triangle->material = m_white;
+  triangle_update(triangle);
+  list_append(world->primitives, prm_from_triangle(triangle));
 
   const struct aiScene *scene = aiImportFile(file, 0);
 
@@ -196,14 +291,17 @@ world_from_model(const char *file)
         v3_set_xyz(&triangle->v0, v1.x, v1.y, v1.z);
         v3_set_xyz(&triangle->v1, v2.x, v2.y, v2.z);
         v3_set_xyz(&triangle->v2, v3.x, v3.y, v3.z);
-        triangle->material = m_white;
-        triangle_scale_uni(triangle, 100.0f);
+        v3_rotate_xyz(&triangle->v0, 0, 3.0f, 0);
+        v3_rotate_xyz(&triangle->v1, 0, 3.0f, 0);
+        v3_rotate_xyz(&triangle->v2, 0, 3.0f, 0);
+        triangle->material = m_purple;
+        triangle_scale_uni(triangle, 20.0f);
         triangle_update(triangle);
         list_append(world->primitives, prm_from_triangle(triangle));
       }
     }
 
-    printf("Total primitives: %zu\n", world->primitives->length);
+    //printf("Total primitives: %zu\n", world->primitives->length);
     aiReleaseImport(scene);
   }
   else
