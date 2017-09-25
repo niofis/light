@@ -361,9 +361,10 @@ find_closest(ray_t* ray, world_t* world, float max_distance)
   return closest;
 }
 
-void
-traceray(ray_t *ray, world_t *world, color_t *color)
+color_t
+traceray(ray_t *ray, world_t *world)
 {
+  color_t color = c_black;
   //intersection_t result;
   float max_distance = 1000.0f;
 
@@ -378,16 +379,14 @@ traceray(ray_t *ray, world_t *world, color_t *color)
       v3_sub(&rf_ray.direction, &ray->direction, &vtemp);
       v3_normalize(&rf_ray.direction);
       rf_ray.origin = result.hit_point;
-      traceray(&rf_ray, world, color);
+      return traceray(&rf_ray, world);
     }
     else {
-      shading(world, &result, color);
+      shading(world, &result, &color);
     }
   }
-  else
-  {
-    color_set_argb(color, 1.0f, 0.0f, 0.0f, 0.0f);
-  }
+
+  return color;
 }
 
 float randf()
@@ -464,7 +463,7 @@ render(job_t *job)
       ray_t ry;
       color_t color;
       getray(&ry, x, y, job);
-      traceray(&ry, job->world, &color);
+      color = traceray(&ry, job->world);
       //color = pathtrace(&ry, job->world, 0);
       //ARGB
       buffer[p] = color_to_argb(&color);

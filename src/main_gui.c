@@ -86,7 +86,7 @@ int gui_init(int width, int height, bool fullscreen)
 
     //camera_rotate_xyz(job->world->camera, 0, 0.1f, 0);
     
-    //v3_rotate_xyz(&((point_light_t*)job->world->lights->head->item)->position, 0, 0.1f, 0);
+    v3_rotate_xyz(&((point_light_t*)job->world->lights->head->item)->position, 0, 0.1f, 0);
 
     usleep(10);
   }
