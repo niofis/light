@@ -191,6 +191,7 @@ shading(world_t *world, intersection_t *trace, color_t *color)
   color_mul(color, &(trace->material.color), &light);
 }
 
+/*
 void
 bvh_traverse_heap(ray_t* ray, bvh_heap_t *heap, size_t idx, intersection_t* closest)
 {
@@ -257,21 +258,19 @@ bvh_traverse_heap(ray_t* ray, bvh_heap_t *heap, size_t idx, intersection_t* clos
       bvh_traverse_heap(ray, heap, id_r, closest);
   }
 }
+*/
 
-intersection_t
-bvh_traverse(ray_t *ray, bvhnode_t *node)
+void
+bvh_traverse(ray_t *ray, bvhnode_t *node, intersection_t *closest)
 {
-  intersection_t closest = {.hit = 0};
   if(!aabb_intersect(&node->bb, ray))
-    return closest;
+    return;
 
   primitive_t *primitive = node->primitive;
   if(primitive != NULL) {
     //Only leaves have primitives
-    intersection_t its;
-    its.hit = 0;
-    prm_intersect(primitive, ray);
-    if(its.hit && its.distance > 0.001f && its.distance < closest.distance) {
+    intersection_t its = prm_intersect(primitive, ray);
+    if(its.hit && its.distance > 0.001f && its.distance < closest->distance) {
       v3_mul_scalar(&its.hit_point, &ray->direction, its.distance);
       v3_add(&its.hit_point, &its.hit_point, &ray->origin);
 
@@ -288,23 +287,21 @@ bvh_traverse(ray_t *ray, bvhnode_t *node)
       }
       //memcpy(closest, &its, sizeof(intersection_t));
 
-      v3_copy(&closest.hit_point, &its.hit_point);
-      v3_copy(&closest.normal, &its.normal);
-      closest.material = its.material;
-      closest.distance = its.distance;
-      closest.hit = its.hit;
+      v3_copy(&closest->hit_point, &its.hit_point);
+      v3_copy(&closest->normal, &its.normal);
+      closest->material = its.material;
+      closest->distance = its.distance;
+      closest->hit = its.hit;
 
     }
   }
   else {
     //Not a leaf
     if(node->left)
-      return bvh_traverse(ray, node->left);
+      bvh_traverse(ray, node->left, closest);
     if(node->right)
-      return bvh_traverse(ray, node->right);
+      bvh_traverse(ray, node->right, closest);
   }
-
-  return closest;
 }
 
 void
@@ -354,8 +351,8 @@ find_closest(ray_t* ray, world_t* world, float max_distance)
 
   //int hits = 0;
   //simple_traverse(ray, world->primitives, &closest);
-  //bvh_traverse(ray, world->bvh->root, &closest);
-  bvh_traverse_heap(ray, world->bvh->heap, 0, &closest);
+  bvh_traverse(ray, world->bvh->root, &closest);
+  //bvh_traverse_heap(ray, world->bvh->heap, 0, &closest);
   //if(hits)
   //printf("hits: %i\n", hits);
 

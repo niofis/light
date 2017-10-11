@@ -2,6 +2,7 @@
 
 typedef enum {X_AXIS, Y_AXIS, Z_AXIS} axis_t;
 
+/*
 void
 bvh_mkh_helper(bvh_heap_t *heap, bvhnode_t *node, size_t idx)
 {
@@ -38,13 +39,8 @@ bvh_make_heap(bvh_t *bvh)
   bvh->heap = heap;
 
   bvh_mkh_helper(heap, bvh->root, 0);
-
-  /*
-  for(int i = 0; i < count; i++) {
-    printf("min(%f, %f, %f) max(%f, %f, %f) %X (%i)\n",heap->min_x[i], heap->min_y[i], heap->min_z[i], heap->max_x[i], heap->max_y[i], heap->max_z[i], heap->primitives[i],i);
-  }
-  */
 }
+*/
 
 void
 sort_leaves(bvhnode_t* leaves, size_t start, size_t end, axis_t axis)
@@ -96,7 +92,6 @@ bvh_build(bvh_t *bvh, size_t start, size_t end)
     aabb_combine(&bnode->bb, &bnode->bb, &node->bb);
   }
 
-  //TODO:
   //find the biggest axis and sort the leaves using that
   float x_length = bnode->bb.max.x - bnode->bb.min.x;
   float y_length = bnode->bb.max.y - bnode->bb.min.y;
@@ -152,7 +147,7 @@ bvh_new(const list_t *primitives)
   bvh->leaves = leaves;
   bvh->length = idx;
   bvh->root = bvh_build(bvh, 0, primitives->length - 1);
-  bvh_make_heap(bvh);
+  //bvh_make_heap(bvh);
 
   return bvh;
 }
@@ -172,6 +167,7 @@ bvh_destroy_children(bvhnode_t **node)
   *node = NULL;
 }
 
+/*
 void
 bvh_destroy_heap(bvh_heap_t **heap)
 {
@@ -189,13 +185,13 @@ bvh_destroy_heap(bvh_heap_t **heap)
   free(hp);
   hp = NULL;
 }
-
+*/
 void
 bvh_destroy(bvh_t **bvh)
 {
   bvh_t *b = *bvh;
   bvh_destroy_children(&(b->root));
-  bvh_destroy_heap(&(b->heap));
+  //bvh_destroy_heap(&(b->heap));
   free(b->leaves);
   free(*bvh);
   *bvh = NULL;

@@ -22,7 +22,6 @@ typedef struct {
 typedef struct {
   bvhnode_t *root;  
   bvhnode_t *leaves;
-  bvh_heap_t *heap;
   size_t length;
 } bvh_t;
 
