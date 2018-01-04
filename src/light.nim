@@ -27,9 +27,6 @@ proc main() =
   let jb = newJob(resolution = (ScreenW, ScreenH))
   let view = newView(Title, ScreenW, ScreenH, update(jb))
 
-  if view.init() == false:
-    return
-
   view.start()
 
 main()
