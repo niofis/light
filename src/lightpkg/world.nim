@@ -39,7 +39,7 @@ proc newWorld*(): World =
 
   #Miscelaneus
   world.objects.add(newSphere((-5'f32, 0'f32, -2'f32), 2'f32,
-                      material.Blue, false))
+                      material.Chrome, false))
 
   world.objects.add(newSphere((0'f32, 5'f32, 1'f32), 4'f32,
                       material.Yellow, false))

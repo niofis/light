@@ -10,9 +10,9 @@ const
   ScreenW = 800
   ScreenH = ((ScreenW / 16) * 9).int
   
-var imgBuffer = newImage(ScreenW, ScreenH)
 
 proc update(job: Job): auto =
+  var imgBuffer = newImage(ScreenW, ScreenH)
   result = proc (pixels: var openArray[uint32]) =
     #do the rendering
     let res = render(job, PathTracing)
