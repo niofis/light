@@ -73,7 +73,7 @@ proc pathTrace*(w: World, r: Ray, depth: int): Color =
 
   if res.solid.material.reflection > 0:
     let nray = r.reflect(res.ht)
-    let ncolor = pathTrace(w, nray, depth)
+    let ncolor = pathTrace(w, nray, depth + 1)
     return (res.solid.material.color * (1 - res.solid.material.reflection)) + (ncolor * res.solid.material.reflection)
 
   let nray = (origin: res.ht.point, direction: rnd_dome(res.ht.normal))
