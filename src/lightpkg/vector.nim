@@ -3,7 +3,7 @@ import math
 type Vector3* = tuple[x: float32, y: float32, z: float32]
 
 proc `+`*(a, b: Vector3): Vector3 = (x: a.x + b.x, y: a.y + b.y, z: a.z + b.z)
-proc `*`*(a, b: Vector3): Vector3 = (x: a.x * b.x, y: a.y * b.y, z: a.z * b.z)
+#proc `*`*(a, b: Vector3): Vector3 = (x: a.x * b.x, y: a.y * b.y, z: a.z * b.z)
 proc `*`*(a: Vector3, s: float32): Vector3 = (x: a.x * s, y: a.y * s, z: a.z * s)
 proc `-`*(a, b: Vector3): Vector3 = (x: a.x - b.x, y: a.y - b.y, z: a.z - b.z)
 proc `/`*(a: Vector3, s: float32): Vector3 = (x: a.x / s, y: a.y / s, z: a.z / s)
