@@ -16,9 +16,9 @@ type
     title*: string
     width*: int
     height*: int
-    update*: proc(pixels:var openArray[uint32])
+    update*: proc(pixels:var seq[uint32])
 
-proc newView*(title:string, width:int, height:int, update: proc(pixels:var openArray[uint32])): View =
+proc newView*(title:string, width:int, height:int, update: proc(pixels:var seq[uint32])): View =
   var view = View()
   view.title = title
   view.width = width
@@ -82,7 +82,7 @@ proc start*(view: View) =
   var
     done = false
     pressed: seq[sdl.Keycode] = @[]
-    pixels: array[1024*768, uint32]
+    pixels = newSeq[uint32](view.width * view.height)
 
   let
     totalWBytes = view.width * sizeof(uint32)
@@ -107,7 +107,7 @@ proc start*(view: View) =
 
     view.update(pixels)
 
-    discard texture.updateTexture(nil, addr(pixels), totalWBytes)
+    discard texture.updateTexture(nil, addr(pixels[0]), totalWBytes)
     discard view.renderer.renderCopy(texture, nil, nil)
     let fps = 1.0/(epochTime() - start)
     discard view.renderer.stringRGBA(0,
