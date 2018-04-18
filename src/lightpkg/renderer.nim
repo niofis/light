@@ -29,14 +29,12 @@ proc render*(job: Job, algorithm: RenderMethod): seq[Color] =
     height = job.resolution.height
     samples = job.samples.float32
     ps = toSeq(0..<width * height)
-    hs = toSeq(0..<height)
-    ws = toSeq(0..<width)
     trace = case algorithm
       of PathTracing: pathTrace
       of RayTracing: rayTrace
       else: nullTrace
 
-  ps.pmap(proc (p:int): auto =
+  ps.pmap(proc (p:int): Color =
       let x = p mod width
       let y = p / width
       var clr = color.Black
@@ -45,8 +43,8 @@ proc render*(job: Job, algorithm: RenderMethod): seq[Color] =
       ray.origin = world.camera.eye
 
       for i in 1..job.samples:
-        ray.direction = ((world.camera.lt + (vdu * (float32(x) + float32(random(1.0))) +
-                        vdv * (float32(y) + float32(random(1.0))))) -
+        ray.direction = ((world.camera.lt + (vdu * (float32(x) + float32(rand(1.0))) +
+                        vdv * (float32(y) + float32(rand(1.0))))) -
                         world.camera.eye).unit
         clr = clr + trace(world, ray, 0)
 

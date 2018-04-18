@@ -13,7 +13,7 @@ const MAXDEPTH = 5
 
 randomize()
 
-proc rnd2(): float32 = (2.0 * random(1.0)) - 1.0
+proc rnd2(): float32 = (2.0 * rand(1.0)) - 1.0
 
 proc rndDome(normal: Vector3): Vector3 =
   var d:float32
