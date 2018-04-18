@@ -12,7 +12,7 @@ proc worker[T, S](data: seq[T], op: proc (x: T): S {.closure.}): seq[S]{.inline.
 
 proc pmap*[T, S](data: seq[T], op: proc (x: T): S {.closure.} ): seq[S]{.inline.} =
   let
-    num_blocks = num_cpus * 2
+    num_blocks = num_cpus
     seg_size = int(data.len / num_blocks)
 
   var 
