@@ -1,0 +1,6 @@
+[package]
+name = "lightrs"
+version = "0.1.0"
+authors = ["Enrique <niofis@gmail.com>"]
+
+[dependencies]
