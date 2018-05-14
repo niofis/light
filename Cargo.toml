@@ -1,6 +1,13 @@
 [package]
-name = "lightrs"
+name = "light"
 version = "0.1.0"
 authors = ["Enrique <niofis@gmail.com>"]
 
 [dependencies]
+time = "0.1"
+
+[dependencies.sdl2]
+version = "0.31"
+default-features = false
+features = ["gfx"]
+
