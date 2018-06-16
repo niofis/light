@@ -7,6 +7,30 @@ use sdl2::keyboard::Keycode;
 use sdl2::gfx::primitives::DrawRenderer;
 use std::time::Duration;
 
+struct Vector3 {
+    x: f32,
+    y: f32,
+    z: f32
+}
+
+struct Triangle {
+    u: Vector3,
+    v: Vector3,
+    w: Vector3
+}
+
+struct Camera {
+    lb: f32,
+    lt: f32,
+    rt: f32,
+    eye: Vector3
+}
+
+struct World {
+    camera: Camera,
+    triangles: Vec<Triangle>
+}
+
 fn main() {
     let sdl_context = sdl2::init().expect("sdl2_context");
     let video_subsystem = sdl_context.video().expect("video_subsystem");
