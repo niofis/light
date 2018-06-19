@@ -6,6 +6,9 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::gfx::primitives::DrawRenderer;
 use std::time::Duration;
+use sdl2::pixels::PixelFormatEnum;
+use sdl2::rect::Rect;
+
 
 struct Vector3 {
     x: f32,
@@ -45,6 +48,12 @@ fn main() {
     let mut curr_time : f64;
     let mut fps : String;
 
+    let texture_creator = canvas.texture_creator();
+    let mut texture = texture_creator.create_texture_streaming(
+        PixelFormatEnum::RGB24, 800, 600).unwrap();
+    // Create a red-green gradient
+
+
     'events_loop: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -56,11 +65,24 @@ fn main() {
         }
         canvas.set_draw_color(Color::RGB(0,0,0));
         canvas.clear();
+
+        texture.with_lock(None, |buffer: &mut [u8], pitch: usize| {
+            for y in 0..600 {
+                for x in 0..800 {
+                    let offset = y*pitch + x*3;
+                    buffer[offset] = x as u8;
+                    buffer[offset + 1] = y as u8;
+                    buffer[offset + 2] = 0;
+                }
+            }
+        }).unwrap();
+
+        canvas.copy(&texture, None, Some(Rect::new(0, 0, 800, 600))).unwrap();
         curr_time = time::precise_time_s();
         fps = format!("{:.*}", 2, 1.0 / (curr_time - prev_time));
         prev_time = curr_time;
         canvas.string(0,0, &fps, Color::RGB(255, 255, 255)).expect("canvas.string");
         canvas.present();
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
+        //::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
 }
