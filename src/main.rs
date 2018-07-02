@@ -53,10 +53,10 @@ fn main() {
 
     let texture_creator = canvas.texture_creator();
     let mut texture = texture_creator.create_texture_streaming(
-        PixelFormatEnum::RGB24, WIDTH as u32, HEIGHT as u32).unwrap();
+        PixelFormatEnum::ARGB8888, WIDTH as u32, HEIGHT as u32).unwrap();
     let rect = Rect::new(0, 0, WIDTH as u32, HEIGHT as u32);
 
-    let mut pixels: [u8; WIDTH * HEIGHT] = [0; WIDTH * HEIGHT];
+    //let mut pixels: [u8; WIDTH * HEIGHT * 4] = [0; WIDTH * HEIGHT * 4];
 
     'events_loop: loop {
         for event in event_pump.poll_iter() {
@@ -68,27 +68,37 @@ fn main() {
             }
         }
 
-        /*texture.with_lock(None, |buffer: &mut [u8], pitch: usize| {
-            for y in 0..HEIGHT {
-                for x in 0..WIDTH {
-                    let offset = y*pitch + x*3;
-                    buffer[offset] = x as u8;
-                    buffer[offset + 1] = y as u8;
-                    buffer[offset + 2] = 0;
-                }
+        
+        texture.with_lock(None, |buffer: &mut [u8], pitch: usize| {
+            for y in 0..100 {
+                    let offset = y*pitch + y*4;
+                    buffer[offset] = 0; //B
+                    buffer[offset + 1] = 0; //G
+                    buffer[offset + 2] = 255; //R
+                    buffer[offset + 3] = 255;
             }
-        }).unwrap();*/
+        }).unwrap();
+        
 
-        for y in 0..HEIGHT {
-                for x in 0..WIDTH {
-                    let offset = y*3 + x*3;
-                    pixels[offset] = x as u8;
-                    pixels[offset + 1] = y as u8;
-                    pixels[offset + 2] = 0;
-                }
+        
+        /*
+        for y in 0..100 {
+                    let offset = y*WIDTH*4 + y*4;
+                    pixels[offset] = 255; //B
+                    pixels[offset + 1] = 0;  //G
+                    pixels[offset + 2] = 0;  //R
+                    pixels[offset + 3] = 255;
+                    /*let pixel: u32 = 
+                        (255 << 3 |
+                        x << 2 |
+                        y << 1 |
+                        0) as u32;
+
+                    pixels[y*WIDTH + x] = pixel;*/
             }
 
-        texture.update(None, &pixels, 3).unwrap();
+        texture.update(None, &pixels, WIDTH * 4).unwrap();
+        */
 
         canvas.copy(&texture, None, Some(rect)).unwrap();
         curr_time = time::precise_time_s();
