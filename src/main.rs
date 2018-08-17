@@ -76,6 +76,7 @@ fn main() {
                     buffer[offset + 1] = 0; //G
                     buffer[offset + 2] = 255; //R
                     buffer[offset + 3] = 255;
+bcl
             }
         }).unwrap();
         
