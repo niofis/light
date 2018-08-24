@@ -9,8 +9,8 @@ use std::time::Duration;
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::Rect;
 
-const WIDTH: usize = 800;
-const HEIGHT: usize = 600;
+const WIDTH: usize = 320;
+const HEIGHT: usize = 240;
 
 
 struct Vector3 {
@@ -76,7 +76,6 @@ fn main() {
                     buffer[offset + 1] = 0; //G
                     buffer[offset + 2] = 255; //R
                     buffer[offset + 3] = 255;
-bcl
             }
         }).unwrap();
         
