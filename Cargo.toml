@@ -5,6 +5,8 @@ authors = ["Enrique <niofis@gmail.com>"]
 
 [dependencies]
 time = "0.1"
+rand = "0.3.14"
+rayon = "1.0"
 
 [dependencies.sdl2]
 version = "0.31"
