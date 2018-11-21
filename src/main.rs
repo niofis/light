@@ -306,12 +306,16 @@ impl World {
 fn render(world: &World) -> Vec<V3> {
     let vdu = (world.camera.rt - world.camera.lt) / WIDTH as f32;
     let vdv = (world.camera.lb - world.camera.lt) / HEIGHT as f32;
+    let rnd1 = rand::random();
+    let rnd2 = rand::random();
+    let rnd3 = rand::random();
+    //let rnd4 = rand::random();
 
     (0..HEIGHT*WIDTH).into_par_iter().map(|pixel| {
         let x = pixel % WIDTH;
         let y = pixel / WIDTH;
 
-        let mut rng = rand::XorShiftRng::from_seed([pixel as u32, x as u32, y as u32, rand::random()]);
+        let mut rng = rand::XorShiftRng::from_seed([rnd1, rnd2, rnd3, rand::random()]);
 
         let color: V3 = (0..SAMPLES).map(|_| {
             let ray = Ray {
