@@ -16,7 +16,7 @@ use rayon::prelude::*;
 
 const WIDTH: usize = 427;
 const HEIGHT: usize = 240;
-const SAMPLES: u32 = 10;
+const SAMPLES: u32 = 1;
 const MAXDEPTH: u32 = 5;
 
 #[derive(Copy, Clone, Debug)]
@@ -351,12 +351,27 @@ fn main() {
 
     let mut world = World::new();
     let yaxis = V3{x: 0.0, y: 1.0, z: 0.0};
+    let mut count = 0.0;
+    let mut acc: Vec<V3> = Vec::new();
+    acc.resize(WIDTH * HEIGHT, V3{x:0.0, y:0.0, z:0.0});
 
     'events_loop: loop {
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit {..} | Event::KeyDown { keycode: Some(Keycode::Escape), ..} => {
                     break 'events_loop
+                },
+                Event::KeyDown{ keycode: Some(Keycode::Right), ..} => {
+                    world.camera.rotate(&yaxis, 0.01);
+                    acc = Vec::new();
+                    acc.resize(WIDTH * HEIGHT, V3{x:0.0, y:0.0, z:0.0});
+                    count = 0.0;
+                },
+                Event::KeyDown{ keycode: Some(Keycode::Left), ..} => {
+                    world.camera.rotate(&yaxis, -0.01);
+                    acc = Vec::new();
+                    acc.resize(WIDTH * HEIGHT, V3{x:0.0, y:0.0, z:0.0});
+                    count = 0.0;
                 },
                 _ => {}
             }
@@ -365,12 +380,16 @@ fn main() {
 
 
         let data = render(&world);
+        count = count + 1.0;
+
         texture.with_lock(None, |buffer: &mut [u8], pitch: usize| {
             for y in 0..HEIGHT {
                 for x in 0..WIDTH {
                     let offset = y*pitch + x*3;
-
-                    let pixel = data[y * WIDTH + x];
+                    let pos = y * WIDTH + x;
+                    let d = data[pos];
+                    acc[pos] = acc[pos] + d;
+                    let pixel = acc[pos] / count;
 
                     buffer[offset] = (pixel.x * 255.99) as u8; //B
                     buffer[offset + 1] = (pixel.y * 255.99) as u8; //G
@@ -387,6 +406,6 @@ fn main() {
         canvas.present();
 
         //rotate the camera
-        world.camera.rotate(&yaxis, 0.01);
+        //world.camera.rotate(&yaxis, 0.01);
     }
 }
