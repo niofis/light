@@ -8,7 +8,7 @@ use sdl2::pixels::Color;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::gfx::primitives::DrawRenderer;
-use std::time::Duration;
+// use std::time::Duration;
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::Rect;
 use rand::{Rng, SeedableRng};
@@ -89,7 +89,31 @@ impl ops::Div<f32> for V3 {
 impl V3 {
     fn dot(&self, rhs: &V3) -> f32 { self.x * rhs.x + self.y * rhs.y + self.z * rhs.z } 
     fn norm(&self) -> f32 { self.dot(self).sqrt() }
-    fn unit(self) -> V3 { self / self.norm() }    
+    fn unit(self) -> V3 { self / self.norm() }
+    fn cross(&self, rhs: &V3) -> V3 {
+        V3 {
+            x: self.y * rhs.z - self.z * rhs.y,
+            y: self.z * rhs.x - self.x * rhs.z,
+            z: self.x * rhs.y - self.y * rhs.x
+        }
+    }
+    fn rotate(self, rhs: &V3, rads: f32) -> V3 {
+        //awesome explanation:
+        //https://math.stackexchange.com/a/1432182
+        /*
+        let par = self * (self.dot(rhs) / rhs.dot(rhs));
+        let ort = self - par;
+        let w = rhs.cross(&ort);
+        let x1 = rads.cos() / ort.norm();
+        let x2 = rads.sin() / w.norm();
+        let part = (ort * x1 + w * x2) * ort.norm();
+        part + par
+        */
+        (self * rads.cos()) + 
+            (*rhs * ((1.0 - rads.cos())*(rhs.dot(&self)))) +
+            (rhs.cross(&self) * rads.sin())
+    }
+
 }
 
 fn random_dome<R: Rng>(rng: &mut R, normal: V3) -> V3 {
@@ -122,6 +146,15 @@ struct Camera {
     lt: V3,
     rt: V3,
     lb: V3,
+}
+
+impl Camera {
+    fn rotate(&mut self, rhs: &V3, rads: f32) {
+        self.eye = self.eye.rotate(rhs, rads);
+        self.lt = self.lt.rotate(rhs, rads);
+        self.rt = self.rt.rotate(rhs, rads);
+        self.lb = self.lb.rotate(rhs, rads);
+    }
 }
 
 #[derive(Debug)]
@@ -185,10 +218,10 @@ impl World {
     fn new () -> World {
         World {
             camera: Camera {
-                eye: V3 {x: 0., y: 4.5, z: 75.},
-                lt: V3 {x: -8., y: 9., z: 50.},
-                rt: V3 {x: 8., y: 9., z: 50.},
-                lb: V3 {x: -8., y: 0., z: 50.}
+                eye: V3 {x: 0., y: 4.5, z: 12.},
+                lt: V3 {x: -6., y: 9., z: 7.},
+                rt: V3 {x: 6., y: 9., z: 7.},
+                lb: V3 {x: -6., y: 0., z: 7.}
             },
             spheres: vec![
                 Sphere {
@@ -278,7 +311,7 @@ fn render(world: &World) -> Vec<V3> {
         let x = pixel % WIDTH;
         let y = pixel / WIDTH;
 
-        let mut rng = rand::XorShiftRng::from_seed([pixel as u32, x as u32, y as u32, 42]);
+        let mut rng = rand::XorShiftRng::from_seed([pixel as u32, x as u32, y as u32, rand::random()]);
 
         let color: V3 = (0..SAMPLES).map(|_| {
             let ray = Ray {
@@ -302,7 +335,6 @@ fn main() {
     let video_subsystem = sdl_context.video().expect("video_subsystem");
     let window = video_subsystem.window("Light", WIDTH as u32, HEIGHT as u32)
         .position_centered()
-        .opengl()
         .build()
         .expect("window");
 
@@ -317,8 +349,8 @@ fn main() {
         PixelFormatEnum::RGB24, WIDTH as u32, HEIGHT as u32).unwrap();
     let rect = Rect::new(0, 0, WIDTH as u32, HEIGHT as u32);
 
-    //let mut pixels: [u8; WIDTH * HEIGHT * 4] = [0; WIDTH * HEIGHT * 4];
-    let world = World::new();
+    let mut world = World::new();
+    let yaxis = V3{x: 0.0, y: 1.0, z: 0.0};
 
     'events_loop: loop {
         for event in event_pump.poll_iter() {
@@ -332,7 +364,7 @@ fn main() {
 
 
 
-    let data = render(&world);
+        let data = render(&world);
         texture.with_lock(None, |buffer: &mut [u8], pitch: usize| {
             for y in 0..HEIGHT {
                 for x in 0..WIDTH {
@@ -345,33 +377,16 @@ fn main() {
                     buffer[offset + 2] = (pixel.z * 255.99) as u8; //R
                 }
             }
-            /*
-            for y in 0..100 {
-                let offset = y*pitch + y*3;
-                buffer[offset] = 255; //B
-                buffer[offset + 1] = 255; //G
-                buffer[offset + 2] = 255; //R
-                buffer[offset + 3] = 255;
-            }*/
         }).unwrap();
-/*
-        texture.with_lock(None, |buffer: &mut [u8], pitch: usize| {
-        for y in 0..HEIGHT {
-            for x in 0..WIDTH {
-                let offset = y*pitch + x*3;
-                buffer[offset] = x as u8;
-                buffer[offset + 1] = y as u8;
-                buffer[offset + 2] = 0;
-            }
-        }
-    }).unwrap();*/
 
-canvas.copy(&texture, None, Some(rect)).unwrap();
-curr_time = time::precise_time_s();
-fps = format!("{:.*}", 2, 1.0 / (curr_time - prev_time));
-prev_time = curr_time;
-canvas.string(0,0, &fps, Color::RGB(255, 255, 255)).expect("canvas.string");
-canvas.present();
-//::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
-}
+        canvas.copy(&texture, None, Some(rect)).unwrap();
+        curr_time = time::precise_time_s();
+        fps = format!("{:.*}", 2, 1.0 / (curr_time - prev_time));
+        prev_time = curr_time;
+        canvas.string(0,0, &fps, Color::RGB(128, 128, 128)).expect("canvas.string");
+        canvas.present();
+
+        //rotate the camera
+        world.camera.rotate(&yaxis, 0.01);
+    }
 }
