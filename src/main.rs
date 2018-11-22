@@ -255,6 +255,12 @@ impl World {
                     is_light: true,
                 },
                 Sphere {
+                    center: V3 {x: 0.0, y: 13.0, z: 0.0},
+                    radius: 1.0,
+                    color: V3 {x: 0.0, y: 0.0, z: 0.0},
+                    is_light: false,
+                },
+                Sphere {
                     center: V3 {x: -5., y: 0., z: 2.},
                     radius: 2.,
                     color: V3 {x: 1., y: 1., z: 0.},
@@ -395,9 +401,9 @@ fn main() {
                     acc[pos] = acc[pos] + d;
                     let pixel = acc[pos] / count;
 
-                    buffer[offset] = (pixel.x * 255.99) as u8; //B
-                    buffer[offset + 1] = (pixel.y * 255.99) as u8; //G
-                    buffer[offset + 2] = (pixel.z * 255.99) as u8; //R
+                    buffer[offset] = (pixel.x.min(1.0) * 255.99) as u8; //B
+                    buffer[offset + 1] = (pixel.y.min(1.0) * 255.99) as u8; //G
+                    buffer[offset + 2] = (pixel.z.min(1.0) * 255.99) as u8; //R
                 }
             }
         }).unwrap();
