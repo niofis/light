@@ -3,6 +3,14 @@ name = "light"
 version = "0.1.0"
 authors = ["Enrique <niofis@gmail.com>"]
 
+[lib]
+name="light"
+path="src/lib.rs"
+
+[[bin]]
+name="gui"
+path="src/main.rs"
+
 [dependencies]
 time = "0.1"
 rand = "0.3.14"
