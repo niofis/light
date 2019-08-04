@@ -2,22 +2,12 @@
 name = "light"
 version = "0.1.0"
 authors = ["Enrique <niofis@gmail.com>"]
-
-[lib]
-name="light"
-path="src/lib.rs"
-
-[[bin]]
-name="gui"
-path="src/main.rs"
+edition = "2018"
 
 [dependencies]
-time = "0.1"
-rand = "0.3.14"
-rayon = "1.0"
+time = "0.1.42"
 
 [dependencies.sdl2]
-version = "0.31"
+version = "0.32.2"
 default-features = false
 features = ["gfx"]
-
