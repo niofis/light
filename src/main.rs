@@ -9,7 +9,69 @@ use sdl2::rect::Rect;
 use std::error::Error;
 
 const WIDTH: usize = 800;
-const HEIGHT: usize = 600;
+const HEIGHT: usize = 450;
+
+struct ColorF(f32, f32, f32);
+
+/*fn render() -> Vec<u8> {
+    let bpp = 4;
+    let mut buffer: Vec<u8> = vec![0; bpp * WIDTH * HEIGHT];
+    let x = 400;
+    let y = 300;
+    let offset = (y * WIDTH + x) * bpp;
+    buffer[offset] = 255; //B
+    buffer[offset + 1] = 0; //G
+    buffer[offset + 2] = 0; //R
+    buffer[offset + 3] = 0; //A? ignored
+    buffer
+}
+*/
+
+fn render() -> Vec<u8> {
+    let bpp = 4;
+    let pixels = (0..HEIGHT*WIDTH).map(|pixel| {
+        //let x = pixel % WIDTH;
+        //let y = pixel / WIDTH;
+
+        ColorF(1.0,0.0,0.0)
+    });
+
+    let mut buffer = Vec::new();
+    let buffer: Vec<u8> = pixels.fold(buffer, |mut acc, pixel| {
+        let ColorF(r,g,b) = pixel;
+        acc.push((b * 255.99) as u8);
+        acc.push((g * 255.99) as u8);
+        acc.push((r * 255.99) as u8);
+        acc.push(255 as u8);
+        acc
+    });
+    buffer
+}
+
+fn render2() -> Vec<u8> {
+    let bpp = 4;
+    let pixels: Vec<ColorF> = (0..HEIGHT*WIDTH).map(|pixel| {
+        //let x = pixel % WIDTH;
+        //let y = pixel / WIDTH;
+
+        ColorF(1.0,0.0,0.0)
+    }).collect();
+    let mut buffer: Vec<u8> = vec![0; bpp * WIDTH * HEIGHT];
+    for pixel in 0..HEIGHT*WIDTH {
+        let ColorF(r,g,b) = pixels[pixel];
+        let x = pixel % WIDTH;
+        let y = pixel / WIDTH;
+
+
+        let offset = (y * WIDTH + x) * bpp;
+        buffer[offset] = (b * 255.99) as u8;
+        buffer[offset + 1] = (g * 255.99) as u8;
+        buffer[offset + 2] = (r * 255.99) as u8;
+        buffer[offset + 3] = 255;
+    }
+    
+    buffer
+}
 
 fn main() -> Result<(), Box<dyn Error>> {
     let sdl_context = sdl2::init()?;
@@ -26,13 +88,15 @@ fn main() -> Result<(), Box<dyn Error>> {
         WIDTH as u32,
         HEIGHT as u32,
     )?;
+    let bpp = 4;
     let rect = Rect::new(0, 0, WIDTH as u32, HEIGHT as u32);
 
     let mut prev_time = time::precise_time_s();
     let mut curr_time: f64;
     let mut fps: String;
 
-    let data: Vec<u8> = vec![128; 4 * WIDTH * HEIGHT];
+    //let data: Vec<u8> = vec![128; 4 * WIDTH * HEIGHT];
+    //let mut buffer: Vec<u8> = vec![0; bpp * WIDTH * HEIGHT];
 
     'event_loop: loop {
         for event in event_pump.poll_iter() {
@@ -63,7 +127,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                     }
                 })?;
         */
-        texture.update(rect, &data, 4 * WIDTH)?;
+        let buffer = render();
+        texture.update(rect, &buffer, bpp * WIDTH)?;
 
         canvas.copy(&texture, None, Some(rect))?;
 
