@@ -29,16 +29,16 @@ struct ColorF(f32, f32, f32);
 
 fn render() -> Vec<u8> {
     let bpp = 4;
-    let pixels = (0..HEIGHT*WIDTH).map(|pixel| {
+    let pixels = (0..HEIGHT * WIDTH).map(|pixel| {
         //let x = pixel % WIDTH;
         //let y = pixel / WIDTH;
 
-        ColorF(1.0,0.0,0.0)
+        ColorF(1.0, 0.0, 0.0)
     });
 
     let mut buffer = Vec::new();
     let buffer: Vec<u8> = pixels.fold(buffer, |mut acc, pixel| {
-        let ColorF(r,g,b) = pixel;
+        let ColorF(r, g, b) = pixel;
         acc.push((b * 255.99) as u8);
         acc.push((g * 255.99) as u8);
         acc.push((r * 255.99) as u8);
@@ -50,18 +50,19 @@ fn render() -> Vec<u8> {
 
 fn render2() -> Vec<u8> {
     let bpp = 4;
-    let pixels: Vec<ColorF> = (0..HEIGHT*WIDTH).map(|pixel| {
-        //let x = pixel % WIDTH;
-        //let y = pixel / WIDTH;
+    let pixels: Vec<ColorF> = (0..HEIGHT * WIDTH)
+        .map(|pixel| {
+            //let x = pixel % WIDTH;
+            //let y = pixel / WIDTH;
 
-        ColorF(1.0,0.0,0.0)
-    }).collect();
+            ColorF(1.0, 0.0, 0.0)
+        })
+        .collect();
     let mut buffer: Vec<u8> = vec![0; bpp * WIDTH * HEIGHT];
-    for pixel in 0..HEIGHT*WIDTH {
-        let ColorF(r,g,b) = pixels[pixel];
+    for pixel in 0..HEIGHT * WIDTH {
+        let ColorF(r, g, b) = pixels[pixel];
         let x = pixel % WIDTH;
         let y = pixel / WIDTH;
-
 
         let offset = (y * WIDTH + x) * bpp;
         buffer[offset] = (b * 255.99) as u8;
@@ -69,7 +70,7 @@ fn render2() -> Vec<u8> {
         buffer[offset + 2] = (r * 255.99) as u8;
         buffer[offset + 3] = 255;
     }
-    
+
     buffer
 }
 
