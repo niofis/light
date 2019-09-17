@@ -6,6 +6,7 @@ edition = "2018"
 
 [dependencies]
 time = "0.1.42"
+rayon = "1.2"
 
 [dependencies.sdl2]
 version = "0.32.2"
