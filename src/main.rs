@@ -12,20 +12,27 @@ use std::ops;
 const WIDTH: usize = 800;
 const HEIGHT: usize = 450;
 
-struct Color(f32, f32, f32);
-struct Vector(f32, f32, f32);
-struct Ray(Vector, Vector);
+struct Color(f32, f32, f32); //r,g,b
+#[derive(Clone, Copy)]
+struct Vector(f32, f32, f32); //x,y,z
+struct Ray(Vector, Vector); //origin, direction
 struct Camera {
     eye: Vector,
     left_top: Vector,
-    left_bottom: Vector,
-    right_top: Vector,
-    width: f32,
-    height: f32,
+    delta_right: Vector,
+    delta_down: Vector,
 }
 enum Primitive {
     Sphere(Vector, f32),
     Triangle(Vector, Vector, Vector, Vector),
+}
+struct World {
+    camera: Camera,
+    primitives: Vec<Primitive>,
+}
+struct Hit {
+    normal: Vector,
+    distance: f32,
 }
 
 impl ops::Add<Vector> for Vector {
@@ -38,6 +45,16 @@ impl ops::Add<Vector> for Vector {
     }
 }
 
+impl ops::Sub<Vector> for Vector {
+    type Output = Vector;
+
+    fn sub(self, rhs: Vector) -> Vector {
+        let Vector(x0, y0, z0) = self;
+        let Vector(x1, y1, z1) = rhs;
+        Vector(x0 - x1, y0 - y1, z0 - z1)
+    }
+}
+
 impl ops::Mul<f32> for Vector {
     type Output = Vector;
 
@@ -47,26 +64,104 @@ impl ops::Mul<f32> for Vector {
     }
 }
 
+impl ops::Div<f32> for Vector {
+    type Output = Vector;
+
+    fn div(self, rhs: f32) -> Vector {
+        let Vector(x, y, z) = self;
+        Vector(x / rhs, y / rhs, z / rhs)
+    }
+}
+
+impl Vector {
+    fn dot(self, rhs: Vector) -> f32 {
+        let Vector(x0, y0, z0) = self;
+        let Vector(x1, y1, z1) = rhs;
+        x0 * x1 + y0 * y1 + z0 * z1
+    }
+    fn norm(self) -> f32 {
+        self.dot(self).sqrt()
+    }
+    fn unit(self) -> Vector {
+        self / self.norm()
+    }
+}
+
 impl Camera {
-    fn new(eye: Vector, left_top: Vector, width: f32, height: f32) -> Camera {
-        let Vector(x0, y0, z0) = left_top;
-        let left_bottom = Vector(x0, y0 - height, z0);
-        let right_top = Vector(x0 + width, y0, z0);
+    fn new(
+        eye: Vector,
+        left_top: Vector,
+        left_bottom: Vector,
+        right_top: Vector,
+        width: f32,
+        height: f32,
+    ) -> Camera {
+        let delta_right = (right_top - left_top) / width;
+        let delta_down = (left_bottom - left_top) / height;
 
         Camera {
             eye,
             left_top,
-            left_bottom,
-            right_top,
-            width,
-            height,
+            delta_right,
+            delta_down,
         }
     }
 
     fn get_ray(self, x: f32, y: f32) -> Ray {
+        let Camera {
+            left_top,
+            delta_right,
+            delta_down,
+            eye,
+        } = self;
 
+        let origin = left_top + (delta_right * x) + (delta_down * y);
+        let direction = origin - eye;
+
+        Ray(origin, direction)
     }
 }
+
+impl World {
+    fn demo() -> World {
+        let camera = Camera::new(
+            Vector(0.0, 4.5, 75.0),
+            Vector(-8.0, 9.0, 50.0),
+            Vector(-8.0, 0.0, 50.0),
+            Vector(8.0, 9.0, 50.0),
+            WIDTH as f32,
+            HEIGHT as f32,
+        );
+        let primitives = vec![Primitive::Sphere(Vector(0.0, 0.0, 0.0), 2.0)];
+        World { camera, primitives }
+    }
+}
+
+fn sphere_intersection(sphere: Primitive::Sphere, ray: Ray) -> Option<f32> {
+    let Sphere(center, radius) = sphere;
+    let Ray(origin, direction) = ray;
+    let oc = origin - center;
+    let a = ray.direction.dot(direction);
+    let b = oc.dot(direction);
+    let c = oc.dot(oc) - radius * radius;
+    let dis = b * b - a * c;
+
+    if dis > 0. {
+        let e = dis.sqrt();
+
+        let distance = (-b - e) / a;
+        if distance > 0.007 {
+            return Some(distance);
+        }
+
+        let distance = (-b + e) / a;
+        if distance > 0.007 {
+            return Some(distance);
+        }
+    }
+    None
+}
+
 /*
 fn render() -> Vec<u8> {
     let bpp = 4;
@@ -130,13 +225,13 @@ fn render2() -> Vec<u8> {
 }
 */
 
-fn render() -> Vec<u8> {
+fn render(world: &World) -> Vec<u8> {
     let bpp = 4;
     let pixels = (0..HEIGHT * WIDTH).map(|pixel| {
-        let x = pixel % WIDTH;
-        let y = pixel / WIDTH;
+        let x = (pixel % WIDTH) as f32;
+        let y = (pixel / WIDTH) as f32;
 
-
+        let ray = world.camera.get_ray(x, y);
 
         Color(1.0, 0.0, 0.0)
     });
@@ -178,6 +273,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     //let data: Vec<u8> = vec![128; 4 * WIDTH * HEIGHT];
     //let mut buffer: Vec<u8> = vec![0; bpp * WIDTH * HEIGHT];
+    let world = World::demo();
 
     'event_loop: loop {
         for event in event_pump.poll_iter() {
@@ -208,7 +304,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                     }
                 })?;
         */
-        let buffer = render();
+        let buffer = render(&world);
         texture.update(rect, &buffer, bpp * WIDTH)?;
 
         canvas.copy(&texture, None, Some(rect))?;
