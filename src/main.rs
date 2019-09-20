@@ -13,23 +13,31 @@ const WIDTH: usize = 800;
 const HEIGHT: usize = 450;
 
 struct Color(f32, f32, f32); //r,g,b
-#[derive(Clone, Copy)]
+
+#[derive(Clone, Copy, Debug)]
 struct Vector(f32, f32, f32); //x,y,z
+
+#[derive(Clone, Copy, Debug)]
 struct Ray(Vector, Vector); //origin, direction
+
 struct Camera {
     eye: Vector,
     left_top: Vector,
     delta_right: Vector,
     delta_down: Vector,
 }
+
+#[derive(Clone, Copy, Debug)]
 enum Primitive {
     Sphere(Vector, f32),
     Triangle(Vector, Vector, Vector, Vector),
 }
+
 struct World {
     camera: Camera,
     primitives: Vec<Primitive>,
 }
+
 struct Hit {
     normal: Vector,
     distance: f32,
@@ -39,6 +47,16 @@ impl ops::Add<Vector> for Vector {
     type Output = Vector;
 
     fn add(self, rhs: Vector) -> Vector {
+        let Vector(x0, y0, z0) = self;
+        let Vector(x1, y1, z1) = rhs;
+        Vector(x0 + x1, y0 + y1, z0 + z1)
+    }
+}
+
+impl ops::Add<&Vector> for &Vector {
+    type Output = Vector;
+
+    fn add(self, rhs: &Vector) -> Vector {
         let Vector(x0, y0, z0) = self;
         let Vector(x1, y1, z1) = rhs;
         Vector(x0 + x1, y0 + y1, z0 + z1)
@@ -55,7 +73,26 @@ impl ops::Sub<Vector> for Vector {
     }
 }
 
+impl ops::Sub<&Vector> for &Vector {
+    type Output = Vector;
+
+    fn sub(self, rhs: &Vector) -> Vector {
+        let Vector(x0, y0, z0) = self;
+        let Vector(x1, y1, z1) = rhs;
+        Vector(x0 - x1, y0 - y1, z0 - z1)
+    }
+}
+
 impl ops::Mul<f32> for Vector {
+    type Output = Vector;
+
+    fn mul(self, rhs: f32) -> Vector {
+        let Vector(x, y, z) = self;
+        Vector(x * rhs, y * rhs, z * rhs)
+    }
+}
+
+impl ops::Mul<f32> for &Vector {
     type Output = Vector;
 
     fn mul(self, rhs: f32) -> Vector {
@@ -107,7 +144,7 @@ impl Camera {
         }
     }
 
-    fn get_ray(self, x: f32, y: f32) -> Ray {
+    fn get_ray(&self, x: f32, y: f32) -> Ray {
         let Camera {
             left_top,
             delta_right,
@@ -115,8 +152,8 @@ impl Camera {
             eye,
         } = self;
 
-        let origin = left_top + (delta_right * x) + (delta_down * y);
-        let direction = origin - eye;
+        let origin = left_top + &(delta_right * x) + (delta_down * y);
+        let direction = origin - *eye;
 
         Ray(origin, direction)
     }
@@ -137,16 +174,16 @@ impl World {
     }
 }
 
-fn sphere_intersection(sphere: Primitive::Sphere, ray: Ray) -> Option<f32> {
-    let Sphere(center, radius) = sphere;
+fn sphere_intersect(sphere: (&Vector, f32), ray: Ray) -> Option<f32> {
+    let (center, radius) = sphere;
     let Ray(origin, direction) = ray;
-    let oc = origin - center;
-    let a = ray.direction.dot(direction);
+    let oc = origin - *center;
+    let a = direction.dot(direction);
     let b = oc.dot(direction);
     let c = oc.dot(oc) - radius * radius;
     let dis = b * b - a * c;
 
-    if dis > 0. {
+    if dis > 0.0 {
         let e = dis.sqrt();
 
         let distance = (-b - e) / a;
@@ -160,6 +197,13 @@ fn sphere_intersection(sphere: Primitive::Sphere, ray: Ray) -> Option<f32> {
         }
     }
     None
+}
+
+fn intersect(primitive: &Primitive, ray: Ray) -> Option<f32> {
+    match primitive {
+        Primitive::Sphere(center, radius) => sphere_intersect((center, *radius), ray),
+        _ => None,
+    }
 }
 
 /*
@@ -232,8 +276,19 @@ fn render(world: &World) -> Vec<u8> {
         let y = (pixel / WIDTH) as f32;
 
         let ray = world.camera.get_ray(x, y);
-
-        Color(1.0, 0.0, 0.0)
+        let hit: bool = world
+            .primitives
+            .iter()
+            .map(|primitive| intersect(primitive, ray))
+            .any(|hit| match hit {
+                Some(distance) => true,
+                None => false,
+            });
+        if hit {
+            Color(1.0, 0.0, 0.0)
+        } else {
+            Color(0.0, 0.0, 0.0)
+        }
     });
 
     let mut buffer: Vec<u8> = vec![0; bpp * WIDTH * HEIGHT];
