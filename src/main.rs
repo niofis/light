@@ -62,9 +62,13 @@ impl Camera {
             height,
         }
     }
-}
 
-/*fn render() -> Vec<u8> {
+    fn get_ray(self, x: f32, y: f32) -> Ray {
+
+    }
+}
+/*
+fn render() -> Vec<u8> {
     let bpp = 4;
     let mut buffer: Vec<u8> = vec![0; bpp * WIDTH * HEIGHT];
     let x = 400;
@@ -78,18 +82,18 @@ impl Camera {
 }
 */
 /*
-fn render2() -> Vec<u8> {
+fn render1() -> Vec<u8> {
     let bpp = 4;
     let pixels = (0..HEIGHT * WIDTH).map(|pixel| {
         //let x = pixel % WIDTH;
         //let y = pixel / WIDTH;
 
-        ColorF(1.0, 0.0, 0.0)
+        Color(1.0, 0.0, 0.0)
     });
 
     let mut buffer = Vec::new();
     let buffer: Vec<u8> = pixels.fold(buffer, |mut acc, pixel| {
-        let ColorF(r, g, b) = pixel;
+        let Color(r, g, b) = pixel;
         acc.push((b * 255.99) as u8);
         acc.push((g * 255.99) as u8);
         acc.push((r * 255.99) as u8);
@@ -99,19 +103,19 @@ fn render2() -> Vec<u8> {
     buffer
 }
 
-fn render3() -> Vec<u8> {
+fn render2() -> Vec<u8> {
     let bpp = 4;
-    let pixels: Vec<ColorF> = (0..HEIGHT * WIDTH)
+    let pixels: Vec<Color> = (0..HEIGHT * WIDTH)
         .map(|pixel| {
             //let x = pixel % WIDTH;
             //let y = pixel / WIDTH;
 
-            ColorF(1.0, 0.0, 0.0)
+            Color(1.0, 0.0, 0.0)
         })
         .collect();
     let mut buffer: Vec<u8> = vec![0; bpp * WIDTH * HEIGHT];
     for pixel in 0..HEIGHT * WIDTH {
-        let ColorF(r, g, b) = pixels[pixel];
+        let Color(r, g, b) = pixels[pixel];
         let x = pixel % WIDTH;
         let y = pixel / WIDTH;
 
@@ -128,7 +132,14 @@ fn render3() -> Vec<u8> {
 
 fn render() -> Vec<u8> {
     let bpp = 4;
-    let pixels = (0..HEIGHT * WIDTH).map(|pixel| Color(1.0, 0.0, 0.0));
+    let pixels = (0..HEIGHT * WIDTH).map(|pixel| {
+        let x = pixel % WIDTH;
+        let y = pixel / WIDTH;
+
+
+
+        Color(1.0, 0.0, 0.0)
+    });
 
     let mut buffer: Vec<u8> = vec![0; bpp * WIDTH * HEIGHT];
     let mut offset = 0;
