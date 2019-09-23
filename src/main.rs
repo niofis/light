@@ -52,17 +52,17 @@ impl ops::Add<Vector> for Vector {
         Vector(x0 + x1, y0 + y1, z0 + z1)
     }
 }
-
-impl ops::Add<&Vector> for &Vector {
+/*
+impl ops::Add<Vector> for Vector {
     type Output = Vector;
 
-    fn add(self, rhs: &Vector) -> Vector {
+    fn add(self, rhs: Vector) -> Vector {
         let Vector(x0, y0, z0) = self;
         let Vector(x1, y1, z1) = rhs;
         Vector(x0 + x1, y0 + y1, z0 + z1)
     }
 }
-
+*/
 impl ops::Sub<Vector> for Vector {
     type Output = Vector;
 
@@ -72,17 +72,17 @@ impl ops::Sub<Vector> for Vector {
         Vector(x0 - x1, y0 - y1, z0 - z1)
     }
 }
-
-impl ops::Sub<&Vector> for &Vector {
+/*
+impl ops::Sub<Vector> for Vector {
     type Output = Vector;
 
-    fn sub(self, rhs: &Vector) -> Vector {
+    fn sub(self, rhs: Vector) -> Vector {
         let Vector(x0, y0, z0) = self;
         let Vector(x1, y1, z1) = rhs;
         Vector(x0 - x1, y0 - y1, z0 - z1)
     }
 }
-
+*/
 impl ops::Mul<f32> for Vector {
     type Output = Vector;
 
@@ -91,8 +91,8 @@ impl ops::Mul<f32> for Vector {
         Vector(x * rhs, y * rhs, z * rhs)
     }
 }
-
-impl ops::Mul<f32> for &Vector {
+/*
+impl ops::Mul<f32> for Vector {
     type Output = Vector;
 
     fn mul(self, rhs: f32) -> Vector {
@@ -100,7 +100,7 @@ impl ops::Mul<f32> for &Vector {
         Vector(x * rhs, y * rhs, z * rhs)
     }
 }
-
+*/
 impl ops::Div<f32> for Vector {
     type Output = Vector;
 
@@ -152,7 +152,7 @@ impl Camera {
             eye,
         } = self;
 
-        let origin = left_top + &(delta_right * x) + (delta_down * y);
+        let origin = *left_top + (*delta_right * x) + (*delta_down * y);
         let direction = origin - *eye;
 
         Ray(origin, direction)
@@ -174,10 +174,10 @@ impl World {
     }
 }
 
-fn sphere_intersect(sphere: (&Vector, f32), ray: Ray) -> Option<f32> {
+fn sphere_intersect(sphere: (Vector, f32), ray: Ray) -> Option<f32> {
     let (center, radius) = sphere;
     let Ray(origin, direction) = ray;
-    let oc = origin - *center;
+    let oc = origin - center;
     let a = direction.dot(direction);
     let b = oc.dot(direction);
     let c = oc.dot(oc) - radius * radius;
@@ -201,7 +201,7 @@ fn sphere_intersect(sphere: (&Vector, f32), ray: Ray) -> Option<f32> {
 
 fn intersect(primitive: &Primitive, ray: Ray) -> Option<f32> {
     match primitive {
-        Primitive::Sphere(center, radius) => sphere_intersect((center, *radius), ray),
+        Primitive::Sphere(center, radius) => sphere_intersect((*center, *radius), ray),
         _ => None,
     }
 }
@@ -269,26 +269,28 @@ fn render2() -> Vec<u8> {
 }
 */
 
+fn trace(primitives: &Vec<Primitive>, ray: Ray) -> Color {
+    let hit: bool = primitives
+        .iter()
+        .map(|primitive| intersect(primitive, ray))
+        .any(|hit| match hit {
+            Some(distance) => true,
+            None => false,
+        });
+    if hit {
+        Color(1.0, 0.0, 0.0)
+    } else {
+        Color(0.0, 0.0, 0.0)
+    }
+}
+
 fn render(world: &World) -> Vec<u8> {
     let bpp = 4;
     let pixels = (0..HEIGHT * WIDTH).map(|pixel| {
         let x = (pixel % WIDTH) as f32;
         let y = (pixel / WIDTH) as f32;
-
         let ray = world.camera.get_ray(x, y);
-        let hit: bool = world
-            .primitives
-            .iter()
-            .map(|primitive| intersect(primitive, ray))
-            .any(|hit| match hit {
-                Some(distance) => true,
-                None => false,
-            });
-        if hit {
-            Color(1.0, 0.0, 0.0)
-        } else {
-            Color(0.0, 0.0, 0.0)
-        }
+        trace(&world.primitives, ray)
     });
 
     let mut buffer: Vec<u8> = vec![0; bpp * WIDTH * HEIGHT];
@@ -326,8 +328,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut curr_time: f64;
     let mut fps: String;
 
-    //let data: Vec<u8> = vec![128; 4 * WIDTH * HEIGHT];
-    //let mut buffer: Vec<u8> = vec![0; bpp * WIDTH * HEIGHT];
     let world = World::demo();
 
     'event_loop: loop {
@@ -344,33 +344,11 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
         }
 
-        //canvas.set_draw_color(Color::RGB(0, 0, 0));
-        //canvas.clear();
-
-        /*
-                texture.with_lock(None, |buffer: &mut [u8], pitch: usize| {
-                    for y in 0..HEIGHT {
-                        for x in 0..WIDTH {
-                            let offset = y * pitch + x * 3;
-                            buffer[offset] = 0 as u8; //R
-                            buffer[offset + 1] = 0 as u8; //G
-                            buffer[offset + 2] = 255 as u8; //B
-                        }
-                    }
-                })?;
-        */
         let buffer = render(&world);
         texture.update(rect, &buffer, bpp * WIDTH)?;
 
         canvas.copy(&texture, None, Some(rect))?;
 
-        /*canvas.with_texture_canvas(&mut texture, |texture_canvas| {
-                    texture_canvas.set_draw_color(Color::RGBA(0, 0, 0, 255));
-                    texture_canvas.clear();
-                    texture_canvas.set_draw_color(Color::RGBA(255, 0, 0, 255));
-                    texture_canvas.fill_rect(Rect::new(50, 50, 50, 50)).unwrap();
-                });
-        */
         curr_time = time::precise_time_s();
         fps = format!("{:.*}", 2, 1.0 / (curr_time - prev_time));
         prev_time = curr_time;
