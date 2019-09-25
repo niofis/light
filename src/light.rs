@@ -1,16 +1,5 @@
-extern crate sdl2;
-extern crate time;
 use rayon::prelude::*;
-use sdl2::event::Event;
-use sdl2::gfx::primitives::DrawRenderer;
-use sdl2::keyboard::Keycode;
-use sdl2::pixels::PixelFormatEnum;
-use sdl2::rect::Rect;
-use std::error::Error;
 use std::ops;
-
-const WIDTH: usize = 800;
-const HEIGHT: usize = 450;
 
 struct Color(f32, f32, f32); //r,g,b
 
@@ -33,7 +22,10 @@ enum Primitive {
     Triangle(Vector, Vector, Vector, Vector),
 }
 
-struct World {
+pub struct World {
+    bpp: u32,
+    width: u32,
+    height: u32,
     camera: Camera,
     primitives: Vec<Primitive>,
 }
@@ -160,17 +152,51 @@ impl Camera {
 }
 
 impl World {
-    fn demo() -> World {
+    pub fn demo(bpp: u32, width: u32, height: u32) -> World {
         let camera = Camera::new(
             Vector(0.0, 4.5, 75.0),
             Vector(-8.0, 9.0, 50.0),
             Vector(-8.0, 0.0, 50.0),
             Vector(8.0, 9.0, 50.0),
-            WIDTH as f32,
-            HEIGHT as f32,
+            width as f32,
+            height as f32,
         );
         let primitives = vec![Primitive::Sphere(Vector(0.0, 0.0, 0.0), 2.0)];
-        World { camera, primitives }
+        World {
+            bpp,
+            width,
+            height,
+            camera,
+            primitives,
+        }
+    }
+
+    pub fn render(&self) -> Vec<u8> {
+        let World {
+            width,
+            height,
+            bpp,
+            camera,
+            primitives,
+        } = self;
+        let pixels = (0..height * width).map(|pixel| {
+            let x = (pixel % width) as f32;
+            let y = (pixel / width) as f32;
+            let ray = camera.get_ray(x, y);
+            trace(primitives, ray)
+        });
+        let mut buffer: Vec<u8> = vec![0; (bpp * width * height) as usize];
+
+        let mut offset = 0;
+        for pixel in pixels {
+            let Color(r, g, b) = pixel;
+            buffer[offset] = (b * 255.99) as u8;
+            buffer[offset + 1] = (g * 255.99) as u8;
+            buffer[offset + 2] = (r * 255.99) as u8;
+            buffer[offset + 3] = 255;
+            offset = offset + 4;
+        }
+        buffer
     }
 }
 
@@ -277,83 +303,10 @@ fn trace(primitives: &Vec<Primitive>, ray: Ray) -> Color {
             Some(distance) => true,
             None => false,
         });
+
     if hit {
         Color(1.0, 0.0, 0.0)
     } else {
         Color(0.0, 0.0, 0.0)
     }
-}
-
-fn render(world: &World) -> Vec<u8> {
-    let bpp = 4;
-    let pixels = (0..HEIGHT * WIDTH).map(|pixel| {
-        let x = (pixel % WIDTH) as f32;
-        let y = (pixel / WIDTH) as f32;
-        let ray = world.camera.get_ray(x, y);
-        trace(&world.primitives, ray)
-    });
-
-    let mut buffer: Vec<u8> = vec![0; bpp * WIDTH * HEIGHT];
-    let mut offset = 0;
-    for pixel in pixels {
-        let Color(r, g, b) = pixel;
-        buffer[offset] = (b * 255.99) as u8;
-        buffer[offset + 1] = (g * 255.99) as u8;
-        buffer[offset + 2] = (r * 255.99) as u8;
-        buffer[offset + 3] = 255;
-        offset = offset + 4;
-    }
-    buffer
-}
-
-fn main() -> Result<(), Box<dyn Error>> {
-    let sdl_context = sdl2::init()?;
-    let video_subsystem = sdl_context.video()?;
-    let window = video_subsystem
-        .window("Light v2", WIDTH as u32, HEIGHT as u32)
-        .position_centered()
-        .build()?;
-    let mut event_pump = sdl_context.event_pump()?;
-    let mut canvas = window.into_canvas().accelerated().build()?;
-    let texture_creator = canvas.texture_creator();
-    let mut texture = texture_creator.create_texture_streaming(
-        PixelFormatEnum::ARGB8888,
-        WIDTH as u32,
-        HEIGHT as u32,
-    )?;
-    let bpp = 4;
-    let rect = Rect::new(0, 0, WIDTH as u32, HEIGHT as u32);
-
-    let mut prev_time = time::precise_time_s();
-    let mut curr_time: f64;
-    let mut fps: String;
-
-    let world = World::demo();
-
-    'event_loop: loop {
-        for event in event_pump.poll_iter() {
-            match event {
-                Event::Quit { .. }
-                | Event::KeyDown {
-                    keycode: Some(Keycode::Escape),
-                    ..
-                } => {
-                    break 'event_loop;
-                }
-                _ => {}
-            }
-        }
-
-        let buffer = render(&world);
-        texture.update(rect, &buffer, bpp * WIDTH)?;
-
-        canvas.copy(&texture, None, Some(rect))?;
-
-        curr_time = time::precise_time_s();
-        fps = format!("{:.*}", 2, 1.0 / (curr_time - prev_time));
-        prev_time = curr_time;
-        canvas.string(0, 0, &fps, sdl2::pixels::Color::RGB(255, 255, 255))?;
-        canvas.present();
-    }
-    Ok(())
 }
