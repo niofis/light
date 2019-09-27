@@ -19,7 +19,7 @@ struct Camera {
 #[derive(Clone, Copy, Debug)]
 enum Primitive {
     Sphere(Vector, f32),
-    Triangle(Vector, Vector, Vector, Vector),
+    Triangle(Vector, Vector, Vector),
 }
 
 pub struct World {
@@ -44,17 +44,7 @@ impl ops::Add<Vector> for Vector {
         Vector(x0 + x1, y0 + y1, z0 + z1)
     }
 }
-/*
-impl ops::Add<Vector> for Vector {
-    type Output = Vector;
 
-    fn add(self, rhs: Vector) -> Vector {
-        let Vector(x0, y0, z0) = self;
-        let Vector(x1, y1, z1) = rhs;
-        Vector(x0 + x1, y0 + y1, z0 + z1)
-    }
-}
-*/
 impl ops::Sub<Vector> for Vector {
     type Output = Vector;
 
@@ -64,17 +54,7 @@ impl ops::Sub<Vector> for Vector {
         Vector(x0 - x1, y0 - y1, z0 - z1)
     }
 }
-/*
-impl ops::Sub<Vector> for Vector {
-    type Output = Vector;
 
-    fn sub(self, rhs: Vector) -> Vector {
-        let Vector(x0, y0, z0) = self;
-        let Vector(x1, y1, z1) = rhs;
-        Vector(x0 - x1, y0 - y1, z0 - z1)
-    }
-}
-*/
 impl ops::Mul<f32> for Vector {
     type Output = Vector;
 
@@ -83,16 +63,7 @@ impl ops::Mul<f32> for Vector {
         Vector(x * rhs, y * rhs, z * rhs)
     }
 }
-/*
-impl ops::Mul<f32> for Vector {
-    type Output = Vector;
 
-    fn mul(self, rhs: f32) -> Vector {
-        let Vector(x, y, z) = self;
-        Vector(x * rhs, y * rhs, z * rhs)
-    }
-}
-*/
 impl ops::Div<f32> for Vector {
     type Output = Vector;
 
@@ -113,6 +84,20 @@ impl Vector {
     }
     fn unit(self) -> Vector {
         self / self.norm()
+    }
+    fn cross(self, rhs: Vector) -> Vector {
+        let Vector(x1, y1, z1) = self;
+        let Vector(x2, y2, z2) = rhs;
+        Vector(y1 * z2 - z1 * y2, z1 * x2 - x1 * z2, x1 * y2 - y1 * x2)
+    }
+}
+
+impl Primitive {
+    fn triangle_new(pt1: Vector, pt2: Vector, pt3: Vector) -> Primitive {
+        let edge1 = pt2 - pt1;
+        let edge2 = pt3 - pt1;
+        let normal = edge1.cross(edge2).unit();
+        Primitive::Triangle(edge1, edge2, normal)
     }
 }
 
@@ -225,10 +210,17 @@ fn sphere_intersect(sphere: (Vector, f32), ray: Ray) -> Option<f32> {
     None
 }
 
+fn triangle_intersect(triangle: (Vector, Vector, Vector), ray: Ray) -> Option<f32> {
+    let (edge1, edge2, normal) = triangle;
+    None
+}
+
 fn intersect(primitive: &Primitive, ray: Ray) -> Option<f32> {
     match primitive {
         Primitive::Sphere(center, radius) => sphere_intersect((*center, *radius), ray),
-        _ => None,
+        Primitive::Triangle(edge1, edge2, normal) => {
+            triangle_intersect((*edge1, *edge2, *normal), ray)
+        }
     }
 }
 
