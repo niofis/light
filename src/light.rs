@@ -19,7 +19,7 @@ struct Camera {
 #[derive(Clone, Copy, Debug)]
 enum Primitive {
     Sphere(Vector, f32),
-    Triangle(Vector, Vector, Vector),
+    Triangle(Vector, Vector, Vector, Vector),
 }
 
 pub struct World {
@@ -93,11 +93,11 @@ impl Vector {
 }
 
 impl Primitive {
-    fn triangle_new(pt1: Vector, pt2: Vector, pt3: Vector) -> Primitive {
+    fn new_triangle(pt1: Vector, pt2: Vector, pt3: Vector) -> Primitive {
         let edge1 = pt2 - pt1;
         let edge2 = pt3 - pt1;
         let normal = edge1.cross(edge2).unit();
-        Primitive::Triangle(edge1, edge2, normal)
+        Primitive::Triangle(pt1, edge1, edge2, normal)
     }
 }
 
@@ -146,7 +146,14 @@ impl World {
             width as f32,
             height as f32,
         );
-        let primitives = vec![Primitive::Sphere(Vector(0.0, 0.0, 0.0), 2.0)];
+        let primitives = vec![
+            Primitive::Sphere(Vector(0.0, 0.0, 0.0), 2.0),
+            Primitive::new_triangle(
+                Vector(-8.0, 0.0, 0.0),
+                Vector(-7.0, 2.0, 0.0),
+                Vector(-6.0, 0.0, 0.0),
+            ),
+        ];
         World {
             bpp,
             width,
@@ -210,16 +217,48 @@ fn sphere_intersect(sphere: (Vector, f32), ray: Ray) -> Option<f32> {
     None
 }
 
-fn triangle_intersect(triangle: (Vector, Vector, Vector), ray: Ray) -> Option<f32> {
-    let (edge1, edge2, normal) = triangle;
+fn triangle_intersect(triangle: (Vector, Vector, Vector, Vector), ray: Ray) -> Option<f32> {
+    let (v0, edge1, edge2, normal) = triangle;
+    let Ray(origin, direction) = ray;
+    let pvec = direction.cross(edge2);
+
+    let det = edge1.dot(pvec);
+    //No culling version
+    if det > -0.007 && det < 0.007 {
+        return None;
+    }
+
+    let inv_det = 1.0 / det;
+
+    let tvec = origin - v0;
+
+    let u = tvec.dot(pvec) * inv_det;
+    if u < 0.0 || u > 1.0 {
+        return None;
+    }
+
+    let qvec = tvec.cross(edge1);
+
+    let v = direction.dot(qvec) * inv_det;
+    if v < 0.0 || (u + v) > 1.007 {
+        //add EPSILON to offset small precision errors
+        return None;
+    }
+
+    let t = edge2.dot(qvec) * inv_det;
+
+    if t > 0.007 {
+        return Some(t);
+    }
+
     None
 }
 
 fn intersect(primitive: &Primitive, ray: Ray) -> Option<f32> {
     match primitive {
         Primitive::Sphere(center, radius) => sphere_intersect((*center, *radius), ray),
-        Primitive::Triangle(edge1, edge2, normal) => {
-            triangle_intersect((*edge1, *edge2, *normal), ray)
+        Primitive::Triangle(v0, edge1, edge2, normal) => {
+            triangle_intersect((*v0, *edge1, *edge2, *normal), ray)
         }
     }
 }
