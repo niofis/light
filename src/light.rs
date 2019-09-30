@@ -1,6 +1,7 @@
 use rayon::prelude::*;
 use std::ops;
 
+#[derive(Clone, Copy, Debug)]
 struct Color(f32, f32, f32); //r,g,b
 
 #[derive(Clone, Copy, Debug)]
@@ -18,8 +19,18 @@ struct Camera {
 
 #[derive(Clone, Copy, Debug)]
 enum Primitive {
-    Sphere(Vector, f32),
-    Triangle(Vector, Vector, Vector, Vector),
+    Sphere {
+        center: Vector,
+        radius: f32,
+        color: Color,
+    },
+    Triangle {
+        origin: Vector,
+        edge1: Vector,
+        edge2: Vector,
+        normal: Vector,
+        color: Color,
+    },
 }
 
 pub struct World {
@@ -93,11 +104,17 @@ impl Vector {
 }
 
 impl Primitive {
-    fn new_triangle(pt1: Vector, pt2: Vector, pt3: Vector) -> Primitive {
+    fn new_triangle(pt1: Vector, pt2: Vector, pt3: Vector, color: Color) -> Primitive {
         let edge1 = pt2 - pt1;
         let edge2 = pt3 - pt1;
         let normal = edge1.cross(edge2).unit();
-        Primitive::Triangle(pt1, edge1, edge2, normal)
+        Primitive::Triangle {
+            origin: pt1,
+            edge1,
+            edge2,
+            normal,
+            color,
+        }
     }
 }
 
@@ -147,11 +164,16 @@ impl World {
             height as f32,
         );
         let primitives = vec![
-            Primitive::Sphere(Vector(0.0, 0.0, 0.0), 2.0),
+            Primitive::Sphere {
+                center: Vector(0.0, 0.0, 0.0),
+                radius: 2.0,
+                color: Color(0.0, 0.0, 1.0),
+            },
             Primitive::new_triangle(
                 Vector(-8.0, 0.0, 0.0),
                 Vector(-7.0, 2.0, 0.0),
                 Vector(-6.0, 0.0, 0.0),
+                Color(0.0, 1.0, 0.0),
             ),
         ];
         World {
@@ -217,8 +239,8 @@ fn sphere_intersect(sphere: (Vector, f32), ray: Ray) -> Option<f32> {
     None
 }
 
-fn triangle_intersect(triangle: (Vector, Vector, Vector, Vector), ray: Ray) -> Option<f32> {
-    let (v0, edge1, edge2, normal) = triangle;
+fn triangle_intersect(triangle: (Vector, Vector, Vector), ray: Ray) -> Option<f32> {
+    let (v0, edge1, edge2) = triangle;
     let Ray(origin, direction) = ray;
     let pvec = direction.cross(edge2);
 
@@ -256,10 +278,13 @@ fn triangle_intersect(triangle: (Vector, Vector, Vector, Vector), ray: Ray) -> O
 
 fn intersect(primitive: &Primitive, ray: Ray) -> Option<f32> {
     match primitive {
-        Primitive::Sphere(center, radius) => sphere_intersect((*center, *radius), ray),
-        Primitive::Triangle(v0, edge1, edge2, normal) => {
-            triangle_intersect((*v0, *edge1, *edge2, *normal), ray)
-        }
+        Primitive::Sphere { center, radius, .. } => sphere_intersect((*center, *radius), ray),
+        Primitive::Triangle {
+            origin,
+            edge1,
+            edge2,
+            ..
+        } => triangle_intersect((*origin, *edge1, *edge2), ray),
     }
 }
 
@@ -327,17 +352,20 @@ fn render2() -> Vec<u8> {
 */
 
 fn trace(primitives: &Vec<Primitive>, ray: Ray) -> Color {
-    let hit: bool = primitives
+    let closest = primitives
         .iter()
-        .map(|primitive| intersect(primitive, ray))
-        .any(|hit| match hit {
-            Some(distance) => true,
-            None => false,
+        .filter_map(|primitive| intersect(primitive, ray).map(|dist| (primitive, dist)))
+        .fold(None, |closest, (pr, dist)| match closest {
+            None => Some((pr, dist)),
+            Some(res) if dist < res.1 => Some((pr, dist)),
+            _ => closest,
         });
 
-    if hit {
-        Color(1.0, 0.0, 0.0)
-    } else {
-        Color(0.0, 0.0, 0.0)
+    match closest {
+        Some((primitive, _)) => match primitive {
+            Primitive::Sphere { color, .. } => *color,
+            Primitive::Triangle { color, .. } => *color,
+        },
+        None => Color(0.0, 0.0, 0.0),
     }
 }
