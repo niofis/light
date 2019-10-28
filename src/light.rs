@@ -1,36 +1,15 @@
-use rayon::prelude::*;
-use std::ops;
+//use rayon::prelude::*;
 
 mod color;
-
-#[derive(Clone, Copy, Debug)]
-struct Vector(f32, f32, f32); //x,y,z
-
-#[derive(Clone, Copy, Debug)]
-struct Ray(Vector, Vector); //origin, direction
-
-struct Camera {
-    eye: Vector,
-    left_top: Vector,
-    delta_right: Vector,
-    delta_down: Vector,
-}
-
-#[derive(Clone, Copy, Debug)]
-enum Primitive {
-    Sphere {
-        center: Vector,
-        radius: f32,
-        color: Color,
-    },
-    Triangle {
-        origin: Vector,
-        edge1: Vector,
-        edge2: Vector,
-        normal: Vector,
-        color: Color,
-    },
-}
+use color::*;
+mod vector;
+use vector::*;
+mod ray;
+use ray::*;
+mod camera;
+use camera::*;
+mod primitive;
+use primitive::*;
 
 pub struct World {
     bpp: u32,
@@ -39,160 +18,6 @@ pub struct World {
     camera: Camera,
     primitives: Vec<Primitive>,
     point_lights: Vec<Vector>,
-}
-
-struct Hit {
-    normal: Vector,
-    distance: f32,
-}
-
-impl ops::Add<Vector> for Vector {
-    type Output = Vector;
-
-    fn add(self, rhs: Vector) -> Vector {
-        let Vector(x0, y0, z0) = self;
-        let Vector(x1, y1, z1) = rhs;
-        Vector(x0 + x1, y0 + y1, z0 + z1)
-    }
-}
-
-impl ops::Sub<Vector> for Vector {
-    type Output = Vector;
-
-    fn sub(self, rhs: Vector) -> Vector {
-        let Vector(x0, y0, z0) = self;
-        let Vector(x1, y1, z1) = rhs;
-        Vector(x0 - x1, y0 - y1, z0 - z1)
-    }
-}
-
-impl ops::Mul<f32> for Vector {
-    type Output = Vector;
-
-    fn mul(self, rhs: f32) -> Vector {
-        let Vector(x, y, z) = self;
-        Vector(x * rhs, y * rhs, z * rhs)
-    }
-}
-
-impl ops::Mul<f32> for Color {
-    type Output = Color;
-
-    fn mul(self, rhs: f32) -> Color {
-        let Color(r, g, b) = self;
-        Color(r * rhs, g * rhs, b * rhs)
-    }
-}
-
-impl ops::Mul<Color> for Color {
-    type Output = Color;
-    fn mul(self, rhs: Color) -> Color {
-        let Color(ar, ag, ab) = self;
-        let Color(br, bg, bb) = rhs;
-        Color(ar * br, ag * bg, ab * bb)
-    }
-}
-
-impl ops::Add<Color> for Color {
-    type Output = Color;
-    fn add(self, rhs: Color) -> Color {
-        let Color(ar, ag, ab) = self;
-        let Color(br, bg, bb) = rhs;
-        Color(ar + br, ag + bg, ab + bb)
-    }
-}
-
-impl ops::Div<f32> for Vector {
-    type Output = Vector;
-
-    fn div(self, rhs: f32) -> Vector {
-        let Vector(x, y, z) = self;
-        Vector(x / rhs, y / rhs, z / rhs)
-    }
-}
-
-impl Vector {
-    fn dot(self, rhs: Vector) -> f32 {
-        let Vector(x0, y0, z0) = self;
-        let Vector(x1, y1, z1) = rhs;
-        x0 * x1 + y0 * y1 + z0 * z1
-    }
-    fn norm(self) -> f32 {
-        self.dot(self).sqrt()
-    }
-    fn unit(self) -> Vector {
-        self / self.norm()
-    }
-    fn cross(self, rhs: Vector) -> Vector {
-        let Vector(x1, y1, z1) = self;
-        let Vector(x2, y2, z2) = rhs;
-        Vector(y1 * z2 - z1 * y2, z1 * x2 - x1 * z2, x1 * y2 - y1 * x2)
-    }
-}
-
-impl Ray {
-    fn point(self, rhs: f32) -> Vector {
-        let Ray(origin, direction) = self;
-        origin + (direction * rhs)
-    }
-}
-
-impl Primitive {
-    fn new_triangle(pt1: Vector, pt2: Vector, pt3: Vector, color: Color) -> Primitive {
-        let edge1 = pt2 - pt1;
-        let edge2 = pt3 - pt1;
-        let normal = edge1.cross(edge2).unit();
-
-        Primitive::Triangle {
-            origin: pt1,
-            edge1,
-            edge2,
-            normal,
-            color,
-        }
-    }
-
-    fn normal(self, point: Vector) -> Vector {
-        match self {
-            Primitive::Sphere { center, .. } => (point - center).unit(),
-            Primitive::Triangle { normal, .. } => normal,
-        }
-    }
-}
-
-impl Camera {
-    fn new(
-        eye: Vector,
-        left_top: Vector,
-        left_bottom: Vector,
-        right_top: Vector,
-        width: f32,
-        height: f32,
-    ) -> Camera {
-        let delta_right = (right_top - left_top) / width;
-        let delta_down = (left_bottom - left_top) / height;
-
-        Camera {
-            eye,
-            left_top,
-            delta_right,
-            delta_down,
-        }
-    }
-
-    fn get_ray(&self, x: f32, y: f32) -> Ray {
-        let Camera {
-            left_top,
-            delta_right,
-            delta_down,
-            eye,
-        } = self;
-
-        let origin = *left_top + (*delta_right * x) + (*delta_down * y);
-        let direction = origin - *eye;
-
-        Ray(origin, direction)
-    }
 }
 
 impl World {
@@ -207,12 +32,12 @@ impl World {
         );
         let primitives = vec![
             Primitive::Sphere {
-                center: Vector(0.0, -1_000_001.0, 0.0),
-                radius: 999_999.0,
+                center: Vector(0.0, -1_000_000.0, 0.0),
+                radius: 1_000_000.0,
                 color: Color(1.0, 1.0, 1.0),
             },
             Primitive::Sphere {
-                center: Vector(0.0, 0.0, 0.0),
+                center: Vector(0.0, 2.0, 0.0),
                 radius: 2.0,
                 color: Color(0.0, 0.0, 1.0),
             },
@@ -223,7 +48,7 @@ impl World {
                 Color(0.0, 1.0, 0.0),
             ),
         ];
-        let point_lights = vec![Vector(0.0, 10.0, -10.0)];
+        let point_lights = vec![Vector(10.0, 10.0, -10.0)];
         World {
             bpp,
             width,
@@ -250,7 +75,7 @@ impl World {
                 let y = (pixel / width) as f32;
                 let ray = camera.get_ray(x, y);
 
-                let closest = find_closest_primitive(ray, primitives);
+                let closest = find_closest_primitive(&ray, primitives);
 
                 match closest {
                     Some((primitive, distance)) => {
@@ -275,94 +100,6 @@ impl World {
     }
 }
 
-fn sphere_intersect(sphere: (Vector, f32), ray: Ray) -> Option<f32> {
-    let (center, radius) = sphere;
-    let Ray(origin, direction) = ray;
-    let oc = origin - center;
-    let a = direction.dot(direction);
-    let b = oc.dot(direction);
-    let c = oc.dot(oc) - radius * radius;
-    let dis = b * b - a * c;
-
-    if dis > 0.0 {
-        let e = dis.sqrt();
-
-        let distance = (-b - e) / a;
-        if distance > 0.007 {
-            return Some(distance);
-        }
-
-        let distance = (-b + e) / a;
-        if distance > 0.007 {
-            return Some(distance);
-        }
-    }
-    None
-}
-
-fn triangle_intersect(triangle: (Vector, Vector, Vector), ray: Ray) -> Option<f32> {
-    let (v0, edge1, edge2) = triangle;
-    let Ray(origin, direction) = ray;
-    let pvec = direction.cross(edge2);
-
-    let det = edge1.dot(pvec);
-    //No culling version
-    if det > -0.007 && det < 0.007 {
-        return None;
-    }
-
-    let inv_det = 1.0 / det;
-
-    let tvec = origin - v0;
-
-    let u = tvec.dot(pvec) * inv_det;
-    if u < 0.0 || u > 1.0 {
-        return None;
-    }
-
-    let qvec = tvec.cross(edge1);
-
-    let v = direction.dot(qvec) * inv_det;
-    if v < 0.0 || (u + v) > 1.007 {
-        //add EPSILON to offset small precision errors
-        return None;
-    }
-
-    let t = edge2.dot(qvec) * inv_det;
-
-    if t > 0.007 {
-        return Some(t);
-    }
-
-    None
-}
-
-fn intersect(primitive: &Primitive, ray: Ray) -> Option<f32> {
-    match primitive {
-        Primitive::Sphere { center, radius, .. } => sphere_intersect((*center, *radius), ray),
-        Primitive::Triangle {
-            origin,
-            edge1,
-            edge2,
-            ..
-        } => triangle_intersect((*origin, *edge1, *edge2), ray),
-    }
-}
-
-/*
-fn render() -> Vec<u8> {
-    let bpp = 4;
-    let mut buffer: Vec<u8> = vec![0; bpp * WIDTH * HEIGHT];
-    let x = 400;
-    let y = 300;
-    let offset = (y * WIDTH + x) * bpp;
-    buffer[offset] = 255; //B
-    buffer[offset + 1] = 0; //G
-    buffer[offset + 2] = 0; //R
-    buffer[offset + 3] = 0; //A? ignored
-    buffer
-}
-*/
 /*
 fn render1() -> Vec<u8> {
     let bpp = 4;
@@ -412,34 +149,18 @@ fn render2() -> Vec<u8> {
 }
 */
 
-fn find_closest_primitive(ray: Ray, primitives: &Vec<Primitive>) -> Option<(&Primitive, f32)> {
+fn find_closest_primitive<'a>(
+    ray: &Ray,
+    primitives: &'a Vec<Primitive>,
+) -> Option<(&'a Primitive, f32)> {
     primitives
         .iter()
-        .filter_map(|primitive| intersect(primitive, ray).map(|dist| (primitive, dist)))
+        .filter_map(|primitive| primitive.intersect(ray).map(|dist| (primitive, dist)))
         .fold(None, |closest, (pr, dist)| match closest {
             None => Some((pr, dist)),
             Some(res) if dist < res.1 => Some((pr, dist)),
             _ => closest,
         })
-}
-
-fn trace_ray(ray: Ray, primitives: &Vec<Primitive>) -> Color {
-    let closest = primitives
-        .iter()
-        .filter_map(|primitive| intersect(primitive, ray).map(|dist| (primitive, dist)))
-        .fold(None, |closest, (pr, dist)| match closest {
-            None => Some((pr, dist)),
-            Some(res) if dist < res.1 => Some((pr, dist)),
-            _ => closest,
-        });
-
-    match closest {
-        Some((primitive, _)) => match primitive {
-            Primitive::Sphere { color, .. } => *color,
-            Primitive::Triangle { color, .. } => *color,
-        },
-        None => Color(0.0, 0.0, 0.0),
-    }
 }
 
 fn calculate_shading(
@@ -452,11 +173,11 @@ fn calculate_shading(
 
     let incident_lights = point_lights.iter().filter_map(|light| {
         let ray = Ray(point, *light);
-        let closest = find_closest_primitive(ray, primitives);
-        let max_distance = (*light - point).norm();
+        let closest = find_closest_primitive(&ray, primitives);
+        let light_distance = (*light - point).norm();
         match closest {
             Some((_, dist)) => {
-                if dist <= max_distance {
+                if dist > light_distance {
                     return Some(light);
                 } else {
                     return None;
@@ -467,8 +188,8 @@ fn calculate_shading(
     });
 
     let prm_color = match prm {
-        Primitive::Sphere { color, .. } => *color,
-        Primitive::Triangle { color, .. } => *color,
+        Primitive::Sphere { color, .. } => color,
+        Primitive::Triangle { color, .. } => color,
     };
 
     let color_intensity = incident_lights
@@ -482,17 +203,9 @@ fn calculate_shading(
         })
         .fold(Color(0.0, 0.0, 0.0), |acc, col| acc + col);
 
-    prm_color * color_intensity
-
-    /*
-        let dot = normal.dot(point_lights[0].unit());
-        if dot < 0.0 {
-            return Color(0.0, 0.0, 0.0);
-        }
-
-        match prm {
-            Primitive::Sphere { color, .. } => *color * dot,
-            Primitive::Triangle { color, .. } => *color * dot,
-        }
-    */
+    Color(
+        prm_color.0 * color_intensity.0,
+        prm_color.1 * color_intensity.1,
+        prm_color.2 * color_intensity.2,
+    )
 }
