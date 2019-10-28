@@ -1,8 +1,7 @@
 use rayon::prelude::*;
 use std::ops;
 
-#[derive(Clone, Copy, Debug)]
-struct Color(f32, f32, f32); //r,g,b
+mod color;
 
 #[derive(Clone, Copy, Debug)]
 struct Vector(f32, f32, f32); //x,y,z
@@ -82,6 +81,24 @@ impl ops::Mul<f32> for Color {
     fn mul(self, rhs: f32) -> Color {
         let Color(r, g, b) = self;
         Color(r * rhs, g * rhs, b * rhs)
+    }
+}
+
+impl ops::Mul<Color> for Color {
+    type Output = Color;
+    fn mul(self, rhs: Color) -> Color {
+        let Color(ar, ag, ab) = self;
+        let Color(br, bg, bb) = rhs;
+        Color(ar * br, ag * bg, ab * bb)
+    }
+}
+
+impl ops::Add<Color> for Color {
+    type Output = Color;
+    fn add(self, rhs: Color) -> Color {
+        let Color(ar, ag, ab) = self;
+        let Color(br, bg, bb) = rhs;
+        Color(ar + br, ag + bg, ab + bb)
     }
 }
 
@@ -226,20 +243,23 @@ impl World {
             primitives,
             point_lights,
         } = self;
-        let pixels = (0..height * width).map(|pixel| {
-            let x = (pixel % width) as f32;
-            let y = (pixel / width) as f32;
-            let ray = camera.get_ray(x, y);
+        let pixels = (0..height * width)
+            //.into_par_iter()
+            .map(|pixel| {
+                let x = (pixel % width) as f32;
+                let y = (pixel / width) as f32;
+                let ray = camera.get_ray(x, y);
 
-            let closest = find_closest_primitive(ray, primitives);
+                let closest = find_closest_primitive(ray, primitives);
 
-            match closest {
-                Some((primitive, distance)) => {
-                    calculate_shading(primitive, ray.point(distance), point_lights)
+                match closest {
+                    Some((primitive, distance)) => {
+                        calculate_shading(primitive, ray.point(distance), primitives, point_lights)
+                    }
+                    None => Color(0.0, 0.0, 0.0),
                 }
-                None => Color(0.0, 0.0, 0.0),
-            }
-        });
+            });
+        // .collect::<Vec<Color>>();
         let mut buffer: Vec<u8> = vec![0; (bpp * width * height) as usize];
 
         let mut offset = 0;
@@ -430,18 +450,49 @@ fn calculate_shading(
 ) -> Color {
     let normal = prm.normal(point);
 
-    let incident_lights = point_lights.filter_map(|light| {
-        let ray = Ray(point, light);
+    let incident_lights = point_lights.iter().filter_map(|light| {
+        let ray = Ray(point, *light);
         let closest = find_closest_primitive(ray, primitives);
+        let max_distance = (*light - point).norm();
+        match closest {
+            Some((_, dist)) => {
+                if dist <= max_distance {
+                    return Some(light);
+                } else {
+                    return None;
+                }
+            }
+            None => Some(light),
+        }
     });
 
-    let dot = normal.dot(point_lights[0].unit());
-    if dot < 0.0 {
-        return Color(0.0, 0.0, 0.0);
-    }
+    let prm_color = match prm {
+        Primitive::Sphere { color, .. } => *color,
+        Primitive::Triangle { color, .. } => *color,
+    };
 
-    match prm {
-        Primitive::Sphere { color, .. } => *color * dot,
-        Primitive::Triangle { color, .. } => *color * dot,
-    }
+    let color_intensity = incident_lights
+        .map(|light| {
+            let dot = normal.dot(light.unit());
+            if dot < 0.0 {
+                return Color(0.0, 0.0, 0.0);
+            } else {
+                return Color(1.0, 1.0, 1.0) * dot;
+            }
+        })
+        .fold(Color(0.0, 0.0, 0.0), |acc, col| acc + col);
+
+    prm_color * color_intensity
+
+    /*
+        let dot = normal.dot(point_lights[0].unit());
+        if dot < 0.0 {
+            return Color(0.0, 0.0, 0.0);
+        }
+
+        match prm {
+            Primitive::Sphere { color, .. } => *color * dot,
+            Primitive::Triangle { color, .. } => *color * dot,
+        }
+    */
 }
