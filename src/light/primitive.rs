@@ -21,7 +21,7 @@ impl Primitive {
     pub fn new_triangle(pt1: Vector, pt2: Vector, pt3: Vector, color: Color) -> Primitive {
         let edge1 = pt2 - pt1;
         let edge2 = pt3 - pt1;
-        let normal = edge1.cross(edge2).unit();
+        let normal = edge1.cross(&edge2).unit();
 
         Primitive::Triangle {
             origin: pt1,
@@ -41,24 +41,24 @@ impl Primitive {
 
     pub fn intersect(&self, ray: &Ray) -> Option<f32> {
         match self {
-            Primitive::Sphere { center, radius, .. } => sphere_intersect((*center, *radius), *ray),
+            Primitive::Sphere { center, radius, .. } => sphere_intersect((center, radius), ray),
             Primitive::Triangle {
                 origin,
                 edge1,
                 edge2,
                 ..
-            } => triangle_intersect((*origin, *edge1, *edge2), *ray),
+            } => triangle_intersect((origin, edge1, edge2), ray),
         }
     }
 }
 
-fn sphere_intersect(sphere: (Vector, f32), ray: Ray) -> Option<f32> {
+fn sphere_intersect(sphere: (&Vector, &f32), ray: &Ray) -> Option<f32> {
     let (center, radius) = sphere;
     let Ray(origin, direction) = ray;
     let oc = origin - center;
     let a = direction.dot(direction);
     let b = oc.dot(direction);
-    let c = oc.dot(oc) - radius * radius;
+    let c = oc.dot(&oc) - radius * radius;
     let dis = b * b - a * c;
 
     if dis > 0.0 {
@@ -77,12 +77,12 @@ fn sphere_intersect(sphere: (Vector, f32), ray: Ray) -> Option<f32> {
     None
 }
 
-fn triangle_intersect(triangle: (Vector, Vector, Vector), ray: Ray) -> Option<f32> {
+fn triangle_intersect(triangle: (&Vector, &Vector, &Vector), ray: &Ray) -> Option<f32> {
     let (v0, edge1, edge2) = triangle;
     let Ray(origin, direction) = ray;
     let pvec = direction.cross(edge2);
 
-    let det = edge1.dot(pvec);
+    let det = edge1.dot(&pvec);
     //No culling version
     if det > -0.007 && det < 0.007 {
         return None;
@@ -92,20 +92,20 @@ fn triangle_intersect(triangle: (Vector, Vector, Vector), ray: Ray) -> Option<f3
 
     let tvec = origin - v0;
 
-    let u = tvec.dot(pvec) * inv_det;
+    let u = tvec.dot(&pvec) * inv_det;
     if u < 0.0 || u > 1.0 {
         return None;
     }
 
     let qvec = tvec.cross(edge1);
 
-    let v = direction.dot(qvec) * inv_det;
+    let v = direction.dot(&qvec) * inv_det;
     if v < 0.0 || (u + v) > 1.007 {
         //add EPSILON to offset small precision errors
         return None;
     }
 
-    let t = edge2.dot(qvec) * inv_det;
+    let t = edge2.dot(&qvec) * inv_det;
 
     if t > 0.007 {
         return Some(t);

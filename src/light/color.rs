@@ -1,6 +1,5 @@
 use std::ops;
 
-#[derive(Clone, Copy, Debug)]
 pub struct Color(pub f32, pub f32, pub f32); //r,g,b
 
 impl ops::Mul<f32> for Color {

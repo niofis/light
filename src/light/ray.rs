@@ -1,6 +1,5 @@
 use crate::light::vector::*;
 
-#[derive(Clone, Copy, Debug)]
 pub struct Ray(pub Vector, pub Vector); //origin, direction
 
 impl Ray {

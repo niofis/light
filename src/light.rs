@@ -194,7 +194,7 @@ fn calculate_shading(
 
     let color_intensity = incident_lights
         .map(|light| {
-            let dot = normal.dot(light.unit());
+            let dot = normal.dot(&light.unit());
             if dot < 0.0 {
                 return Color(0.0, 0.0, 0.0);
             } else {
