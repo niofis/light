@@ -19,8 +19,8 @@ pub enum Primitive {
 
 impl Primitive {
     pub fn new_triangle(pt1: Vector, pt2: Vector, pt3: Vector, color: Color) -> Primitive {
-        let edge1 = pt2 - pt1;
-        let edge2 = pt3 - pt1;
+        let edge1 = &pt2 - &pt1;
+        let edge2 = &pt3 - &pt1;
         let normal = edge1.cross(&edge2).unit();
 
         Primitive::Triangle {
@@ -32,10 +32,10 @@ impl Primitive {
         }
     }
 
-    pub fn normal(&self, point: Vector) -> Vector {
+    pub fn normal(&self, point: &Vector) -> Vector {
         match self {
-            Primitive::Sphere { center, .. } => (point - *center).unit(),
-            Primitive::Triangle { normal, .. } => *normal,
+            Primitive::Sphere { center, .. } => ((point - center).unit()),
+            Primitive::Triangle { normal, .. } => Vector(normal.0, normal.1, normal.2),
         }
     }
 
@@ -55,7 +55,7 @@ impl Primitive {
 fn sphere_intersect(sphere: (&Vector, &f32), ray: &Ray) -> Option<f32> {
     let (center, radius) = sphere;
     let Ray(origin, direction) = ray;
-    let oc = origin - center;
+    let oc = origin - &center;
     let a = direction.dot(direction);
     let b = oc.dot(direction);
     let c = oc.dot(&oc) - radius * radius;

@@ -17,8 +17,8 @@ impl Camera {
         width: f32,
         height: f32,
     ) -> Camera {
-        let delta_right = (right_top - left_top) / width;
-        let delta_down = (left_bottom - left_top) / height;
+        let delta_right = (&right_top - &left_top) / width;
+        let delta_down = (&left_bottom - &left_top) / height;
 
         Camera {
             eye,
@@ -36,8 +36,8 @@ impl Camera {
             eye,
         } = self;
 
-        let origin = *left_top + (*delta_right * x) + (*delta_down * y);
-        let direction = origin - *eye;
+        let origin = left_top + &(delta_right * x) + (delta_down * y);
+        let direction = &origin - eye;
 
         Ray(origin, direction)
     }

@@ -79,7 +79,7 @@ impl World {
 
                 match closest {
                     Some((primitive, distance)) => {
-                        calculate_shading(primitive, ray.point(distance), primitives, point_lights)
+                        calculate_shading(primitive, &ray.point(distance), primitives, point_lights)
                     }
                     None => Color(0.0, 0.0, 0.0),
                 }
@@ -165,16 +165,16 @@ fn find_closest_primitive<'a>(
 
 fn calculate_shading(
     prm: &Primitive,
-    point: Vector,
+    point: &Vector,
     primitives: &Vec<Primitive>,
     point_lights: &Vec<Vector>,
 ) -> Color {
     let normal = prm.normal(point);
 
     let incident_lights = point_lights.iter().filter_map(|light| {
-        let ray = Ray(point, *light);
+        let ray = Ray(Vector(point.0, point.1, point.2), Vector(light.0, light.1, light.2));
         let closest = find_closest_primitive(&ray, primitives);
-        let light_distance = (*light - point).norm();
+        let light_distance = (light - point).norm();
         match closest {
             Some((_, dist)) => {
                 if dist > light_distance {
