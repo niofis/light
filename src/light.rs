@@ -1,4 +1,4 @@
-//use rayon::prelude::*;
+use rayon::prelude::*;
 
 mod color;
 use color::*;
@@ -69,7 +69,7 @@ impl World {
             point_lights,
         } = self;
         let pixels = (0..height * width)
-            //.into_par_iter()
+            .into_par_iter()
             .map(|pixel| {
                 let x = (pixel % width) as f32;
                 let y = (pixel / width) as f32;
@@ -83,8 +83,8 @@ impl World {
                     }
                     None => Color(0.0, 0.0, 0.0),
                 }
-            });
-        // .collect::<Vec<Color>>();
+            })
+         .collect::<Vec<Color>>();
         let mut buffer: Vec<u8> = vec![0; (bpp * width * height) as usize];
 
         let mut offset = 0;
