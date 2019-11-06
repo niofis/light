@@ -1,4 +1,4 @@
-use crate::light::color::*;
+use crate::light::material::*;
 use crate::light::ray::*;
 use crate::light::vector::*;
 
@@ -6,19 +6,19 @@ pub enum Primitive {
     Sphere {
         center: Vector,
         radius: f32,
-        color: Color,
+        material: Material,
     },
     Triangle {
         origin: Vector,
         edge1: Vector,
         edge2: Vector,
         normal: Vector,
-        color: Color,
+        material: Material,
     },
 }
 
 impl Primitive {
-    pub fn new_triangle(pt1: Vector, pt2: Vector, pt3: Vector, color: Color) -> Primitive {
+    pub fn new_triangle(pt1: Vector, pt2: Vector, pt3: Vector, material: Material) -> Primitive {
         let edge1 = &pt2 - &pt1;
         let edge2 = &pt3 - &pt1;
         let normal = edge1.cross(&edge2).unit();
@@ -28,7 +28,7 @@ impl Primitive {
             edge1,
             edge2,
             normal,
-            color,
+            material,
         }
     }
 

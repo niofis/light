@@ -1,5 +1,7 @@
 use rayon::prelude::*;
 
+mod material;
+use material::*;
 mod color;
 use color::*;
 mod vector;
@@ -34,18 +36,18 @@ impl World {
             Primitive::Sphere {
                 center: Vector(0.0, -1_000_000.0, 0.0),
                 radius: 1_000_000.0,
-                color: Color(1.0, 1.0, 1.0),
+                material: Material::Simple(Color(1.0, 1.0, 1.0)),
             },
             Primitive::Sphere {
                 center: Vector(0.0, 2.0, 0.0),
                 radius: 2.0,
-                color: Color(0.0, 0.0, 1.0),
+                material: Material::Reflective(Color(0.0, 0.0, 1.0), 1.0),
             },
             Primitive::new_triangle(
                 Vector(-8.0, 0.0, 0.0),
                 Vector(-7.0, 2.0, 0.0),
                 Vector(-6.0, 0.0, 0.0),
-                Color(0.0, 1.0, 0.0),
+                Material::Simple(Color(0.0, 1.0, 0.0)),
             ),
         ];
         let point_lights = vec![Vector(10.0, 10.0, -10.0)];
@@ -75,16 +77,9 @@ impl World {
                 let y = (pixel / width) as f32;
                 let ray = camera.get_ray(x, y);
 
-                let closest = find_closest_primitive(&ray, primitives);
-
-                match closest {
-                    Some((primitive, distance)) => {
-                        calculate_shading(primitive, &ray.point(distance), primitives, point_lights)
-                    }
-                    None => Color(0.0, 0.0, 0.0),
-                }
+                trace_ray(ray, primitives, point_lights, 0)
             })
-         .collect::<Vec<Color>>();
+            .collect::<Vec<Color>>();
         let mut buffer: Vec<u8> = vec![0; (bpp * width * height) as usize];
 
         let mut offset = 0;
@@ -149,6 +144,45 @@ fn render2() -> Vec<u8> {
 }
 */
 
+fn trace_ray(
+    ray: Ray,
+    primitives: &Vec<Primitive>,
+    point_lights: &Vec<Vector>,
+    depth: u8,
+) -> Color {
+    if depth > 10 {
+        return Color(0.0, 0.0, 0.0);
+    }
+
+    let closest = find_closest_primitive(&ray, primitives);
+    match closest {
+        Some((primitive, distance)) => {
+            let point = ray.point(distance);
+            let prm_material = match primitive {
+                Primitive::Sphere { material, .. } => material,
+                Primitive::Triangle { material, .. } => material,
+            };
+            let normal = primitive.normal(&point);
+
+            match prm_material {
+                Material::Simple(_) => {
+                    calculate_shading(primitive, &point, primitives, point_lights)
+                }
+                Material::Reflective(_, _) => {
+                    let ri = ray.1.unit();
+                    let dot = ri.dot(&normal) * 2.0;
+                    let new_dir = &ri - &(&normal * dot);
+                    let reflected_ray = Ray(point, new_dir.unit());
+                    trace_ray(reflected_ray, primitives, point_lights, depth + 1)
+                }
+            }
+        }
+        None => {
+            return Color(0.0, 0.0, 0.0);
+        }
+    }
+}
+
 fn find_closest_primitive<'a>(
     ray: &Ray,
     primitives: &'a Vec<Primitive>,
@@ -172,7 +206,10 @@ fn calculate_shading(
     let normal = prm.normal(point);
 
     let incident_lights = point_lights.iter().filter_map(|light| {
-        let ray = Ray(Vector(point.0, point.1, point.2), Vector(light.0, light.1, light.2));
+        let ray = Ray(
+            Vector(point.0, point.1, point.2),
+            Vector(light.0, light.1, light.2),
+        );
         let closest = find_closest_primitive(&ray, primitives);
         let light_distance = (light - point).norm();
         match closest {
@@ -187,9 +224,14 @@ fn calculate_shading(
         }
     });
 
-    let prm_color = match prm {
-        Primitive::Sphere { color, .. } => color,
-        Primitive::Triangle { color, .. } => color,
+    let prm_material = match prm {
+        Primitive::Sphere { material, .. } => material,
+        Primitive::Triangle { material, .. } => material,
+    };
+
+    let prm_color = match prm_material {
+        Material::Simple(color) => color,
+        Material::Reflective(color, _) => color,
     };
 
     let color_intensity = incident_lights
