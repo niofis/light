@@ -12,6 +12,9 @@ mod camera;
 use camera::*;
 mod primitive;
 use primitive::*;
+mod solids;
+mod transform;
+use transform::*;
 
 pub struct World {
     bpp: u32,
@@ -32,16 +35,16 @@ impl World {
             width as f32,
             height as f32,
         );
-        let primitives = vec![
+        let mut primitives = vec![
             Primitive::Sphere {
-                center: Vector(0.0, -1_000_000.0, 0.0),
+                center: Vector(0.0, -1_000_002.0, 0.0),
                 radius: 1_000_000.0,
                 material: Material::Simple(Color(1.0, 1.0, 1.0)),
             },
             Primitive::Sphere {
-                center: Vector(0.0, 2.0, 0.0),
-                radius: 2.0,
-                material: Material::Reflective(Color(0.0, 0.0, 1.0), 1.0),
+                center: Vector(7.0, 5.0, 0.0),
+                radius: 5.0,
+                material: Material::Reflective(Color(0.0, 0.0, 1.0), 0.5),
             },
             Primitive::new_triangle(
                 Vector(-8.0, 0.0, 0.0),
@@ -50,7 +53,8 @@ impl World {
                 Material::Simple(Color(0.0, 1.0, 0.0)),
             ),
         ];
-        let point_lights = vec![Vector(10.0, 10.0, -10.0)];
+        primitives.append(&mut solids::cube());
+        let point_lights = vec![Vector(10.0, 10.0, -10.0), Vector(-10.0, 10.0, -10.0)];
         World {
             bpp,
             width,
@@ -85,9 +89,9 @@ impl World {
         let mut offset = 0;
         for pixel in pixels {
             let Color(r, g, b) = pixel;
-            buffer[offset] = (b * 255.99) as u8;
-            buffer[offset + 1] = (g * 255.99) as u8;
-            buffer[offset + 2] = (r * 255.99) as u8;
+            buffer[offset] = (b.min(1.0) * 255.99) as u8;
+            buffer[offset + 1] = (g.min(1.0) * 255.99) as u8;
+            buffer[offset + 2] = (r.min(1.0) * 255.99) as u8;
             buffer[offset + 3] = 255;
             offset = offset + 4;
         }
@@ -168,12 +172,13 @@ fn trace_ray(
                 Material::Simple(_) => {
                     calculate_shading(primitive, &point, primitives, point_lights)
                 }
-                Material::Reflective(_, _) => {
+                Material::Reflective(_, idx) => {
                     let ri = ray.1.unit();
                     let dot = ri.dot(&normal) * 2.0;
                     let new_dir = &ri - &(&normal * dot);
-                    let reflected_ray = Ray(point, new_dir.unit());
-                    trace_ray(reflected_ray, primitives, point_lights, depth + 1)
+                    let reflected_ray = Ray::new(&point, &new_dir.unit());
+                    (calculate_shading(primitive, &point, primitives, point_lights) * (1.0 - idx))
+                        + trace_ray(reflected_ray, primitives, point_lights, depth + 1) * *idx
                 }
             }
         }
