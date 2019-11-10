@@ -1,4 +1,5 @@
 use rayon::prelude::*;
+use std::f32::consts::PI;
 
 mod material;
 use material::*;
@@ -37,12 +38,7 @@ impl World {
         );
         let mut primitives = vec![
             Primitive::Sphere {
-                center: Vector(0.0, -1_000_002.0, 0.0),
-                radius: 1_000_000.0,
-                material: Material::Simple(Color(1.0, 1.0, 1.0)),
-            },
-            Primitive::Sphere {
-                center: Vector(7.0, 5.0, 0.0),
+                center: Vector(7.0, 5.0, 2.0),
                 radius: 5.0,
                 material: Material::Reflective(Color(0.0, 0.0, 1.0), 0.5),
             },
@@ -53,8 +49,23 @@ impl World {
                 Material::Simple(Color(0.0, 1.0, 0.0)),
             ),
         ];
-        primitives.append(&mut solids::cube());
-        let point_lights = vec![Vector(10.0, 10.0, -10.0), Vector(-10.0, 10.0, -10.0)];
+        // cube thingy
+        let cube_trs = vec![
+            Transform::rotate(0.0, PI / 4.0, PI / 4.0),
+            Transform::scale(3.0, 3.0, 3.0),
+            Transform::translate(0.0, 0.0, 0.0),
+        ];
+        let mut cube = solids::cube(&Transform::combine(&cube_trs));
+        primitives.append(&mut cube);
+
+        //cornell box
+        let cornell_trs = vec![
+            Transform::scale(42.0, 24.0, 50.0),
+            Transform::translate(0.0, 5.0, 0.0),
+        ];
+        let mut cornell = solids::cornell_box(&Transform::combine(&cornell_trs));
+        primitives.append(&mut cornell);
+        let point_lights = vec![Vector(-10.0, 10.0, -10.0)];
         World {
             bpp,
             width,
@@ -211,12 +222,10 @@ fn calculate_shading(
     let normal = prm.normal(point);
 
     let incident_lights = point_lights.iter().filter_map(|light| {
-        let ray = Ray(
-            Vector(point.0, point.1, point.2),
-            Vector(light.0, light.1, light.2),
-        );
+        let direction = light - point;
+        let ray = Ray::new(point, &(direction.unit()));
         let closest = find_closest_primitive(&ray, primitives);
-        let light_distance = (light - point).norm();
+        let light_distance = direction.norm();
         match closest {
             Some((_, dist)) => {
                 if dist > light_distance {

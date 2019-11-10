@@ -24,4 +24,7 @@ impl Material {
     pub fn cyan() -> Material {
         Material::Simple(Color(0.0, 1.0, 1.0))
     }
+    pub fn white() -> Material {
+        Material::Simple(Color(1.0, 1.0, 1.0))
+    }
 }
