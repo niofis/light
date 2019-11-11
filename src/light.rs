@@ -38,9 +38,9 @@ impl World {
         );
         let mut primitives = vec![
             Primitive::Sphere {
-                center: Vector(7.0, 5.0, 2.0),
+                center: Vector(16.0, -2.0, 10.0),
                 radius: 5.0,
-                material: Material::Reflective(Color(0.0, 0.0, 1.0), 0.5),
+                material: Material::Reflective(Color(0.0, 0.0, 1.0), 1.0),
             },
             Primitive::new_triangle(
                 Vector(-8.0, 0.0, 0.0),
@@ -49,15 +49,15 @@ impl World {
                 Material::Simple(Color(0.0, 1.0, 0.0)),
             ),
         ];
+
         // cube thingy
         let cube_trs = vec![
             Transform::rotate(0.0, PI / 4.0, PI / 4.0),
             Transform::scale(3.0, 3.0, 3.0),
-            Transform::translate(0.0, 0.0, 0.0),
+            Transform::translate(-10.0, -2.0, 0.0),
         ];
         let mut cube = solids::cube(&Transform::combine(&cube_trs));
         primitives.append(&mut cube);
-
         //cornell box
         let cornell_trs = vec![
             Transform::scale(42.0, 24.0, 50.0),
@@ -65,7 +65,12 @@ impl World {
         ];
         let mut cornell = solids::cornell_box(&Transform::combine(&cornell_trs));
         primitives.append(&mut cornell);
+
+        let mut donut = solids::torus();
+        primitives.append(&mut donut);
+
         let point_lights = vec![Vector(-10.0, 10.0, -10.0)];
+
         World {
             bpp,
             width,

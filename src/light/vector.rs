@@ -80,6 +80,9 @@ impl ops::Div<f32> for &Vector {
 }
 
 impl Vector {
+    pub fn clone(&self) -> Vector {
+        Vector(self.0, self.1, self.2)
+    }
     pub fn dot(&self, rhs: &Vector) -> f32 {
         let Vector(x0, y0, z0) = self;
         let Vector(x1, y1, z1) = rhs;

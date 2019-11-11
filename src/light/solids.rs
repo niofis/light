@@ -2,6 +2,7 @@ use crate::light::material::*;
 use crate::light::primitive::*;
 use crate::light::transform::*;
 use crate::light::vector::*;
+use std::f32::consts::PI;
 
 pub fn cube(transform: &Transform) -> Vec<Primitive> {
     let pt1 = || transform.apply(&Vector(-0.5, 0.5, -0.5));
@@ -60,4 +61,52 @@ pub fn cornell_box(transform: &Transform) -> Vec<Primitive> {
         Primitive::new_triangle(pt3(), pt4(), pt8(), Material::white()),
         Primitive::new_triangle(pt7(), pt3(), pt8(), Material::white()),
     ]
+}
+
+pub fn torus() -> Vec<Primitive> {
+    let trs = Transform::rotate(PI / -4.0, 0.0, 0.0);
+    let rd1 = 1.5;
+    let rd2 = 4.0;
+    let sc1 = 20;
+    let sc2 = 40;
+    let pt = Vector(0.0, rd1, 0.0);
+    let rt1 = 2.0 * PI / (sc1 as f32);
+    let rt2 = 2.0 * PI / (sc2 as f32);
+    let mut triangles: Vec<Primitive> = Vec::new();
+    let mut cur = (0..=sc1)
+        .map(|x| Transform::rotate((x as f32) * rt1, 0.0, 0.0).apply(&pt))
+        .map(|p| Transform::translate(0.0, 0.0, -rd2).apply(&p))
+        .collect::<Vec<Vector>>();
+
+    for _ in 0..sc2 {
+        let next = cur
+            .iter()
+            .map(|p| Transform::rotate(0.0, rt2, 0.0).apply(p))
+            .collect::<Vec<Vector>>();
+
+        for n in 0..sc1 {
+            /*triangles.push(Primitive::Sphere {
+                center: cur[n].clone(),
+                radius: 0.1,
+                material: Material::blue(),
+            });*/
+            triangles.push(Primitive::new_triangle(
+                trs.apply(&cur[n]),
+                trs.apply(&next[n]),
+                trs.apply(&next[n + 1]),
+                Material::green(),
+            ));
+            triangles.push(Primitive::new_triangle(
+                trs.apply(&next[n + 1]),
+                trs.apply(&cur[n + 1]),
+                trs.apply(&cur[n]),
+                Material::green(),
+            ));
+        }
+        cur = next;
+    }
+
+    println!("{:#?}", triangles.len());
+
+    triangles
 }
