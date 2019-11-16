@@ -1,3 +1,4 @@
+use crate::light::bounding_box::*;
 use crate::light::material::*;
 use crate::light::ray::*;
 use crate::light::vector::*;
@@ -15,6 +16,8 @@ pub enum Primitive {
         edge2: Vector,
         normal: Vector,
         material: Material,
+        pt2: Vector,
+        pt3: Vector,
     },
 }
 
@@ -30,6 +33,8 @@ impl Primitive {
             edge2,
             normal,
             material,
+            pt2,
+            pt3
         }
     }
 
@@ -49,6 +54,19 @@ impl Primitive {
                 edge2,
                 ..
             } => triangle_intersect((origin, edge1, edge2), ray),
+        }
+    }
+
+    pub fn bounding_box(&self) -> BoundingBox {
+        match self {
+            Primitive::Sphere { center, radius, .. } => BoundingBox {
+                min: Vector(center.0 - radius, center.1 - radius, center.2 - radius),
+                max: Vector(center.0 + radius, center.1 + radius, center.2 + radius),
+            },
+            Primitive::Triangle {origin, pt2, pt3, .. } => BoundingBox {
+                min: Vector(origin.0.min(pt2.0).min(pt3.0), origin.1.min(pt2.1).min(pt3.1), origin.2.min(pt2.2).min(pt3.2)),
+                max: Vector(origin.0.max(pt2.0).max(pt3.0), origin.1.max(pt2.1).max(pt3.1), origin.2.max(pt2.2).max(pt3.2)),
+            }
         }
     }
 }

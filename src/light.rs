@@ -1,6 +1,7 @@
 use rayon::prelude::*;
 use std::f32::consts::PI;
 
+mod bounding_box;
 mod material;
 use material::*;
 mod color;
@@ -66,9 +67,9 @@ impl World {
         let mut cornell = solids::cornell_box(&Transform::combine(&cornell_trs));
         primitives.append(&mut cornell);
 
-        let mut donut = solids::torus();
-        primitives.append(&mut donut);
-
+        /*let mut donut = solids::torus();
+                primitives.append(&mut donut);
+        */
         let point_lights = vec![Vector(-10.0, 10.0, -10.0)];
 
         World {

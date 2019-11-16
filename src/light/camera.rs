@@ -39,6 +39,6 @@ impl Camera {
         let origin = left_top + &(delta_right * x) + (delta_down * y);
         let direction = &origin - eye;
 
-        Ray(origin, direction)
+        Ray(origin, direction.unit())
     }
 }
