@@ -44,4 +44,18 @@ impl BoundingBox {
         }
         Some(true)
     }
+
+    pub fn combine(&self, rhs: &BoundingBox) -> BoundingBox {
+        let min = Vector(
+            self.min.0.min(rhs.min.0),
+            self.min.1.min(rhs.min.1),
+            self.min.2.min(rhs.min.2),
+        );
+        let max = Vector(
+            self.max.0.max(rhs.max.0),
+            self.max.1.max(rhs.max.1),
+            self.max.2.max(rhs.max.2),
+        );
+        BoundingBox { min, max }
+    }
 }
