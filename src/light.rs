@@ -3,6 +3,8 @@ use std::f32::consts::PI;
 
 mod bounding_box;
 use bounding_box::*;
+mod bounding_volume_hierarchy;
+use bounding_volume_hierarchy::*;
 mod material;
 use material::*;
 mod color;
@@ -78,6 +80,9 @@ impl World {
             min: Vector(-1.0, -1.0, -1.0),
             max: Vector(1.0, 1.0, 1.0),
         };
+
+        let bvh = BVH::new(&primitives);
+        println!("{:#?}", bvh);
 
         World {
             bpp,

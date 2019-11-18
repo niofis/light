@@ -8,7 +8,13 @@ pub struct BoundingBox {
 }
 
 impl BoundingBox {
-    fn centroid(&self) -> Vector {
+    pub fn empty() -> BoundingBox {
+        BoundingBox {
+            min: Vector(0.0, 0.0, 0.0),
+            max: Vector(0.0, 0.0, 0.0),
+        }
+    }
+    pub fn centroid(&self) -> Vector {
         (&self.min + &self.max) / 2.0
     }
 
