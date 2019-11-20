@@ -28,7 +28,6 @@ pub struct World {
     camera: Camera,
     primitives: Vec<Primitive>,
     point_lights: Vec<Vector>,
-    bounding_box: BoundingBox,
 }
 
 impl World {
@@ -76,13 +75,8 @@ impl World {
         */
         let point_lights = vec![Vector(-10.0, 10.0, -10.0)];
 
-        let bounding_box = BoundingBox {
-            min: Vector(-1.0, -1.0, -1.0),
-            max: Vector(1.0, 1.0, 1.0),
-        };
-
         let bvh = BVH::new(&primitives);
-        println!("{:#?}", bvh);
+        //println!("{:#?}", bvh);
 
         World {
             bpp,
@@ -91,7 +85,6 @@ impl World {
             camera,
             primitives,
             point_lights,
-            bounding_box,
         }
     }
 
@@ -103,7 +96,6 @@ impl World {
             camera,
             primitives,
             point_lights,
-            bounding_box,
         } = self;
         let pixels = (0..height * width)
             .into_par_iter()
@@ -112,11 +104,7 @@ impl World {
                 let y = (pixel / width) as f32;
                 let ray = camera.get_ray(x, y);
 
-                if let Some(_) = bounding_box.intersect(&ray) {
-                    Color(0.0, 0.0, 1.0)
-                } else {
-                    trace_ray(ray, primitives, point_lights, 0)
-                }
+                trace_ray(ray, primitives, point_lights, 0)
             })
             .collect::<Vec<Color>>();
         let mut buffer: Vec<u8> = vec![0; (bpp * width * height) as usize];
