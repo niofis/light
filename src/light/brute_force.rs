@@ -1,19 +1,22 @@
 use crate::light::primitive::*;
-use crate::light::Trace::*;
+use crate::light::trace::*;
 use crate::light::ray::*;
 
 pub struct BruteForce {
-    primitives: Vec<&Primitive>
+    primitives: Vec<Primitive>,
 }
 
 impl BruteForce {
-    pub new(primitives: Vec<Primitive>) -> BruteForce {
-        let prms = primitives.map(|p| &p).collect::<Vec<&Primitive>>();
-        BruteForce(prms)
+    pub fn new(primitives: Vec<Primitive>) -> BruteForce {
+        BruteForce {
+            primitives,
+        }
     }
 }
 
-impl Trace for BruteFormce {
-    trace(&self, ray: &Ray) -> &[&Primitive]{
-        Some(&self.prms[..]);
+impl Trace for BruteForce {
+    fn trace(&self, ray: &Ray) -> Option<&[&Primitive]> {
+        let borrows = self.primitives.map(|p| &p).collect::<Vec<&Primitive>>();
+        Some(borrows[..]);
     }
+}

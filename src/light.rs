@@ -22,6 +22,8 @@ use primitive::*;
 mod solids;
 mod transform;
 use transform::*;
+mod brute_force;
+use brute_force::*;
 
 pub struct World {
     bpp: u32,
@@ -30,7 +32,7 @@ pub struct World {
     camera: Camera,
     primitives: Vec<Primitive>,
     point_lights: Vec<Vector>,
-    bvh: BVH,
+    tracer: dyn Trace,
 }
 
 impl World {
@@ -82,10 +84,11 @@ impl World {
 
         let point_lights = vec![Vector(-10.0, 10.0, -10.0)];
 
-        let bvh = BVH::new(primitives[..].to_vec());
+        //let bvh = BVH::new(primitives[..].to_vec());
+        let tracer = BruteForce::new(primitives[..].toVec());
 
         println!("{} total", primitives.len());
-        println!("{:?} in bvh", bvh.stats());
+        //println!("{:?} in bvh", bvh.stats());
 
         World {
             bpp,
@@ -94,7 +97,7 @@ impl World {
             camera,
             primitives,
             point_lights,
-            bvh,
+            tracer,
         }
     }
 
@@ -106,7 +109,7 @@ impl World {
             camera,
             primitives,
             point_lights,
-            bvh,
+            tracer,
         } = self;
         let pixels = (0..height * width)
             .into_par_iter()
@@ -115,9 +118,9 @@ impl World {
                 let y = (pixel / width) as f32;
                 let ray = camera.get_ray(x, y);
 
-                trace_ray(ray, primitives, point_lights, 0)
+                //trace_ray(ray, primitives, point_lights, 0)
 
-                //trace_ray_bvh(ray, bvh, point_lights, 0)
+                trace_ray_bvh(ray, tracer, point_lights, 0)
             })
             .collect::<Vec<Color>>();
         let mut buffer: Vec<u8> = vec![0; (bpp * width * height) as usize];
@@ -184,12 +187,12 @@ fn render2() -> Vec<u8> {
 }
 */
 
-fn trace_ray_bvh(ray: Ray, bvh: &BVH, point_lights: &Vec<Vector>, depth: u8) -> Color {
+fn trace_ray_bvh(ray: Ray, tracer: dyn Trace, point_lights: &Vec<Vector>, depth: u8) -> Color {
     if depth > 10 {
         return Color(0.0, 0.0, 0.0);
     }
 
-    match bvh.trace(&ray) {
+    match tracer.trace(&ray) {
         Some(prms) => {
             let primitives = prms.to_vec();
             let closest = find_closest_primitive(&ray, &primitives);
@@ -203,7 +206,7 @@ fn trace_ray_bvh(ray: Ray, bvh: &BVH, point_lights: &Vec<Vector>, depth: u8) -> 
 
                     match prm_material {
                         Material::Simple(_) => {
-                            calculate_shading_bvh(primitive, &point, bvh, point_lights)
+                            calculate_shading_bvh(primitive, &point, tracer, point_lights)
                         }
                         Material::Reflective(_, idx) => {
                             let normal = primitive.normal(&point);
@@ -211,9 +214,9 @@ fn trace_ray_bvh(ray: Ray, bvh: &BVH, point_lights: &Vec<Vector>, depth: u8) -> 
                             let dot = ri.dot(&normal) * 2.0;
                             let new_dir = &ri - &(&normal * dot);
                             let reflected_ray = Ray::new(&point, &new_dir.unit());
-                            (calculate_shading_bvh(primitive, &point, bvh, point_lights)
+                            (calculate_shading_bvh(primitive, &point, tracer, point_lights)
                                 * (1.0 - idx))
-                                + trace_ray_bvh(reflected_ray, bvh, point_lights, depth + 1) * *idx
+                                + trace_ray_bvh(reflected_ray, tracer, point_lights, depth + 1) * *idx
                         }
                     }
                 }
@@ -227,7 +230,7 @@ fn trace_ray_bvh(ray: Ray, bvh: &BVH, point_lights: &Vec<Vector>, depth: u8) -> 
 fn calculate_shading_bvh(
     prm: &Primitive,
     point: &Vector,
-    bvh: &BVH,
+    tracer: dyn Trace,
     point_lights: &Vec<Vector>,
 ) -> Color {
     let normal = prm.normal(point);
@@ -235,7 +238,7 @@ fn calculate_shading_bvh(
     let incident_lights = point_lights.iter().filter_map(|light| {
         let direction = light - point;
         let ray = Ray::new(point, &(direction.unit()));
-        match bvh.trace(&ray) {
+        match tracer.trace(&ray) {
             Some(prms) => {
                 let primitives = prms.to_vec();
                 let closest = find_closest_primitive(&ray, &primitives);
