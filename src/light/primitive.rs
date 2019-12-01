@@ -3,7 +3,7 @@ use crate::light::material::*;
 use crate::light::ray::*;
 use crate::light::vector::*;
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub enum Primitive {
     Sphere {
         center: Vector,
@@ -34,7 +34,7 @@ impl Primitive {
             normal,
             material,
             pt2,
-            pt3
+            pt3,
         }
     }
 
@@ -63,10 +63,20 @@ impl Primitive {
                 min: Vector(center.0 - radius, center.1 - radius, center.2 - radius),
                 max: Vector(center.0 + radius, center.1 + radius, center.2 + radius),
             },
-            Primitive::Triangle {origin, pt2, pt3, .. } => BoundingBox {
-                min: Vector(origin.0.min(pt2.0).min(pt3.0), origin.1.min(pt2.1).min(pt3.1), origin.2.min(pt2.2).min(pt3.2)),
-                max: Vector(origin.0.max(pt2.0).max(pt3.0), origin.1.max(pt2.1).max(pt3.1), origin.2.max(pt2.2).max(pt3.2)),
-            }
+            Primitive::Triangle {
+                origin, pt2, pt3, ..
+            } => BoundingBox {
+                min: Vector(
+                    origin.0.min(pt2.0).min(pt3.0),
+                    origin.1.min(pt2.1).min(pt3.1),
+                    origin.2.min(pt2.2).min(pt3.2),
+                ),
+                max: Vector(
+                    origin.0.max(pt2.0).max(pt3.0),
+                    origin.1.max(pt2.1).max(pt3.1),
+                    origin.2.max(pt2.2).max(pt3.2),
+                ),
+            },
         }
     }
 }

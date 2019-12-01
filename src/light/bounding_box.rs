@@ -18,7 +18,7 @@ impl BoundingBox {
         (&self.min + &self.max) / 2.0
     }
 
-    pub fn intersect(&self, ray: &Ray) -> Option<bool> {
+    pub fn intersect(&self, ray: &Ray) -> bool {
         let Ray(origin, direction) = ray;
         let BoundingBox { min, max } = self;
         let dxi: f32 = 1.0 / direction.0;
@@ -34,7 +34,7 @@ impl BoundingBox {
         let tymin = (params[sign[1]].1 - origin.1) * dyi;
         let tymax = (params[1 - sign[1]].1 - origin.1) * dyi;
         if tmin > tymax || tymin > tmax {
-            return None;
+            return false;
         }
         if tymin > tmin {
             tmin = tymin;
@@ -46,9 +46,9 @@ impl BoundingBox {
         let tzmax = (params[1 - sign[2]].2 - origin.2) * dzi;
 
         if tmin > tzmax || tzmin > tmax {
-            return None;
+            return false;
         }
-        Some(true)
+        true
     }
 
     pub fn combine(&self, rhs: &BoundingBox) -> BoundingBox {

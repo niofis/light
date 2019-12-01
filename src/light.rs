@@ -2,7 +2,9 @@ use rayon::prelude::*;
 use std::f32::consts::PI;
 
 mod bounding_box;
+mod trace;
 use bounding_box::*;
+use trace::*;
 mod bounding_volume_hierarchy;
 use bounding_volume_hierarchy::*;
 mod material;
@@ -28,6 +30,7 @@ pub struct World {
     camera: Camera,
     primitives: Vec<Primitive>,
     point_lights: Vec<Vector>,
+    bvh: BVH,
 }
 
 impl World {
@@ -68,15 +71,21 @@ impl World {
             Transform::translate(0.0, 5.0, 0.0),
         ];
         let mut cornell = solids::cornell_box(&Transform::combine(&cornell_trs));
-        primitives.append(&mut cornell);
+        //primitives.append(&mut cornell);
 
-        /*let mut donut = solids::torus();
-                primitives.append(&mut donut);
-        */
+        let primitives = cornell;
+
+        let mut donut = solids::torus();
+        //primitives.append(&mut donut);
+
+        //let primitives = donut;
+
         let point_lights = vec![Vector(-10.0, 10.0, -10.0)];
 
-        let bvh = BVH::new(&primitives);
-        //println!("{:#?}", bvh);
+        let bvh = BVH::new(primitives[..].to_vec());
+
+        println!("{} total", primitives.len());
+        println!("{:?} in bvh", bvh.stats());
 
         World {
             bpp,
@@ -85,6 +94,7 @@ impl World {
             camera,
             primitives,
             point_lights,
+            bvh,
         }
     }
 
@@ -96,6 +106,7 @@ impl World {
             camera,
             primitives,
             point_lights,
+            bvh,
         } = self;
         let pixels = (0..height * width)
             .into_par_iter()
@@ -105,6 +116,8 @@ impl World {
                 let ray = camera.get_ray(x, y);
 
                 trace_ray(ray, primitives, point_lights, 0)
+
+                //trace_ray_bvh(ray, bvh, point_lights, 0)
             })
             .collect::<Vec<Color>>();
         let mut buffer: Vec<u8> = vec![0; (bpp * width * height) as usize];
@@ -170,6 +183,105 @@ fn render2() -> Vec<u8> {
     buffer
 }
 */
+
+fn trace_ray_bvh(ray: Ray, bvh: &BVH, point_lights: &Vec<Vector>, depth: u8) -> Color {
+    if depth > 10 {
+        return Color(0.0, 0.0, 0.0);
+    }
+
+    match bvh.trace(&ray) {
+        Some(prms) => {
+            let primitives = prms.to_vec();
+            let closest = find_closest_primitive(&ray, &primitives);
+            match closest {
+                Some((primitive, distance)) => {
+                    let point = ray.point(distance);
+                    let prm_material = match primitive {
+                        Primitive::Sphere { material, .. } => material,
+                        Primitive::Triangle { material, .. } => material,
+                    };
+
+                    match prm_material {
+                        Material::Simple(_) => {
+                            calculate_shading_bvh(primitive, &point, bvh, point_lights)
+                        }
+                        Material::Reflective(_, idx) => {
+                            let normal = primitive.normal(&point);
+                            let ri = ray.1.unit();
+                            let dot = ri.dot(&normal) * 2.0;
+                            let new_dir = &ri - &(&normal * dot);
+                            let reflected_ray = Ray::new(&point, &new_dir.unit());
+                            (calculate_shading_bvh(primitive, &point, bvh, point_lights)
+                                * (1.0 - idx))
+                                + trace_ray_bvh(reflected_ray, bvh, point_lights, depth + 1) * *idx
+                        }
+                    }
+                }
+                None => Color(0.0, 0.0, 0.0),
+            }
+        }
+        None => Color(0.0, 0.0, 0.0),
+    }
+}
+
+fn calculate_shading_bvh(
+    prm: &Primitive,
+    point: &Vector,
+    bvh: &BVH,
+    point_lights: &Vec<Vector>,
+) -> Color {
+    let normal = prm.normal(point);
+
+    let incident_lights = point_lights.iter().filter_map(|light| {
+        let direction = light - point;
+        let ray = Ray::new(point, &(direction.unit()));
+        match bvh.trace(&ray) {
+            Some(prms) => {
+                let primitives = prms.to_vec();
+                let closest = find_closest_primitive(&ray, &primitives);
+                let light_distance = direction.norm();
+                match closest {
+                    Some((_, dist)) => {
+                        if dist > light_distance {
+                            return Some(light);
+                        } else {
+                            return None;
+                        }
+                    }
+                    None => Some(light),
+                }
+            }
+            None => None,
+        }
+    });
+
+    let prm_material = match prm {
+        Primitive::Sphere { material, .. } => material,
+        Primitive::Triangle { material, .. } => material,
+    };
+
+    let prm_color = match prm_material {
+        Material::Simple(color) => color,
+        Material::Reflective(color, _) => color,
+    };
+
+    let color_intensity = incident_lights
+        .map(|light| {
+            let dot = normal.dot(&(light - &point).unit());
+            if dot < 0.0 {
+                return Color(0.0, 0.0, 0.0);
+            } else {
+                return Color(1.0, 1.0, 1.0) * dot;
+            }
+        })
+        .fold(Color(0.0, 0.0, 0.0), |acc, col| acc + col);
+
+    Color(
+        prm_color.0 * color_intensity.0,
+        prm_color.1 * color_intensity.1,
+        prm_color.2 * color_intensity.2,
+    )
+}
 
 fn trace_ray(
     ray: Ray,

@@ -106,7 +106,7 @@ pub fn torus() -> Vec<Primitive> {
         cur = next;
     }
 
-    println!("{:#?}", triangles.len());
+    //println!("{:#?}", triangles.len());
 
     triangles
 }
