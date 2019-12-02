@@ -1,5 +1,6 @@
 use rayon::prelude::*;
 use std::f32::consts::PI;
+use std::sync::Arc;
 
 mod bounding_box;
 mod trace;
@@ -32,7 +33,7 @@ pub struct World {
     camera: Camera,
     primitives: Vec<Primitive>,
     point_lights: Vec<Vector>,
-    tracer: dyn Trace,
+    tracer: Box<dyn Trace>,
 }
 
 impl World {
@@ -85,7 +86,7 @@ impl World {
         let point_lights = vec![Vector(-10.0, 10.0, -10.0)];
 
         //let bvh = BVH::new(primitives[..].to_vec());
-        let tracer = BruteForce::new(primitives[..].toVec());
+        let tracer = Box::new(BruteForce::new(primitives[..].to_vec()));
 
         println!("{} total", primitives.len());
         //println!("{:?} in bvh", bvh.stats());
@@ -109,7 +110,7 @@ impl World {
             camera,
             primitives,
             point_lights,
-            tracer,
+            ..
         } = self;
         let pixels = (0..height * width)
             .into_par_iter()
@@ -120,7 +121,7 @@ impl World {
 
                 //trace_ray(ray, primitives, point_lights, 0)
 
-                trace_ray_bvh(ray, tracer, point_lights, 0)
+                trace_ray_bvh(ray, &*self.tracer, point_lights, 0)
             })
             .collect::<Vec<Color>>();
         let mut buffer: Vec<u8> = vec![0; (bpp * width * height) as usize];
@@ -187,7 +188,7 @@ fn render2() -> Vec<u8> {
 }
 */
 
-fn trace_ray_bvh(ray: Ray, tracer: dyn Trace, point_lights: &Vec<Vector>, depth: u8) -> Color {
+fn trace_ray_bvh(ray: Ray, tracer: &impl Trace, point_lights: &Vec<Vector>, depth: u8) -> Color {
     if depth > 10 {
         return Color(0.0, 0.0, 0.0);
     }
@@ -216,7 +217,8 @@ fn trace_ray_bvh(ray: Ray, tracer: dyn Trace, point_lights: &Vec<Vector>, depth:
                             let reflected_ray = Ray::new(&point, &new_dir.unit());
                             (calculate_shading_bvh(primitive, &point, tracer, point_lights)
                                 * (1.0 - idx))
-                                + trace_ray_bvh(reflected_ray, tracer, point_lights, depth + 1) * *idx
+                                + trace_ray_bvh(reflected_ray, tracer, point_lights, depth + 1)
+                                    * *idx
                         }
                     }
                 }
@@ -230,7 +232,7 @@ fn trace_ray_bvh(ray: Ray, tracer: dyn Trace, point_lights: &Vec<Vector>, depth:
 fn calculate_shading_bvh(
     prm: &Primitive,
     point: &Vector,
-    tracer: dyn Trace,
+    tracer: &impl Trace,
     point_lights: &Vec<Vector>,
 ) -> Color {
     let normal = prm.normal(point);
