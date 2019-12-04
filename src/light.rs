@@ -6,8 +6,8 @@ mod bounding_box;
 mod trace;
 use bounding_box::*;
 use trace::*;
-mod bounding_volume_hierarchy;
-use bounding_volume_hierarchy::*;
+//mod bounding_volume_hierarchy;
+//use bounding_volume_hierarchy::*;
 mod material;
 use material::*;
 mod color;
@@ -31,9 +31,8 @@ pub struct World {
     width: u32,
     height: u32,
     camera: Camera,
-    primitives: Vec<Primitive>,
     point_lights: Vec<Vector>,
-    tracer: Box<dyn Trace>,
+    tracer: BruteForce,
 }
 
 impl World {
@@ -86,7 +85,7 @@ impl World {
         let point_lights = vec![Vector(-10.0, 10.0, -10.0)];
 
         //let bvh = BVH::new(primitives[..].to_vec());
-        let tracer = Box::new(BruteForce::new(primitives[..].to_vec()));
+        let tracer = BruteForce::new(primitives[..].to_vec());
 
         println!("{} total", primitives.len());
         //println!("{:?} in bvh", bvh.stats());
@@ -96,7 +95,6 @@ impl World {
             width,
             height,
             camera,
-            primitives,
             point_lights,
             tracer,
         }
@@ -108,7 +106,6 @@ impl World {
             height,
             bpp,
             camera,
-            primitives,
             point_lights,
             ..
         } = self;
@@ -121,7 +118,7 @@ impl World {
 
                 //trace_ray(ray, primitives, point_lights, 0)
 
-                trace_ray_bvh(ray, &*self.tracer, point_lights, 0)
+                trace_ray_bvh(ray, &self.tracer, point_lights, 0)
             })
             .collect::<Vec<Color>>();
         let mut buffer: Vec<u8> = vec![0; (bpp * width * height) as usize];
@@ -195,8 +192,7 @@ fn trace_ray_bvh(ray: Ray, tracer: &impl Trace, point_lights: &Vec<Vector>, dept
 
     match tracer.trace(&ray) {
         Some(prms) => {
-            let primitives = prms.to_vec();
-            let closest = find_closest_primitive(&ray, &primitives);
+            let closest = find_closest_primitive(&ray, prms);
             match closest {
                 Some((primitive, distance)) => {
                     let point = ray.point(distance);
@@ -242,8 +238,7 @@ fn calculate_shading_bvh(
         let ray = Ray::new(point, &(direction.unit()));
         match tracer.trace(&ray) {
             Some(prms) => {
-                let primitives = prms.to_vec();
-                let closest = find_closest_primitive(&ray, &primitives);
+                let closest = find_closest_primitive(&ray, prms);
                 let light_distance = direction.norm();
                 match closest {
                     Some((_, dist)) => {
@@ -287,13 +282,8 @@ fn calculate_shading_bvh(
         prm_color.2 * color_intensity.2,
     )
 }
-
-fn trace_ray(
-    ray: Ray,
-    primitives: &Vec<Primitive>,
-    point_lights: &Vec<Vector>,
-    depth: u8,
-) -> Color {
+/*
+fn trace_ray(ray: Ray, primitives: &[&Primitive], point_lights: &Vec<Vector>, depth: u8) -> Color {
     if depth > 10 {
         return Color(0.0, 0.0, 0.0);
     }
@@ -327,10 +317,10 @@ fn trace_ray(
         }
     }
 }
-
+*/
 fn find_closest_primitive<'a>(
     ray: &Ray,
-    primitives: &'a Vec<Primitive>,
+    primitives: &'a [&Primitive],
 ) -> Option<(&'a Primitive, f32)> {
     primitives
         .iter()
@@ -341,7 +331,7 @@ fn find_closest_primitive<'a>(
             _ => closest,
         })
 }
-
+/*
 fn calculate_shading(
     prm: &Primitive,
     point: &Vector,
@@ -393,4 +383,4 @@ fn calculate_shading(
         prm_color.1 * color_intensity.1,
         prm_color.2 * color_intensity.2,
     )
-}
+}*/
