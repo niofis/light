@@ -13,12 +13,12 @@ impl BruteForce {
 }
 
 impl Trace for BruteForce {
-    fn trace(&self, ray: &Ray) -> Option<&[&Primitive]> {
+    fn trace(&self, ray: &Ray) -> Option<Vec<&Primitive>> {
         let borrows = self
             .primitives
             .iter()
-            .map(|p| &p)
+            .map(|p| p)
             .collect::<Vec<&Primitive>>();
-        Some(&borrows[..]);
+        Some(borrows)
     }
 }

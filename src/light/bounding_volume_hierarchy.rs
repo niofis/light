@@ -16,8 +16,8 @@ pub enum BVH {
 }
 
 impl Trace for BVH {
-    fn trace<'a>(&self, ray: &Ray) -> Option<&[&Primitive]> {
-        let mut prm_vec = Vec::new();
+    fn trace<'a>(&self, ray: &Ray) -> Option<Vec<&Primitive>> {
+        let mut prm_vec: Vec<&Primitive> = Vec::new();
         let mut stack = VecDeque::new();
         stack.push_back(self);
 
@@ -32,7 +32,10 @@ impl Trace for BVH {
                 }) => {
                     if bounding_box.intersect(ray) {
                         if let Some(prms) = primitives {
-                            prm_vec.extend_from_slice(prms);
+                            prm_vec = prms.iter().fold(prm_vec, |mut acc, p| {
+                                acc.push(&p);
+                                acc
+                            });
                         }
                         stack.push_back(right);
                         stack.push_back(left);
@@ -61,7 +64,6 @@ impl BVH {
         });
 
         if len <= 10 {
-            println!("{}", len);
             return BVH::Node {
                 primitives: Some(primitives),
                 bounding_box: bb,

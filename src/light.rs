@@ -6,8 +6,8 @@ mod bounding_box;
 mod trace;
 use bounding_box::*;
 use trace::*;
-//mod bounding_volume_hierarchy;
-//use bounding_volume_hierarchy::*;
+mod bounding_volume_hierarchy;
+use bounding_volume_hierarchy::*;
 mod material;
 use material::*;
 mod color;
@@ -26,13 +26,15 @@ use transform::*;
 mod brute_force;
 use brute_force::*;
 
+type AccStruct = BVH;
+
 pub struct World {
     bpp: u32,
     width: u32,
     height: u32,
     camera: Camera,
     point_lights: Vec<Vector>,
-    tracer: BruteForce,
+    tracer: AccStruct,
 }
 
 impl World {
@@ -73,21 +75,21 @@ impl World {
             Transform::translate(0.0, 5.0, 0.0),
         ];
         let mut cornell = solids::cornell_box(&Transform::combine(&cornell_trs));
-        //primitives.append(&mut cornell);
+        primitives.append(&mut cornell);
 
-        let primitives = cornell;
+        //let primitives = cornell;
 
         let mut donut = solids::torus();
-        //primitives.append(&mut donut);
+        primitives.append(&mut donut);
 
         //let primitives = donut;
 
         let point_lights = vec![Vector(-10.0, 10.0, -10.0)];
 
-        //let bvh = BVH::new(primitives[..].to_vec());
-        let tracer = BruteForce::new(primitives[..].to_vec());
-
         println!("{} total", primitives.len());
+        //let bvh = BVH::new(primitives[..].to_vec());
+        let tracer = AccStruct::new(primitives);
+
         //println!("{:?} in bvh", bvh.stats());
 
         World {
@@ -192,7 +194,7 @@ fn trace_ray_bvh(ray: Ray, tracer: &impl Trace, point_lights: &Vec<Vector>, dept
 
     match tracer.trace(&ray) {
         Some(prms) => {
-            let closest = find_closest_primitive(&ray, prms);
+            let closest = find_closest_primitive(&ray, &prms);
             match closest {
                 Some((primitive, distance)) => {
                     let point = ray.point(distance);
@@ -238,7 +240,7 @@ fn calculate_shading_bvh(
         let ray = Ray::new(point, &(direction.unit()));
         match tracer.trace(&ray) {
             Some(prms) => {
-                let closest = find_closest_primitive(&ray, prms);
+                let closest = find_closest_primitive(&ray, &prms);
                 let light_distance = direction.norm();
                 match closest {
                     Some((_, dist)) => {
@@ -320,7 +322,7 @@ fn trace_ray(ray: Ray, primitives: &[&Primitive], point_lights: &Vec<Vector>, de
 */
 fn find_closest_primitive<'a>(
     ray: &Ray,
-    primitives: &'a [&Primitive],
+    primitives: &'a Vec<&Primitive>,
 ) -> Option<(&'a Primitive, f32)> {
     primitives
         .iter()
