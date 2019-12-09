@@ -86,7 +86,7 @@ impl World {
 
         let point_lights = vec![Vector(-10.0, 10.0, -10.0)];
 
-        println!("{} total", primitives.len());
+        println!("{} total primitives", primitives.len());
         //let bvh = BVH::new(primitives[..].to_vec());
         let tracer = AccStruct::new(primitives);
 
@@ -120,7 +120,7 @@ impl World {
 
                 //trace_ray(ray, primitives, point_lights, 0)
 
-                trace_ray_bvh(ray, &self.tracer, point_lights, 0)
+                trace_ray(ray, &self.tracer, point_lights, 0)
             })
             .collect::<Vec<Color>>();
         let mut buffer: Vec<u8> = vec![0; (bpp * width * height) as usize];
@@ -138,7 +138,7 @@ impl World {
     }
 }
 
-fn trace_ray_bvh(ray: Ray, tracer: &impl Trace, point_lights: &Vec<Vector>, depth: u8) -> Color {
+fn trace_ray(ray: Ray, tracer: &impl Trace, point_lights: &Vec<Vector>, depth: u8) -> Color {
     if depth > 10 {
         return Color(0.0, 0.0, 0.0);
     }
@@ -156,7 +156,7 @@ fn trace_ray_bvh(ray: Ray, tracer: &impl Trace, point_lights: &Vec<Vector>, dept
 
                     match prm_material {
                         Material::Simple(_) => {
-                            calculate_shading_bvh(primitive, &point, tracer, point_lights)
+                            calculate_shading(primitive, &point, tracer, point_lights)
                         }
                         Material::Reflective(_, idx) => {
                             let normal = primitive.normal(&point);
@@ -164,9 +164,9 @@ fn trace_ray_bvh(ray: Ray, tracer: &impl Trace, point_lights: &Vec<Vector>, dept
                             let dot = ri.dot(&normal) * 2.0;
                             let new_dir = &ri - &(&normal * dot);
                             let reflected_ray = Ray::new(&point, &new_dir.unit());
-                            (calculate_shading_bvh(primitive, &point, tracer, point_lights)
+                            (calculate_shading(primitive, &point, tracer, point_lights)
                                 * (1.0 - idx))
-                                + trace_ray_bvh(reflected_ray, tracer, point_lights, depth + 1)
+                                + trace_ray(reflected_ray, tracer, point_lights, depth + 1)
                                     * *idx
                         }
                     }
@@ -178,7 +178,7 @@ fn trace_ray_bvh(ray: Ray, tracer: &impl Trace, point_lights: &Vec<Vector>, dept
     }
 }
 
-fn calculate_shading_bvh(
+fn calculate_shading(
     prm: &Primitive,
     point: &Vector,
     tracer: &impl Trace,

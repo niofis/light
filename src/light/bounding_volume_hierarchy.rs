@@ -53,7 +53,7 @@ impl Trace for BVH {
 }
 
 impl BVH {
-    pub fn new(primitives: Vec<Primitive>) -> BVH {
+    pub fn new(mut primitives: Vec<Primitive>) -> BVH {
         let len = primitives.len();
         if len == 0 {
             return BVH::Empty;
@@ -74,11 +74,13 @@ impl BVH {
 
         let mid = len / 2;
 
+        let right = primitives.split_off(mid);
+
         return BVH::Node {
             primitives: None,
             bounding_box: bb,
-            left: Box::new(BVH::new(primitives[..mid].to_vec())),
-            right: Box::new(BVH::new(primitives[mid..].to_vec())),
+            left: Box::new(BVH::new(primitives)),
+            right: Box::new(BVH::new(right)),
         };
     }
 

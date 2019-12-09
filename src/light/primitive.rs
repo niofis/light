@@ -3,7 +3,7 @@ use crate::light::material::*;
 use crate::light::ray::*;
 use crate::light::vector::*;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Debug)]
 pub enum Primitive {
     Sphere {
         center: Vector,
@@ -18,6 +18,7 @@ pub enum Primitive {
         material: Material,
         pt2: Vector,
         pt3: Vector,
+        centroid: Vector,
     },
 }
 
@@ -26,6 +27,7 @@ impl Primitive {
         let edge1 = &pt2 - &pt1;
         let edge2 = &pt3 - &pt1;
         let normal = edge1.cross(&edge2).unit();
+        let centroid = (&(&pt1 + &pt2) + &pt3) / 3.0;
 
         Primitive::Triangle {
             origin: pt1,
@@ -35,6 +37,7 @@ impl Primitive {
             material,
             pt2,
             pt3,
+            centroid,
         }
     }
 
@@ -77,6 +80,13 @@ impl Primitive {
                     origin.2.max(pt2.2).max(pt3.2),
                 ),
             },
+        }
+    }
+
+    pub fn centroid(&self) -> Vector {
+        match self {
+            Primitive::Sphere { center, .. } => center.clone(),
+            Primitive::Triangle { centroid, .. } => centroid.clone(),
         }
     }
 }
