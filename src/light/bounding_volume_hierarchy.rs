@@ -63,7 +63,7 @@ impl BVH {
             acc.combine(&p.bounding_box())
         });
 
-        if len <= 10 {
+        if len <= 8 {
             return BVH::Node {
                 primitives: Some(primitives),
                 bounding_box: bb,

@@ -27,6 +27,7 @@ mod brute_force;
 use brute_force::*;
 
 type AccStruct = BVH;
+//type AccStruct = BruteForce;
 
 pub struct World {
     bpp: u32,
@@ -166,8 +167,7 @@ fn trace_ray(ray: Ray, tracer: &impl Trace, point_lights: &Vec<Vector>, depth: u
                             let reflected_ray = Ray::new(&point, &new_dir.unit());
                             (calculate_shading(primitive, &point, tracer, point_lights)
                                 * (1.0 - idx))
-                                + trace_ray(reflected_ray, tracer, point_lights, depth + 1)
-                                    * *idx
+                                + trace_ray(reflected_ray, tracer, point_lights, depth + 1) * *idx
                         }
                     }
                 }
