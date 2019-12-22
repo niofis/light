@@ -15,9 +15,38 @@ pub enum BVH {
     },
 }
 
+fn rec_trace<'a>(bvh: &'a BVH, ray: &Ray, prm_vec: &mut Vec<&'a Primitive>) {
+    match bvh {
+        BVH::Node {
+            primitives,
+            bounding_box,
+            left,
+            right,
+        } => {
+            if bounding_box.intersect(ray) {
+                if let Some(prms) = primitives {
+                    //let mut coso = prms.iter().map(|p| p).collect::<Vec<&Primitive>>();
+                    //prm_vec.append(&mut prms.iter().map(|p| p).collect::<Vec<&Primitive>>());
+
+                    for p in prms {
+                        prm_vec.push(p);
+                    }
+                }
+                rec_trace(&left, ray, prm_vec);
+                rec_trace(&right, ray, prm_vec);
+            }
+        }
+        _ => {}
+    };
+}
+
 impl Trace for BVH {
-    fn trace<'a>(&self, ray: &Ray) -> Option<Vec<&Primitive>> {
+    fn trace(&self, ray: &Ray) -> Option<Vec<&Primitive>> {
         let mut prm_vec: Vec<&Primitive> = Vec::new();
+
+        rec_trace(&self, &ray, &mut prm_vec);
+
+        /*
         let mut stack = VecDeque::new();
         stack.push_back(self);
 
@@ -32,10 +61,9 @@ impl Trace for BVH {
                 }) => {
                     if bounding_box.intersect(ray) {
                         if let Some(prms) = primitives {
-                            prm_vec = prms.iter().fold(prm_vec, |mut acc, p| {
-                                acc.push(&p);
-                                acc
-                            });
+                            for p in prms {
+                                prm_vec.push(&p);
+                            }
                         }
                         stack.push_back(right);
                         stack.push_back(left);
@@ -43,12 +71,13 @@ impl Trace for BVH {
                 }
                 _ => {}
             }
-        }
+        }*/
 
-        if prm_vec.len() > 0 {
-            return Some(prm_vec);
+        if prm_vec.is_empty() {
+            None
+        } else {
+            Some(prm_vec)
         }
-        None
     }
 }
 
@@ -59,11 +88,13 @@ impl BVH {
             return BVH::Empty;
         }
 
+        //primitives.sort_by(|a, b| a.centroid().0.partial_cmp(&b.centroid().0).unwrap());
+
         let bb = primitives.iter().fold(BoundingBox::empty(), |acc, p| {
             acc.combine(&p.bounding_box())
         });
 
-        if len <= 8 {
+        if len <= 1 {
             return BVH::Node {
                 primitives: Some(primitives),
                 bounding_box: bb,
@@ -84,13 +115,15 @@ impl BVH {
         };
     }
 
-    pub fn stats(&self) -> (usize, usize) {
+    pub fn stats(&self) -> (usize, usize, usize) {
         let mut count = 0;
         let mut arity = 0;
+        let mut height = 0;
         let mut stack = VecDeque::new();
         stack.push_back(self);
 
         while !stack.is_empty() {
+            height = height.max(stack.len());
             let bvh = stack.pop_back();
             match bvh {
                 Some(BVH::Node {
@@ -109,7 +142,7 @@ impl BVH {
                 _ => {}
             }
         }
-        (count, arity)
+        (count, arity, height)
     }
 }
 

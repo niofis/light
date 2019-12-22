@@ -91,7 +91,7 @@ impl World {
         //let bvh = BVH::new(primitives[..].to_vec());
         let tracer = AccStruct::new(primitives);
 
-        //println!("{:?} in bvh", bvh.stats());
+        //println!("{:?} in bvh", tracer.stats());
 
         World {
             bpp,

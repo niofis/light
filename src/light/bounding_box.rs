@@ -25,25 +25,21 @@ impl BoundingBox {
         let dxi: f32 = 1.0 / direction.0;
         let dyi: f32 = 1.0 / direction.1;
         let dzi: f32 = 1.0 / direction.2;
-        let sign = vec![
+        let sign = [
             if dxi < 0.0 { 1 } else { 0 },
             if dyi < 0.0 { 1 } else { 0 },
             if dzi < 0.0 { 1 } else { 0 },
         ];
-        let params = vec![min, max];
-        let mut tmin = (params[sign[0]].0 - origin.0) * dxi;
-        let mut tmax = (params[1 - sign[0]].0 - origin.0) * dxi;
+        let params = [min, max];
+        let tmin = (params[sign[0]].0 - origin.0) * dxi;
+        let tmax = (params[1 - sign[0]].0 - origin.0) * dxi;
         let tymin = (params[sign[1]].1 - origin.1) * dyi;
         let tymax = (params[1 - sign[1]].1 - origin.1) * dyi;
         if tmin > tymax || tymin > tmax {
             return false;
         }
-        if tymin > tmin {
-            tmin = tymin;
-        }
-        if tymax < tmax {
-            tmax = tymax;
-        }
+        let tmin = if tymin > tmin { tymin } else { tmin };
+        let tmax = if tymax < tmax { tymax } else { tmax };
         let tzmin = (params[sign[2]].2 - origin.2) * dzi;
         let tzmax = (params[1 - sign[2]].2 - origin.2) * dzi;
 
