@@ -26,6 +26,7 @@ fn rec_trace<'a>(bvh: &'a BVH, ray: &Ray, prm_vec: &mut Vec<&'a Primitive>) {
             if bounding_box.intersect(ray) {
                 if let Some(prms) = primitives {
                     //let mut coso = prms.iter().map(|p| p).collect::<Vec<&Primitive>>();
+                    
                     //prm_vec.append(&mut prms.iter().map(|p| p).collect::<Vec<&Primitive>>());
 
                     for p in prms {

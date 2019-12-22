@@ -25,23 +25,22 @@ impl BoundingBox {
         let dxi: f32 = 1.0 / direction.0;
         let dyi: f32 = 1.0 / direction.1;
         let dzi: f32 = 1.0 / direction.2;
-        let sign = [
-            if dxi < 0.0 { 1 } else { 0 },
-            if dyi < 0.0 { 1 } else { 0 },
-            if dzi < 0.0 { 1 } else { 0 },
-        ];
+        let (sx, rsx) = if dxi < 0.0 { (1,0) } else { (0,1) };
+        let (sy, rsy) = if dyi < 0.0 { (1,0) } else { (0,1) };
+        let (sz, rsz) = if dzi < 0.0 { (1,0) } else { (0,1) };
+        
         let params = [min, max];
-        let tmin = (params[sign[0]].0 - origin.0) * dxi;
-        let tmax = (params[1 - sign[0]].0 - origin.0) * dxi;
-        let tymin = (params[sign[1]].1 - origin.1) * dyi;
-        let tymax = (params[1 - sign[1]].1 - origin.1) * dyi;
+        let tmin = (params[sx].0 - origin.0) * dxi;
+        let tymax = (params[rsy].1 - origin.1) * dyi;
+        let tmax = (params[rsx].0 - origin.0) * dxi;
+        let tymin = (params[sy].1 - origin.1) * dyi;
         if tmin > tymax || tymin > tmax {
             return false;
         }
         let tmin = if tymin > tmin { tymin } else { tmin };
         let tmax = if tymax < tmax { tymax } else { tmax };
-        let tzmin = (params[sign[2]].2 - origin.2) * dzi;
-        let tzmax = (params[1 - sign[2]].2 - origin.2) * dzi;
+        let tzmin = (params[sz].2 - origin.2) * dzi;
+        let tzmax = (params[rsz].2 - origin.2) * dzi;
 
         if tmin > tzmax || tzmin > tmax {
             return false;
