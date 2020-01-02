@@ -5,19 +5,25 @@ use crate::light::trace::*;
 use std::collections::VecDeque;
 
 #[derive(Debug)]
-pub enum BVH {
+pub enum BVHNode {
     Empty,
     Node {
-        primitives: Option<Vec<Primitive>>,
+        primitives: Option<Vec<usize>>,
         bounding_box: BoundingBox,
-        left: Box<BVH>,
-        right: Box<BVH>,
+        left: Box<BVHNode>,
+        right: Box<BVHNode>,
     },
 }
 
-fn rec_trace<'a>(bvh: &'a BVH, ray: &Ray, prm_vec: &mut Vec<&'a Primitive>) {
+#[derive(Debug)]
+pub struct BVH {
+    primitives: Vec<Primitive>,
+    root: BVHNode,
+}
+
+fn rec_trace<'a>(bvh: &'a BVHNode, ray: &Ray, prm_vec: &mut Vec<usize>) {
     match bvh {
-        BVH::Node {
+        BVHNode::Node {
             primitives,
             bounding_box,
             left,
@@ -26,11 +32,11 @@ fn rec_trace<'a>(bvh: &'a BVH, ray: &Ray, prm_vec: &mut Vec<&'a Primitive>) {
             if bounding_box.intersect(ray) {
                 if let Some(prms) = primitives {
                     //let mut coso = prms.iter().map(|p| p).collect::<Vec<&Primitive>>();
-                    
+
                     //prm_vec.append(&mut prms.iter().map(|p| p).collect::<Vec<&Primitive>>());
 
                     for p in prms {
-                        prm_vec.push(p);
+                        prm_vec.push(*p);
                     }
                 }
                 rec_trace(&left, ray, prm_vec);
@@ -43,9 +49,10 @@ fn rec_trace<'a>(bvh: &'a BVH, ray: &Ray, prm_vec: &mut Vec<&'a Primitive>) {
 
 impl Trace for BVH {
     fn trace(&self, ray: &Ray) -> Option<Vec<&Primitive>> {
-        let mut prm_vec: Vec<&Primitive> = Vec::new();
+        let BVH { primitives, root } = self;
+        let mut idx_vec: Vec<usize> = Vec::new();
 
-        rec_trace(&self, &ray, &mut prm_vec);
+        rec_trace(&root, &ray, &mut idx_vec);
 
         /*
         let mut stack = VecDeque::new();
@@ -74,33 +81,73 @@ impl Trace for BVH {
             }
         }*/
 
-        if prm_vec.is_empty() {
+        if idx_vec.is_empty() {
             None
         } else {
+            let prm_vec = idx_vec.iter().map(|i| &primitives[*i]).collect();
             Some(prm_vec)
         }
     }
 }
 
+fn create_hierarchy(primitives: &Vec<Primitive>, mut indexes: Vec<usize>) -> BVHNode {
+    let len = indexes.len();
+
+    let bb = indexes.iter().fold(BoundingBox::empty(), |acc, p| {
+        acc.combine(&primitives[*p].bounding_box())
+    });
+
+    if len <= 1 {
+        return BVHNode::Node {
+            primitives: Some(indexes),
+            bounding_box: bb,
+            left: Box::new(BVHNode::Empty),
+            right: Box::new(BVHNode::Empty),
+        };
+    }
+
+    let mid = len / 2;
+
+    let right = indexes.split_off(mid);
+
+    return BVHNode::Node {
+        primitives: None,
+        bounding_box: bb,
+        left: Box::new(create_hierarchy(&primitives, indexes)),
+        right: Box::new(create_hierarchy(&primitives, right)),
+    };
+}
+
 impl BVH {
-    pub fn new(mut primitives: Vec<Primitive>) -> BVH {
+    pub fn new(primitives: Vec<Primitive>) -> BVH {
         let len = primitives.len();
         if len == 0 {
-            return BVH::Empty;
+            return BVH {
+                primitives,
+                root: BVHNode::Empty,
+            };
         }
 
-        //primitives.sort_by(|a, b| a.centroid().0.partial_cmp(&b.centroid().0).unwrap());
+        let mut indexes: Vec<usize> = (0..len).collect();
+        let root = create_hierarchy(&primitives, indexes);
 
+        BVH { primitives, root }
+
+        //primitives.sort_by(|a, b| a.centroid().0.partial_cmp(&b.centroid().0).unwrap());
+        /*
         let bb = primitives.iter().fold(BoundingBox::empty(), |acc, p| {
             acc.combine(&p.bounding_box())
         });
 
         if len <= 1 {
-            return BVH::Node {
-                primitives: Some(primitives),
-                bounding_box: bb,
-                left: Box::new(BVH::Empty),
-                right: Box::new(BVH::Empty),
+            return BVH {
+                primitives,
+                root: BVHNode::Node {
+                    primitives: Some(primitives),
+                    bounding_box: bb,
+                    left: Box::new(BVH::Empty),
+                    right: Box::new(BVH::Empty),
+                },
             };
         }
 
@@ -108,26 +155,31 @@ impl BVH {
 
         let right = primitives.split_off(mid);
 
-        return BVH::Node {
-            primitives: None,
-            bounding_box: bb,
-            left: Box::new(BVH::new(primitives)),
-            right: Box::new(BVH::new(right)),
+        return BVH {
+            primitives,
+            root: BVHNode::Node {
+                primitives: None,
+                bounding_box: bb,
+                left: Box::new(BVH::new(primitives)),
+                right: Box::new(BVH::new(right)),
+            },
         };
+        */
     }
 
     pub fn stats(&self) -> (usize, usize, usize) {
+        let BVH { root, .. } = self;
         let mut count = 0;
         let mut arity = 0;
         let mut height = 0;
         let mut stack = VecDeque::new();
-        stack.push_back(self);
+        stack.push_back(root);
 
         while !stack.is_empty() {
             height = height.max(stack.len());
             let bvh = stack.pop_back();
             match bvh {
-                Some(BVH::Node {
+                Some(BVHNode::Node {
                     primitives,
                     left,
                     right,
