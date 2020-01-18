@@ -2,6 +2,7 @@ use crate::light::bounding_box::*;
 use crate::light::primitive::*;
 use crate::light::ray::*;
 use crate::light::trace::*;
+use crate::light::vector::*;
 use std::collections::VecDeque;
 
 #[derive(Debug)]
@@ -21,7 +22,7 @@ pub struct BVH {
     root: BVHNode,
 }
 
-fn rec_trace<'a>(bvh: &'a BVHNode, ray: &Ray, prm_vec: &mut Vec<usize>) {
+fn rec_trace(bvh: &BVHNode, ray: &Ray, prm_vec: &mut Vec<usize>) {
     match bvh {
         BVHNode::Node {
             primitives,
@@ -31,10 +32,7 @@ fn rec_trace<'a>(bvh: &'a BVHNode, ray: &Ray, prm_vec: &mut Vec<usize>) {
         } => {
             if bounding_box.intersect(ray) {
                 if let Some(prms) = primitives {
-                    //let mut coso = prms.iter().map(|p| p).collect::<Vec<&Primitive>>();
-
-                    //prm_vec.append(&mut prms.iter().map(|p| p).collect::<Vec<&Primitive>>());
-
+                    //prm_vec.append(&mut prms.iter().map(|p| *p).collect::<Vec<usize>>());
                     for p in prms {
                         prm_vec.push(*p);
                     }
@@ -118,6 +116,104 @@ fn create_hierarchy(primitives: &Vec<Primitive>, mut indexes: Vec<usize>) -> BVH
     };
 }
 
+fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
+    if items.len() == 0 {
+        return BVHNode::Empty;
+    }
+
+    if items.len() <= 4 {
+        return BVHNode::Node {
+            primitives: Some(items.iter().map(|x| x.1).collect::<Vec<usize>>()),
+            bounding_box: BoundingBox::empty(),
+            left: Box::new(BVHNode::Empty),
+            right: Box::new(BVHNode::Empty),
+        };
+    }
+
+    let mut minx = std::f32::MAX;
+    let mut miny = std::f32::MAX;
+    let mut minz = std::f32::MAX;
+    let mut maxx = std::f32::MIN;
+    let mut maxy = std::f32::MIN;
+    let mut maxz = std::f32::MIN;
+
+    for item in items {
+        let (Vector(x, y, z), _) = item;
+        minx = if *x < minx { *x } else { minx };
+        miny = if *y < miny { *y } else { miny };
+        minz = if *z < minz { *z } else { minz };
+
+        maxx = if *x > maxx { *x } else { maxx };
+        maxy = if *y > maxy { *y } else { maxy };
+        maxz = if *z > maxz { *z } else { maxz };
+    }
+
+    let center = Vector(
+        (minx + maxx) / 2.0,
+        (miny + maxy) / 2.0,
+        (minz + maxz) / 2.0,
+    );
+
+    let sector = |c: &Vector| if (c.0 >= center.0) { 1 } else { 0 } +
+        if (c.1 >= center.1) { 2 } else { 0 } +
+        if (c.2 >= center.2) { 4 } else { 0 };
+
+    let sectors = vec![
+        items
+            .iter()
+            .filter_map(|x| if sector(&x.0) == 0 { Some(*x) } else { None })
+            .collect::<Vec<(Vector, usize)>>(),
+        items
+            .iter()
+            .filter_map(|x| if sector(&x.0) == 1 { Some(*x) } else { None })
+            .collect::<Vec<(Vector, usize)>>(),
+        items
+            .iter()
+            .filter_map(|x| if sector(&x.0) == 2 { Some(*x) } else { None })
+            .collect::<Vec<(Vector, usize)>>(),
+        items
+            .iter()
+            .filter_map(|x| if sector(&x.0) == 3 { Some(*x) } else { None })
+            .collect::<Vec<(Vector, usize)>>(),
+        items
+            .iter()
+            .filter_map(|x| if sector(&x.0) == 4 { Some(*x) } else { None })
+            .collect::<Vec<(Vector, usize)>>(),
+        items
+            .iter()
+            .filter_map(|x| if sector(&x.0) == 5 { Some(*x) } else { None })
+            .collect::<Vec<(Vector, usize)>>(),
+        items
+            .iter()
+            .filter_map(|x| if sector(&x.0) == 6 { Some(*x) } else { None })
+            .collect::<Vec<(Vector, usize)>>(),
+        items
+            .iter()
+            .filter_map(|x| if sector(&x.0) == 7 { Some(*x) } else { None })
+            .collect::<Vec<(Vector, usize)>>(),
+    ];
+
+    let lens = sectors.iter().map(|s| s.len() as i64).collect::<Vec<i64>>();
+    let xdiff =
+        ((lens[0] + lens[2] + lens[4] + lens[6]) - (lens[1] + lens[3] + lens[5] + lens[7])).abs();
+    let ydiff =
+        ((lens[0] + lens[1] + lens[4] + lens[5]) - (lens[2] + lens[3] + lens[4] + lens[5])).abs();
+    let zdiff =
+        ((lens[0] + lens[1] + lens[2] + lens[3]) - (lens[4] + lens[5] + lens[6] + lens[7])).abs();
+
+    println!(
+        "{:?} {} {:?} diffs {} {} {}",
+        center,
+        items.len(),
+        sectors.iter().map(|s| s.len()).collect::<Vec<usize>>(),
+        xdiff,
+        ydiff,
+        zdiff
+    );
+
+    BVHNode::Empty
+}
+
 impl BVH {
     pub fn new(primitives: Vec<Primitive>) -> BVH {
         let len = primitives.len();
@@ -128,43 +224,14 @@ impl BVH {
             };
         }
 
-        let mut indexes: Vec<usize> = (0..len).collect();
-        let root = create_hierarchy(&primitives, indexes);
+        let indexes: Vec<usize> = (0..len).collect();
+        let centroid: Vec<Vector> = primitives.iter().map(|x| x.centroid()).collect();
+        let mut items: Vec<(Vector, usize)> =
+            centroid.into_iter().zip(indexes.into_iter()).collect();
+        //let root = create_hierarchy(&primitives, indexes);
+        let root = octree_grouping(&mut items);
 
         BVH { primitives, root }
-
-        //primitives.sort_by(|a, b| a.centroid().0.partial_cmp(&b.centroid().0).unwrap());
-        /*
-        let bb = primitives.iter().fold(BoundingBox::empty(), |acc, p| {
-            acc.combine(&p.bounding_box())
-        });
-
-        if len <= 1 {
-            return BVH {
-                primitives,
-                root: BVHNode::Node {
-                    primitives: Some(primitives),
-                    bounding_box: bb,
-                    left: Box::new(BVH::Empty),
-                    right: Box::new(BVH::Empty),
-                },
-            };
-        }
-
-        let mid = len / 2;
-
-        let right = primitives.split_off(mid);
-
-        return BVH {
-            primitives,
-            root: BVHNode::Node {
-                primitives: None,
-                bounding_box: bb,
-                left: Box::new(BVH::new(primitives)),
-                right: Box::new(BVH::new(right)),
-            },
-        };
-        */
     }
 
     pub fn stats(&self) -> (usize, usize, usize) {

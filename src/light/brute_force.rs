@@ -17,7 +17,7 @@ impl Trace for BruteForce {
         let borrows = self
             .primitives
             .iter()
-            .map(|p| p)
+            //.map(|p| p)
             .collect::<Vec<&Primitive>>();
         Some(borrows)
     }
