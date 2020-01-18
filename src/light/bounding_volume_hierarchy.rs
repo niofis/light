@@ -197,7 +197,7 @@ fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
     let xdiff =
         ((lens[0] + lens[2] + lens[4] + lens[6]) - (lens[1] + lens[3] + lens[5] + lens[7])).abs();
     let ydiff =
-        ((lens[0] + lens[1] + lens[4] + lens[5]) - (lens[2] + lens[3] + lens[4] + lens[5])).abs();
+        ((lens[0] + lens[1] + lens[4] + lens[5]) - (lens[2] + lens[3] + lens[6] + lens[7])).abs();
     let zdiff =
         ((lens[0] + lens[1] + lens[2] + lens[3]) - (lens[4] + lens[5] + lens[6] + lens[7])).abs();
 
@@ -211,7 +211,136 @@ fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
         zdiff
     );
 
-    BVHNode::Empty
+    if xdiff < ydiff && xdiff < zdiff {
+        return BVHNode::Node {
+            primitives: None,
+            bounding_box: BoundingBox::empty(),
+            left: Box::new(octree_grouping(
+                &items
+                    .iter()
+                    .filter_map(|x| {
+                        if [0, 2, 4, 6].contains(&sector(&x.0)) {
+                            Some(*x)
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<Vec<(Vector, usize)>>(),
+            )),
+            right: Box::new(octree_grouping(
+                &items
+                    .iter()
+                    .filter_map(|x| {
+                        if [1, 3, 5, 7].contains(&sector(&x.0)) {
+                            Some(*x)
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<Vec<(Vector, usize)>>(),
+            )),
+        };
+    } else if (ydiff < xdiff && ydiff < zdiff) {
+        return BVHNode::Node {
+            primitives: None,
+            bounding_box: BoundingBox::empty(),
+            left: Box::new(octree_grouping(
+                &items
+                    .iter()
+                    .filter_map(|x| {
+                        if [0, 1, 4, 5].contains(&sector(&x.0)) {
+                            Some(*x)
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<Vec<(Vector, usize)>>(),
+            )),
+            right: Box::new(octree_grouping(
+                &items
+                    .iter()
+                    .filter_map(|x| {
+                        if [2, 3, 6, 7].contains(&sector(&x.0)) {
+                            Some(*x)
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<Vec<(Vector, usize)>>(),
+            )),
+        };
+    } else {
+        return BVHNode::Node {
+            primitives: None,
+            bounding_box: BoundingBox::empty(),
+            left: Box::new(octree_grouping(
+                &items
+                    .iter()
+                    .filter_map(|x| {
+                        if [0, 1, 2, 3].contains(&sector(&x.0)) {
+                            Some(*x)
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<Vec<(Vector, usize)>>(),
+            )),
+            right: Box::new(octree_grouping(
+                &items
+                    .iter()
+                    .filter_map(|x| {
+                        if [4, 5, 6, 7].contains(&sector(&x.0)) {
+                            Some(*x)
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<Vec<(Vector, usize)>>(),
+            )),
+        };
+    }
+}
+
+fn rebuild(prms: &Vec<Primitive>, root: BVHNode) -> BVHNode {
+    match root {
+        BVHNode::Empty => BVHNode::Empty,
+        BVHNode::Node {
+            primitives,
+            left,
+            right,
+            ..
+        } => {
+            let left = rebuild(&prms, *left);
+            let right = rebuild(&prms, *right);
+            let mut bounding_box = BoundingBox::empty();
+
+            if let Some(indexes) = &primitives {
+                bounding_box = indexes.iter().fold(BoundingBox::empty(), |acc, p| {
+                    acc.combine(&prms[*p].bounding_box())
+                });
+            }
+            if let BVHNode::Node {
+                bounding_box: lbb, ..
+            } = &left
+            {
+                bounding_box = bounding_box.combine(&lbb);
+            }
+
+            if let BVHNode::Node {
+                bounding_box: rbb, ..
+            } = &right
+            {
+                bounding_box = bounding_box.combine(&rbb);
+            }
+
+            BVHNode::Node {
+                primitives,
+                left: Box::new(left),
+                right: Box::new(right),
+                bounding_box,
+            }
+        }
+    }
 }
 
 impl BVH {
@@ -230,6 +359,7 @@ impl BVH {
             centroid.into_iter().zip(indexes.into_iter()).collect();
         //let root = create_hierarchy(&primitives, indexes);
         let root = octree_grouping(&mut items);
+        let root = rebuild(&primitives, root);
 
         BVH { primitives, root }
     }
