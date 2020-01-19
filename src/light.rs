@@ -119,8 +119,6 @@ impl World {
                 let y = (pixel / width) as f32;
                 let ray = camera.get_ray(x, y);
 
-                //trace_ray(ray, primitives, point_lights, 0)
-
                 trace_ray(ray, &self.tracer, point_lights, 0)
             })
             .collect::<Vec<Color>>();

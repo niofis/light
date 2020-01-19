@@ -52,33 +52,6 @@ impl Trace for BVH {
 
         rec_trace(&root, &ray, &mut idx_vec);
 
-        /*
-        let mut stack = VecDeque::new();
-        stack.push_back(self);
-
-        while !stack.is_empty() {
-            let bvh = stack.pop_back();
-            match bvh {
-                Some(BVH::Node {
-                    primitives,
-                    bounding_box,
-                    left,
-                    right,
-                }) => {
-                    if bounding_box.intersect(ray) {
-                        if let Some(prms) = primitives {
-                            for p in prms {
-                                prm_vec.push(&p);
-                            }
-                        }
-                        stack.push_back(right);
-                        stack.push_back(left);
-                    }
-                }
-                _ => {}
-            }
-        }*/
-
         if idx_vec.is_empty() {
             None
         } else {
@@ -121,7 +94,7 @@ fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
         return BVHNode::Empty;
     }
 
-    if items.len() <= 4 {
+    if items.len() <= 1 {
         return BVHNode::Node {
             primitives: Some(items.iter().map(|x| x.1).collect::<Vec<usize>>()),
             bounding_box: BoundingBox::empty(),
@@ -201,17 +174,7 @@ fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
     let zdiff =
         ((lens[0] + lens[1] + lens[2] + lens[3]) - (lens[4] + lens[5] + lens[6] + lens[7])).abs();
 
-    println!(
-        "{:?} {} {:?} diffs {} {} {}",
-        center,
-        items.len(),
-        sectors.iter().map(|s| s.len()).collect::<Vec<usize>>(),
-        xdiff,
-        ydiff,
-        zdiff
-    );
-
-    if xdiff < ydiff && xdiff < zdiff {
+    if xdiff <= ydiff && xdiff <= zdiff {
         return BVHNode::Node {
             primitives: None,
             bounding_box: BoundingBox::empty(),
@@ -240,7 +203,7 @@ fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
                     .collect::<Vec<(Vector, usize)>>(),
             )),
         };
-    } else if (ydiff < xdiff && ydiff < zdiff) {
+    } else if (ydiff <= xdiff && ydiff <= zdiff) {
         return BVHNode::Node {
             primitives: None,
             bounding_box: BoundingBox::empty(),

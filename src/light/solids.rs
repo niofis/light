@@ -85,11 +85,6 @@ pub fn torus() -> Vec<Primitive> {
             .collect::<Vec<Vector>>();
 
         for n in 0..sc1 {
-            /*triangles.push(Primitive::Sphere {
-                center: cur[n].clone(),
-                radius: 0.1,
-                material: Material::blue(),
-            });*/
             triangles.push(Primitive::new_triangle(
                 trs.apply(&cur[n]),
                 trs.apply(&next[n]),
@@ -105,8 +100,6 @@ pub fn torus() -> Vec<Primitive> {
         }
         cur = next;
     }
-
-    //println!("{:#?}", triangles.len());
 
     triangles
 }
