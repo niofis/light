@@ -36,6 +36,7 @@ pub struct World {
     camera: Camera,
     point_lights: Vec<Vector>,
     tracer: AccStruct,
+    buffer: Vec<u8>,
 }
 
 impl World {
@@ -83,15 +84,14 @@ impl World {
         let mut donut = solids::torus();
         primitives.append(&mut donut);
 
-        //let primitives = donut;
-
         let point_lights = vec![Vector(-10.0, 10.0, -10.0)];
 
-        println!("{} total primitives", primitives.len());
+        //println!("{} total primitives", primitives.len());
         //let bvh = BVH::new(primitives[..].to_vec());
         let tracer = AccStruct::new(primitives);
 
         //println!("{:?} in bvh", tracer.stats());
+        let buffer: Vec<u8> = vec![0; (bpp * width * height) as usize];
 
         World {
             bpp,
@@ -100,18 +100,18 @@ impl World {
             camera,
             point_lights,
             tracer,
+            buffer,
         }
     }
 
-    pub fn render(&self) -> Vec<u8> {
-        let World {
-            width,
-            height,
-            bpp,
-            camera,
-            point_lights,
-            ..
-        } = self;
+    pub fn render(&mut self) -> &[u8] {
+        let height = self.height;
+        let width = self.width;
+        let camera = &self.camera;
+        let point_lights = &self.point_lights;
+        let tracer = &self.tracer;
+        let buffer = &mut self.buffer;
+
         let pixels = (0..height * width)
             .into_par_iter()
             .map(|pixel| {
@@ -119,10 +119,9 @@ impl World {
                 let y = (pixel / width) as f32;
                 let ray = camera.get_ray(x, y);
 
-                trace_ray(ray, &self.tracer, point_lights, 0)
+                trace_ray(ray, tracer, point_lights, 0)
             })
             .collect::<Vec<Color>>();
-        let mut buffer: Vec<u8> = vec![0; (bpp * width * height) as usize];
 
         let mut offset = 0;
         for pixel in pixels {
@@ -133,7 +132,7 @@ impl World {
             buffer[offset + 3] = 255;
             offset = offset + 4;
         }
-        buffer
+        &self.buffer
     }
 }
 
