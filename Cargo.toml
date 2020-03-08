@@ -1,0 +1,21 @@
+[package]
+name = "light"
+version = "0.1.0"
+authors = ["Enrique <niofis@gmail.com>"]
+edition = "2018"
+
+[dev-dependencies]
+criterion = "0.2"
+
+[dependencies]
+time = "0.1.42"
+rayon = "1.2"
+
+[dependencies.sdl2]
+version = "0.32.2"
+default-features = false
+features = ["gfx"]
+
+[[bench]]
+name = "benchmark"
+harness = false
