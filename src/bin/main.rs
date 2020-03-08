@@ -31,7 +31,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut curr_time: f64;
     let mut fps: String;
 
-    let mut world = World::demo(bpp, width, height);
+    let mut world = World::demo(width, height);
     //let mut buffer: Vec<u8> = vec![0; (bpp * width * height) as usize];
 
     'event_loop: loop {

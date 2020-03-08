@@ -15,9 +15,6 @@ impl BoundingBox {
             max: Vector(MIN, MIN, MIN),
         }
     }
-    pub fn centroid(&self) -> Vector {
-        (&self.min + &self.max) / 2.0
-    }
 
     pub fn intersect(&self, ray: &Ray) -> bool {
         let Ray(origin, direction) = ray;
@@ -25,10 +22,10 @@ impl BoundingBox {
         let dxi: f32 = 1.0 / direction.0;
         let dyi: f32 = 1.0 / direction.1;
         let dzi: f32 = 1.0 / direction.2;
-        let (sx, rsx) = if dxi < 0.0 { (1,0) } else { (0,1) };
-        let (sy, rsy) = if dyi < 0.0 { (1,0) } else { (0,1) };
-        let (sz, rsz) = if dzi < 0.0 { (1,0) } else { (0,1) };
-        
+        let (sx, rsx) = if dxi < 0.0 { (1, 0) } else { (0, 1) };
+        let (sy, rsy) = if dyi < 0.0 { (1, 0) } else { (0, 1) };
+        let (sz, rsz) = if dzi < 0.0 { (1, 0) } else { (0, 1) };
+
         let params = [min, max];
         let tmin = (params[sx].0 - origin.0) * dxi;
         let tymax = (params[rsy].1 - origin.1) * dyi;

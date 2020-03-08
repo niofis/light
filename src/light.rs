@@ -1,6 +1,5 @@
 use rayon::prelude::*;
 use std::f32::consts::PI;
-use std::sync::Arc;
 
 mod bounding_box;
 mod trace;
@@ -30,7 +29,6 @@ type AccStruct = BVH;
 //type AccStruct = BruteForce;
 
 pub struct World {
-    bpp: u32,
     width: u32,
     height: u32,
     camera: Camera,
@@ -40,7 +38,7 @@ pub struct World {
 }
 
 impl World {
-    pub fn demo(bpp: u32, width: u32, height: u32) -> World {
+    pub fn demo(width: u32, height: u32) -> World {
         let camera = Camera::new(
             Vector(0.0, 4.5, -75.0),
             Vector(-8.0, 9.0, -50.0),
@@ -91,10 +89,9 @@ impl World {
         let tracer = AccStruct::new(primitives);
 
         //println!("{:?} in bvh", tracer.stats());
-        let buffer: Vec<u8> = vec![0; (bpp * width * height) as usize];
+        let buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
 
         World {
-            bpp,
             width,
             height,
             camera,

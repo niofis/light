@@ -127,46 +127,32 @@ fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
         (minz + maxz) / 2.0,
     );
 
-    let sector = |c: &Vector| if (c.0 >= center.0) { 1 } else { 0 } +
-        if (c.1 >= center.1) { 2 } else { 0 } +
-        if (c.2 >= center.2) { 4 } else { 0 };
+    let sector = |c: &Vector| if c.0 >= center.0 { 1 } else { 0 } +
+        if c.1 >= center.1 { 2 } else { 0 } +
+        if c.2 >= center.2 { 4 } else { 0 };
 
-    let sectors = vec![
+    let in_sector = |s| {
         items
             .iter()
-            .filter_map(|x| if sector(&x.0) == 0 { Some(*x) } else { None })
-            .collect::<Vec<(Vector, usize)>>(),
-        items
-            .iter()
-            .filter_map(|x| if sector(&x.0) == 1 { Some(*x) } else { None })
-            .collect::<Vec<(Vector, usize)>>(),
-        items
-            .iter()
-            .filter_map(|x| if sector(&x.0) == 2 { Some(*x) } else { None })
-            .collect::<Vec<(Vector, usize)>>(),
-        items
-            .iter()
-            .filter_map(|x| if sector(&x.0) == 3 { Some(*x) } else { None })
-            .collect::<Vec<(Vector, usize)>>(),
-        items
-            .iter()
-            .filter_map(|x| if sector(&x.0) == 4 { Some(*x) } else { None })
-            .collect::<Vec<(Vector, usize)>>(),
-        items
-            .iter()
-            .filter_map(|x| if sector(&x.0) == 5 { Some(*x) } else { None })
-            .collect::<Vec<(Vector, usize)>>(),
-        items
-            .iter()
-            .filter_map(|x| if sector(&x.0) == 6 { Some(*x) } else { None })
-            .collect::<Vec<(Vector, usize)>>(),
-        items
-            .iter()
-            .filter_map(|x| if sector(&x.0) == 7 { Some(*x) } else { None })
-            .collect::<Vec<(Vector, usize)>>(),
+            .filter_map(|x| if sector(&x.0) == s { Some(*x) } else { None })
+            .collect::<Vec<(Vector, usize)>>()
+    };
+
+    let sectors = [
+        in_sector(0),
+        in_sector(1),
+        in_sector(2),
+        in_sector(3),
+        in_sector(4),
+        in_sector(5),
+        in_sector(6),
+        in_sector(7),
     ];
 
-    let lens = sectors.iter().map(|s| s.len() as i64).collect::<Vec<i64>>();
+    let lens = sectors
+        .into_iter()
+        .map(|s| s.len() as i64)
+        .collect::<Vec<i64>>();
     let xdiff =
         ((lens[0] + lens[2] + lens[4] + lens[6]) - (lens[1] + lens[3] + lens[5] + lens[7])).abs();
     let ydiff =
@@ -356,25 +342,5 @@ impl BVH {
             }
         }
         (count, arity, height)
-    }
-}
-
-pub struct BVHIterator<'a> {
-    stack: VecDeque<Box<&'a BVH>>,
-}
-
-impl BVHIterator<'_> {
-    pub fn new<'a>(bvh: &'a BVH) -> BVHIterator<'a> {
-        let mut stack = VecDeque::new();
-        stack.push_back(Box::new(bvh));
-        BVHIterator { stack }
-    }
-}
-
-impl Iterator for BVHIterator<'_> {
-    type Item = Vec<Primitive>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        None
     }
 }
