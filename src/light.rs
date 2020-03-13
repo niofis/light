@@ -21,11 +21,8 @@ use primitive::*;
 mod solids;
 mod transform;
 use transform::*;
-//mod brute_force;
-//use brute_force::*;
 
 type AccStruct = BVH;
-//type AccStruct = BruteForce;
 
 pub struct World {
     width: u32,

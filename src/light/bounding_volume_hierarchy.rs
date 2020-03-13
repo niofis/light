@@ -31,7 +31,6 @@ fn rec_trace(bvh: &BVHNode, ray: &Ray, prm_vec: &mut Vec<usize>) {
         } => {
             if bounding_box.intersect(ray) {
                 if let Some(prms) = primitives {
-                    //prm_vec.append(&mut prms.iter().map(|p| *p).collect::<Vec<usize>>());
                     for p in prms {
                         prm_vec.push(*p);
                     }
@@ -59,36 +58,6 @@ impl Trace for BVH {
         }
     }
 }
-
-/*
-fn create_hierarchy(primitives: &Vec<Primitive>, mut indexes: Vec<usize>) -> BVHNode {
-    let len = indexes.len();
-
-    let bb = indexes.iter().fold(BoundingBox::empty(), |acc, p| {
-        acc.combine(&primitives[*p].bounding_box())
-    });
-
-    if len <= 1 {
-        return BVHNode::Node {
-            primitives: Some(indexes),
-            bounding_box: bb,
-            left: Box::new(BVHNode::Empty),
-            right: Box::new(BVHNode::Empty),
-        };
-    }
-
-    let mid = len / 2;
-
-    let right = indexes.split_off(mid);
-
-    return BVHNode::Node {
-        primitives: None,
-        bounding_box: bb,
-        left: Box::new(create_hierarchy(&primitives, indexes)),
-        right: Box::new(create_hierarchy(&primitives, right)),
-    };
-}
-*/
 
 fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
     if items.len() == 0 {
@@ -313,37 +282,4 @@ impl BVH {
 
         BVH { primitives, root }
     }
-
-    /*
-    pub fn stats(&self) -> (usize, usize, usize) {
-        let BVH { root, .. } = self;
-        let mut count = 0;
-        let mut arity = 0;
-        let mut height = 0;
-        let mut stack = VecDeque::new();
-        stack.push_back(root);
-
-        while !stack.is_empty() {
-            height = height.max(stack.len());
-            let bvh = stack.pop_back();
-            match bvh {
-                Some(BVHNode::Node {
-                    primitives,
-                    left,
-                    right,
-                    ..
-                }) => {
-                    arity = arity + 1;
-                    if let Some(prms) = primitives {
-                        count = count + prms.len();
-                    }
-                    stack.push_back(right);
-                    stack.push_back(left);
-                }
-                _ => {}
-            }
-        }
-        (count, arity, height)
-    }
-    */
 }
