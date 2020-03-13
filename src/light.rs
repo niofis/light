@@ -3,7 +3,6 @@ use std::f32::consts::PI;
 
 mod bounding_box;
 mod trace;
-use bounding_box::*;
 use trace::*;
 mod bounding_volume_hierarchy;
 use bounding_volume_hierarchy::*;
@@ -22,8 +21,8 @@ use primitive::*;
 mod solids;
 mod transform;
 use transform::*;
-mod brute_force;
-use brute_force::*;
+//mod brute_force;
+//use brute_force::*;
 
 type AccStruct = BVH;
 //type AccStruct = BruteForce;

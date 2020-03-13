@@ -3,7 +3,6 @@ use crate::light::primitive::*;
 use crate::light::ray::*;
 use crate::light::trace::*;
 use crate::light::vector::*;
-use std::collections::VecDeque;
 
 #[derive(Debug)]
 pub enum BVHNode {
@@ -61,6 +60,7 @@ impl Trace for BVH {
     }
 }
 
+/*
 fn create_hierarchy(primitives: &Vec<Primitive>, mut indexes: Vec<usize>) -> BVHNode {
     let len = indexes.len();
 
@@ -88,6 +88,7 @@ fn create_hierarchy(primitives: &Vec<Primitive>, mut indexes: Vec<usize>) -> BVH
         right: Box::new(create_hierarchy(&primitives, right)),
     };
 }
+*/
 
 fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
     if items.len() == 0 {
@@ -150,7 +151,7 @@ fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
     ];
 
     let lens = sectors
-        .into_iter()
+        .iter()
         .map(|s| s.len() as i64)
         .collect::<Vec<i64>>();
     let xdiff =
@@ -189,7 +190,7 @@ fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
                     .collect::<Vec<(Vector, usize)>>(),
             )),
         };
-    } else if (ydiff <= xdiff && ydiff <= zdiff) {
+    } else if ydiff <= xdiff && ydiff <= zdiff {
         return BVHNode::Node {
             primitives: None,
             bounding_box: BoundingBox::empty(),
@@ -313,6 +314,7 @@ impl BVH {
         BVH { primitives, root }
     }
 
+    /*
     pub fn stats(&self) -> (usize, usize, usize) {
         let BVH { root, .. } = self;
         let mut count = 0;
@@ -343,4 +345,5 @@ impl BVH {
         }
         (count, arity, height)
     }
+    */
 }
