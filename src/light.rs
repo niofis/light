@@ -75,7 +75,8 @@ impl World {
 
         //let primitives = cornell;
 
-        let mut donut = solids::torus();
+        let donut_trs = vec![Transform::rotate(PI / -4.0, 0.0, 0.0)];
+        let mut donut = solids::torus(1.5, 4.0, 20, 40, &Transform::combine(&donut_trs));
         primitives.append(&mut donut);
 
         let point_lights = vec![Vector(-10.0, 10.0, -10.0)];

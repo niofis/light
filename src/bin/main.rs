@@ -32,7 +32,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut fps: String;
 
     let mut world = World::demo(width, height);
-    //let mut buffer: Vec<u8> = vec![0; (bpp * width * height) as usize];
 
     'event_loop: loop {
         for event in event_pump.poll_iter() {

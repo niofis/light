@@ -63,12 +63,7 @@ pub fn cornell_box(transform: &Transform) -> Vec<Primitive> {
     ]
 }
 
-pub fn torus() -> Vec<Primitive> {
-    let trs = Transform::rotate(PI / -4.0, 0.0, 0.0);
-    let rd1 = 1.5;
-    let rd2 = 4.0;
-    let sc1 = 20;
-    let sc2 = 40;
+pub fn torus(rd1: f32, rd2: f32, sc1: usize, sc2: usize, transform: &Transform) -> Vec<Primitive> {
     let pt = Vector(0.0, rd1, 0.0);
     let rt1 = 2.0 * PI / (sc1 as f32);
     let rt2 = 2.0 * PI / (sc2 as f32);
@@ -86,15 +81,15 @@ pub fn torus() -> Vec<Primitive> {
 
         for n in 0..sc1 {
             triangles.push(Primitive::new_triangle(
-                trs.apply(&cur[n]),
-                trs.apply(&next[n]),
-                trs.apply(&next[n + 1]),
+                transform.apply(&cur[n]),
+                transform.apply(&next[n]),
+                transform.apply(&next[n + 1]),
                 Material::green(),
             ));
             triangles.push(Primitive::new_triangle(
-                trs.apply(&next[n + 1]),
-                trs.apply(&cur[n + 1]),
-                trs.apply(&cur[n]),
+                transform.apply(&next[n + 1]),
+                transform.apply(&cur[n + 1]),
+                transform.apply(&cur[n]),
                 Material::green(),
             ));
         }
