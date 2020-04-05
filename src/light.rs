@@ -73,8 +73,7 @@ impl World {
         let mut cornell = solids::cornell_box(&Transform::combine(&cornell_trs));
         primitives.append(&mut cornell);
 
-        //let primitives = cornell;
-
+        //this is a donut
         let donut_trs = vec![Transform::rotate(PI / -4.0, 0.0, 0.0)];
         let mut donut = solids::torus(1.5, 4.0, 20, 40, &Transform::combine(&donut_trs));
         primitives.append(&mut donut);
@@ -82,7 +81,6 @@ impl World {
         let point_lights = vec![Vector(-10.0, 10.0, -10.0)];
 
         //println!("{} total primitives", primitives.len());
-        //let bvh = BVH::new(primitives[..].to_vec());
         let tracer = AccStruct::new(primitives);
 
         //println!("{:?} in bvh", tracer.stats());
