@@ -346,7 +346,7 @@ fn find_shadow_primitive<'a>(
     primitives
         .iter()
         .filter_map(|primitive| primitive.intersect(ray).map(|dist|  dist))
-        .any(|dist| dist > 0.0 && dist <= max_dist)
+        .any(|dist| dist > 0.0001 && dist <= max_dist)
 }
 
 fn find_closest_primitive<'a>(

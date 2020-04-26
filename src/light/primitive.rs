@@ -120,10 +120,11 @@ fn triangle_intersect(triangle: (&Vector, &Vector, &Vector), ray: &Ray) -> Optio
     let (v0, edge1, edge2) = triangle;
     let Ray(origin, direction) = ray;
     let pvec = direction.cross(edge2);
+    let epsilon = 0.0000001;
 
     let det = edge1.dot(&pvec);
     //No culling version
-    if det > -0.007 && det < 0.007 {
+    if det > -epsilon && det < epsilon {
         return None;
     }
 
@@ -139,14 +140,14 @@ fn triangle_intersect(triangle: (&Vector, &Vector, &Vector), ray: &Ray) -> Optio
     let qvec = tvec.cross(edge1);
 
     let v = direction.dot(&qvec) * inv_det;
-    if v < 0.0 || (u + v) > 1.007 {
+    if v < 0.0 || (u + v) > 1.0 {
         //add EPSILON to offset small precision errors
         return None;
     }
 
     let t = edge2.dot(&qvec) * inv_det;
 
-    if t > 0.007 {
+    if t > epsilon {
         return Some(t);
     }
 
