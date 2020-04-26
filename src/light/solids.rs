@@ -98,3 +98,38 @@ pub fn torus(rd1: f32, rd2: f32, sc1: usize, sc2: usize, transform: &Transform) 
 
     triangles
 }
+
+pub fn sphere(radious: f32, sc1: usize, transform: &Transform) -> Vec<Primitive> {
+    let pt = Vector(0.0, radious, 0.0);
+    let sc2 = sc1 * 2;
+    let rt1 = PI / (sc1 as f32);
+    let rt2 = 2.0 * PI / (sc2 as f32);
+    let mut triangles: Vec<Primitive> = Vec::new();
+    let mut cur = (0..=sc1)
+        .map(|x| Transform::rotate((x as f32) * rt1, 0.0, 0.0).apply(&pt))
+        .collect::<Vec<Vector>>();
+
+    for _ in 0..sc2 {
+        let next = cur
+            .iter()
+            .map(|p| Transform::rotate(0.0, rt2, 0.0).apply(p))
+            .collect::<Vec<Vector>>();
+        for n in 0..sc1 {
+            triangles.push(Primitive::new_triangle(
+                transform.apply(&cur[n]),
+                transform.apply(&next[n + 1]),
+                transform.apply(&next[n]),
+                Material::green(),
+            ));
+            triangles.push(Primitive::new_triangle(
+                transform.apply(&next[n + 1]),
+                transform.apply(&cur[n]),
+                transform.apply(&cur[n + 1]),
+                Material::green(),
+            ));
+        }
+        cur = next;
+    }
+
+    triangles
+}

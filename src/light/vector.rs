@@ -84,9 +84,7 @@ impl Vector {
         Vector(self.0, self.1, self.2)
     }
     pub fn dot(&self, rhs: &Vector) -> f32 {
-        let Vector(x0, y0, z0) = self;
-        let Vector(x1, y1, z1) = rhs;
-        x0 * x1 + y0 * y1 + z0 * z1
+        self.0 * rhs.0 + self.1 * rhs.1 + self.2 * rhs.2
     }
     pub fn norm(&self) -> f32 {
         self.dot(&self).sqrt()
