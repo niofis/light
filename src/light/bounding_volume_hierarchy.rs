@@ -17,7 +17,6 @@ pub enum BVHNode {
 
 #[derive(Debug)]
 pub struct BVH {
-    primitives: Vec<Primitive>,
     root: BVHNode,
 }
 
@@ -44,8 +43,8 @@ fn rec_trace(bvh: &BVHNode, ray: &Ray, prm_vec: &mut Vec<usize>) {
 }
 
 impl Trace for BVH {
-    fn trace(&self, ray: &Ray) -> Option<Vec<&Primitive>> {
-        let BVH { primitives, root } = self;
+    fn trace(&self, ray: &Ray) -> Option<Vec<usize>> {
+        let BVH { root } = self;
         let mut idx_vec: Vec<usize> = Vec::new();
 
         rec_trace(&root, &ray, &mut idx_vec);
@@ -53,8 +52,7 @@ impl Trace for BVH {
         if idx_vec.is_empty() {
             None
         } else {
-            let prm_vec = idx_vec.iter().map(|i| &primitives[*i]).collect();
-            Some(prm_vec)
+            Some(idx_vec)
         }
     }
 }
@@ -119,10 +117,7 @@ fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
         in_sector(7),
     ];
 
-    let lens = sectors
-        .iter()
-        .map(|s| s.len() as i64)
-        .collect::<Vec<i64>>();
+    let lens = sectors.iter().map(|s| s.len() as i64).collect::<Vec<i64>>();
     let xdiff =
         ((lens[0] + lens[2] + lens[4] + lens[6]) - (lens[1] + lens[3] + lens[5] + lens[7])).abs();
     let ydiff =
@@ -263,11 +258,10 @@ fn rebuild(prms: &Vec<Primitive>, root: BVHNode) -> BVHNode {
 }
 
 impl BVH {
-    pub fn new(primitives: Vec<Primitive>) -> BVH {
+    pub fn new(primitives: &Vec<Primitive>) -> BVH {
         let len = primitives.len();
         if len == 0 {
             return BVH {
-                primitives,
                 root: BVHNode::Empty,
             };
         }
@@ -280,6 +274,6 @@ impl BVH {
         let root = octree_grouping(&mut items);
         let root = rebuild(&primitives, root);
 
-        BVH { primitives, root }
+        BVH { root }
     }
 }

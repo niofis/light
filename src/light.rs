@@ -34,6 +34,7 @@ pub struct World {
     point_lights: Vec<Vector>,
     tracer: AccStruct,
     buffer: Vec<u8>,
+    primitives: Vec<Primitive>,
 }
 
 impl World {
@@ -86,7 +87,7 @@ impl World {
         let point_lights = vec![Vector(-10.0, 10.0, -10.0)];
 
         //println!("{} total primitives", primitives.len());
-        let tracer = AccStruct::new(primitives);
+        let tracer = AccStruct::new(&primitives);
 
         //println!("{:?} in bvh", tracer.stats());
         let buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
@@ -98,9 +99,9 @@ impl World {
             point_lights,
             tracer,
             buffer,
+            primitives,
         }
     }
-    
     pub fn demo2(width: u32, height: u32) -> World {
         let gw = 20.0;
         let gh = 15.0;
@@ -134,7 +135,6 @@ impl World {
         ];
         let mut cube = solids::cube(&Transform::combine(&cube_trs));
         primitives.append(&mut cube);
-        
         //this is a donut
         let donut_trs = vec![Transform::rotate(PI / -4.0, 0.0, 0.0)];
         let mut donut = solids::torus(1.5, 4.0, 30, 50, &Transform::combine(&donut_trs));
@@ -144,12 +144,10 @@ impl World {
         let mut sphere = solids::sphere(2.0, 20, &Transform::combine(&sphere_trs));
         primitives.append(&mut sphere);
 
-
-
         let point_lights = vec![Vector(-10.0, 10.0, -10.0)];
 
         //println!("{} total primitives", primitives.len());
-        let tracer = AccStruct::new(primitives);
+        let tracer = AccStruct::new(&primitives);
 
         //println!("{:?} in bvh", tracer.stats());
         let buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
@@ -161,9 +159,9 @@ impl World {
             point_lights,
             tracer,
             buffer,
+            primitives,
         }
     }
-    
     pub fn shader_bench(width: u32, height: u32) -> World {
         let gw = 20.0;
         let gh = 15.0;
@@ -175,19 +173,17 @@ impl World {
             width as f32,
             height as f32,
         );
-        let mut primitives = vec![
-            Primitive::new_triangle(
-                Vector(-100.0, -100.0, 0.0),
-                Vector(0.0, 100.0, 0.0),
-                Vector(100.0, -100.0, 0.0),
-                Material::Simple(Color(1.0, 1.0, 1.0)),
-            ),
-        ];
+        let primitives = vec![Primitive::new_triangle(
+            Vector(-100.0, -100.0, 0.0),
+            Vector(0.0, 100.0, 0.0),
+            Vector(100.0, -100.0, 0.0),
+            Material::Simple(Color(1.0, 1.0, 1.0)),
+        )];
 
         let point_lights = vec![Vector(0.0, 0.0, -10.0)];
 
         //println!("{} total primitives", primitives.len());
-        let tracer = AccStruct::new(primitives);
+        let tracer = AccStruct::new(&primitives);
 
         //println!("{:?} in bvh", tracer.stats());
         let buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
@@ -199,6 +195,7 @@ impl World {
             point_lights,
             tracer,
             buffer,
+            primitives,
         }
     }
 
@@ -206,9 +203,6 @@ impl World {
         let height = self.height;
         let width = self.width;
         let camera = &self.camera;
-        let point_lights = &self.point_lights;
-        let tracer = &self.tracer;
-        let buffer = &mut self.buffer;
 
         let pixels = (0..height * width)
             .into_iter()
@@ -217,10 +211,11 @@ impl World {
                 let y = (pixel / width) as f32;
                 let ray = camera.get_ray(x, y);
 
-                trace_ray(ray, tracer, point_lights, 0)
+                trace_ray(&self, ray, 0)
             })
             .collect::<Vec<Color>>();
 
+        let buffer = &mut self.buffer;
         let mut offset = 0;
         for pixel in pixels {
             let Color(r, g, b) = pixel;
@@ -243,19 +238,19 @@ impl World {
 
     pub fn rotate_light(&mut self, rads: f32) {
         let rotation = Transform::rotate(0.0, rads, 0.0);
-        let mut point_lights = &mut self.point_lights;
+        let point_lights = &mut self.point_lights;
         point_lights[0] = rotation.apply(&point_lights[0]);
     }
 }
 
-fn trace_ray(ray: Ray, tracer: &impl Trace, point_lights: &Vec<Vector>, depth: u8) -> Color {
+fn trace_ray(world: &World, ray: Ray, depth: u8) -> Color {
     if depth > 10 {
         return Color(0.0, 0.0, 0.0);
     }
 
-    match tracer.trace(&ray) {
-        Some(prms) => {
-            let closest = find_closest_primitive(&ray, &prms);
+    match world.tracer.trace(&ray) {
+        Some(prm_idxs) => {
+            let closest = find_closest_primitive(world, &ray, &prm_idxs);
             match closest {
                 Some((primitive, distance)) => {
                     let point = ray.point(distance);
@@ -265,18 +260,15 @@ fn trace_ray(ray: Ray, tracer: &impl Trace, point_lights: &Vec<Vector>, depth: u
                     };
 
                     match prm_material {
-                        Material::Simple(_) => {
-                            calculate_shading(primitive, &point, tracer, point_lights)
-                        }
+                        Material::Simple(_) => calculate_shading(world, primitive, &point),
                         Material::Reflective(_, idx) => {
                             let normal = primitive.normal(&point);
                             let ri = ray.1.unit();
                             let dot = ri.dot(&normal) * 2.0;
                             let new_dir = &ri - &(&normal * dot);
                             let reflected_ray = Ray::new(&point, &new_dir.unit());
-                            (calculate_shading(primitive, &point, tracer, point_lights)
-                                * (1.0 - idx))
-                                + trace_ray(reflected_ray, tracer, point_lights, depth + 1) * *idx
+                            (calculate_shading(world, primitive, &point) * (1.0 - idx))
+                                + trace_ray(world, reflected_ray, depth + 1) * *idx
                         }
                     }
                 }
@@ -287,20 +279,15 @@ fn trace_ray(ray: Ray, tracer: &impl Trace, point_lights: &Vec<Vector>, depth: u
     }
 }
 
-fn calculate_shading(
-    prm: &Primitive,
-    point: &Vector,
-    tracer: &impl Trace,
-    point_lights: &Vec<Vector>,
-) -> Color {
+fn calculate_shading(world: &World, prm: &Primitive, point: &Vector) -> Color {
     let normal = prm.normal(point);
-    let incident_lights = point_lights.iter().filter_map(|light| {
+    let incident_lights = world.point_lights.iter().filter_map(|light| {
         let direction = light - point;
         let ray = Ray::new(point, &(direction.unit()));
-        match tracer.trace(&ray) {
-            Some(prms) => {
+        match world.tracer.trace(&ray) {
+            Some(prm_idxs) => {
                 let light_distance = direction.norm();
-                if find_shadow_primitive(&ray, &prms, light_distance) == false {
+                if find_shadow_primitive(world, &ray, &prm_idxs, light_distance) == false {
                     return Some(light);
                 } else {
                     return None;
@@ -339,23 +326,31 @@ fn calculate_shading(
 }
 
 fn find_shadow_primitive<'a>(
+    world: &World,
     ray: &Ray,
-    primitives: &'a Vec<&Primitive>,
-    max_dist: f32
+    prm_indexes: &[usize],
+    max_dist: f32,
 ) -> bool {
-    primitives
+    let primitives = &world.primitives;
+    prm_indexes
         .iter()
-        .filter_map(|primitive| primitive.intersect(ray).map(|dist|  dist))
+        .filter_map(|idx| primitives[*idx].intersect(ray).map(|dist| dist))
         .any(|dist| dist > 0.0001 && dist <= max_dist)
 }
 
 fn find_closest_primitive<'a>(
+    world: &'a World,
     ray: &Ray,
-    primitives: &'a Vec<&Primitive>,
+    prm_indexes: &[usize],
 ) -> Option<(&'a Primitive, f32)> {
-    primitives
+    let primitives = &world.primitives;
+    prm_indexes
         .iter()
-        .filter_map(|primitive| primitive.intersect(ray).map(|dist| (primitive, dist)))
+        .filter_map(|idx| {
+            primitives[*idx]
+                .intersect(ray)
+                .map(|dist| (&primitives[*idx], dist))
+        })
         .fold(None, |closest, (pr, dist)| match closest {
             None => Some((pr, dist)),
             Some(res) if dist < res.1 => Some((pr, dist)),
