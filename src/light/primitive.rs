@@ -99,17 +99,18 @@ fn sphere_intersect(sphere: (&Vector, &f32), ray: &Ray) -> Option<f32> {
     let b = oc.dot(direction);
     let c = oc.dot(&oc) - radius * radius;
     let dis = b * b - a * c;
+    let epsilon = 0.007;
 
     if dis > 0.0 {
         let e = dis.sqrt();
 
         let distance = (-b - e) / a;
-        if distance > 0.007 {
+        if distance > epsilon {
             return Some(distance);
         }
 
         let distance = (-b + e) / a;
-        if distance > 0.007 {
+        if distance > epsilon {
             return Some(distance);
         }
     }
@@ -120,7 +121,7 @@ fn triangle_intersect(triangle: (&Vector, &Vector, &Vector), ray: &Ray) -> Optio
     let (v0, edge1, edge2) = triangle;
     let Ray(origin, direction) = ray;
     let pvec = direction.cross(edge2);
-    let epsilon = 0.0000001;
+    let epsilon = 0.007;
 
     let det = edge1.dot(&pvec);
     //No culling version
@@ -133,14 +134,14 @@ fn triangle_intersect(triangle: (&Vector, &Vector, &Vector), ray: &Ray) -> Optio
     let tvec = origin - v0;
 
     let u = tvec.dot(&pvec) * inv_det;
-    if u < 0.0 || u > 1.0 {
+    if u < 0.0 || u > 1.0 + epsilon {
         return None;
     }
 
     let qvec = tvec.cross(edge1);
 
     let v = direction.dot(&qvec) * inv_det;
-    if v < 0.0 || (u + v) > 1.0 {
+    if v < 0.0 || (u + v) > 1.0 + epsilon {
         //add EPSILON to offset small precision errors
         return None;
     }
