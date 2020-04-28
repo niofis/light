@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let video_subsystem = sdl_context.video()?;
     let window = video_subsystem
         .window("Light v2", width, height)
-        .fullscreen()
+        //.fullscreen()
         .position_centered()
         .build()?;
     sdl_context.mouse().show_cursor(false);
@@ -31,7 +31,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut curr_time: f64;
     let mut fps: String;
 
-    let mut world = World::shader_bench(width, height);
+    let mut world = World::bunny(width, height);
+    //let mut world = World::shader_bench(width, height);
     //let mut world = World::demo(width, height);
 
     'event_loop: loop {
@@ -48,8 +49,8 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
         }
 
-        //world.rotate_camera(PI / 100.0);
-        //world.rotate_light(PI / 100.0);
+        world.rotate_camera(PI / 100.0);
+        world.rotate_light(PI / 100.0);
         let buffer = world.render();
         texture.update(rect, &buffer, step)?;
 

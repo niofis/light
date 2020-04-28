@@ -62,7 +62,7 @@ fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
         return BVHNode::Empty;
     }
 
-    if items.len() <= 1 {
+    if items.len() <= 4 {
         return BVHNode::Node {
             primitives: Some(items.iter().map(|x| x.1).collect::<Vec<usize>>()),
             bounding_box: BoundingBox::empty(),
@@ -270,7 +270,6 @@ impl BVH {
         let centroid: Vec<Vector> = primitives.iter().map(|x| x.centroid()).collect();
         let mut items: Vec<(Vector, usize)> =
             centroid.into_iter().zip(indexes.into_iter()).collect();
-        //let root = create_hierarchy(&primitives, indexes);
         let root = octree_grouping(&mut items);
         let root = rebuild(&primitives, root);
 

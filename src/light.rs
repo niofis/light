@@ -1,5 +1,6 @@
 use rayon::prelude::*;
 use std::f32::consts::PI;
+use std::path::Path;
 
 mod bounding_box;
 mod trace;
@@ -24,8 +25,8 @@ mod solids;
 mod transform;
 use transform::*;
 
-//type AccStruct = BVH;
-type AccStruct = BruteForce;
+type AccStruct = BVH;
+//type AccStruct = BruteForce;
 
 pub struct World {
     width: u32,
@@ -198,6 +199,78 @@ impl World {
             primitives,
         }
     }
+    pub fn bunny(width: u32, height: u32) -> World {
+        let gw = 20.0;
+        let gh = 15.0;
+        let camera = Camera::new(
+            Vector(0.0, gh / 2.0, -75.0),
+            Vector(-gw / 2.0, gh, -50.0),
+            Vector(-gw / 2.0, 0.0, -50.0),
+            Vector(gw / 2.0, gh, -50.0),
+            width as f32,
+            height as f32,
+        );
+        let mut primitives = Vec::new();
+
+        let bunny_obj = tobj::load_obj(&Path::new("models/bunny_res2.obj"));
+        if bunny_obj.is_ok() == false {
+            panic!("obj model is not valid!");
+        }
+        let (models, _) = bunny_obj.unwrap();
+        let mesh_trs = Transform::combine(&vec![
+            Transform::scale(120.0, 120.0, 120.0),
+            Transform::translate(0.0, -10.0, 0.0),
+        ]);
+
+        for (_, m) in models.iter().enumerate() {
+            let mesh = &m.mesh;
+            for f in 0..mesh.indices.len() / 3 {
+                let i = 3 * f;
+                let x = 3 * mesh.indices[i] as usize;
+                let pt1 = Vector(
+                    mesh.positions[x],
+                    mesh.positions[x + 1],
+                    mesh.positions[x + 2],
+                );
+                let x = 3 * mesh.indices[i + 1] as usize;
+                let pt2 = Vector(
+                    mesh.positions[x],
+                    mesh.positions[x + 1],
+                    mesh.positions[x + 2],
+                );
+                let x = 3 * mesh.indices[i + 2] as usize;
+                let pt3 = Vector(
+                    mesh.positions[x],
+                    mesh.positions[x + 1],
+                    mesh.positions[x + 2],
+                );
+                primitives.push(Primitive::new_triangle(
+                    mesh_trs.apply(&pt1),
+                    mesh_trs.apply(&pt2),
+                    mesh_trs.apply(&pt3),
+                    Material::white(),
+                ));
+            }
+        }
+
+        let point_lights = vec![Vector(0.0, 10.0, -20.0)];
+
+        //println!("{} total primitives", primitives.len());
+        let tracer = AccStruct::new(&primitives);
+
+        //println!("{:?} in bvh", tracer.stats());
+        let buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
+
+        World {
+            width,
+            height,
+            camera,
+            point_lights,
+            tracer,
+            buffer,
+            primitives,
+        }
+    }
 
     pub fn render(&mut self) -> &[u8] {
         let height = self.height;
@@ -205,7 +278,7 @@ impl World {
         let camera = &self.camera;
 
         let pixels = (0..height * width)
-            .into_iter()
+            .into_par_iter()
             .map(|pixel| {
                 let x = (pixel % width) as f32;
                 let y = (pixel / width) as f32;

@@ -10,8 +10,7 @@ fn criterion_benchmark(c: &mut Criterion) {
         b.iter(|| {
             let width: u32 = 800;
             let height: u32 = 450;
-            let bpp = 4;
-            let mut world = World::demo(bpp, width, height);
+            let mut world = World::demo(width, height);
             world.render();
         })
     });

@@ -10,6 +10,7 @@ criterion = "0.2"
 [dependencies]
 time = "0.1.42"
 rayon = "1.2"
+tobj = "1.0.0"
 
 [dependencies.sdl2]
 version = "0.32.2"
