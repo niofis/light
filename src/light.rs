@@ -228,26 +228,26 @@ impl World {
                 let i = 3 * f;
                 let x = 3 * mesh.indices[i] as usize;
                 let pt1 = Vector(
-                    mesh.positions[x],
+                    -mesh.positions[x],
                     mesh.positions[x + 1],
                     mesh.positions[x + 2],
                 );
                 let x = 3 * mesh.indices[i + 1] as usize;
                 let pt2 = Vector(
-                    mesh.positions[x],
+                    -mesh.positions[x],
                     mesh.positions[x + 1],
                     mesh.positions[x + 2],
                 );
                 let x = 3 * mesh.indices[i + 2] as usize;
                 let pt3 = Vector(
-                    mesh.positions[x],
+                    -mesh.positions[x],
                     mesh.positions[x + 1],
                     mesh.positions[x + 2],
                 );
                 primitives.push(Primitive::new_triangle(
                     mesh_trs.apply(&pt1),
-                    mesh_trs.apply(&pt2),
                     mesh_trs.apply(&pt3),
+                    mesh_trs.apply(&pt2),
                     Material::white(),
                 ));
             }

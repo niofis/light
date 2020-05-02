@@ -15,7 +15,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let video_subsystem = sdl_context.video()?;
     let window = video_subsystem
         .window("Light v2", width, height)
-        //.fullscreen()
+        .fullscreen()
         .position_centered()
         .build()?;
     sdl_context.mouse().show_cursor(false);
