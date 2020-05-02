@@ -33,7 +33,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut world = World::bunny(width, height);
     //let mut world = World::shader_bench(width, height);
-    //let mut world = World::demo(width, height);
+    //let mut world = World::demo2(width, height);
 
     'event_loop: loop {
         for event in event_pump.poll_iter() {

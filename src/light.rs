@@ -212,6 +212,13 @@ impl World {
         );
         let mut primitives = Vec::new();
 
+        primitives.push(Primitive::new_triangle(
+            Vector(-800.0, -7.0, -800.0),
+            Vector(0.0, -7.0, 800.0),
+            Vector(800.0, -7.0, -800.0),
+            Material::Simple(Color(1.0, 1.0, 1.0)),
+        ));
+
         let bunny_obj = tobj::load_obj(&Path::new("models/bunny_res2.obj"));
         if bunny_obj.is_ok() == false {
             panic!("obj model is not valid!");
