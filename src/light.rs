@@ -21,6 +21,7 @@ mod camera;
 use camera::*;
 mod primitive;
 use primitive::*;
+mod direct_illumination;
 mod solids;
 mod transform;
 use transform::*;
@@ -361,21 +362,7 @@ fn trace_ray(world: &World, ray: Ray, depth: u8) -> Color {
 
 fn calculate_shading(world: &World, prm: &Primitive, point: &Vector) -> Color {
     let normal = prm.normal(point);
-    let incident_lights = world.point_lights.iter().filter_map(|light| {
-        let direction = light - point;
-        let ray = Ray::new(point, &(direction.unit()));
-        match world.tracer.trace(&ray) {
-            Some(prm_idxs) => {
-                let light_distance = direction.norm();
-                if find_shadow_primitive(world, &ray, &prm_idxs, light_distance) == false {
-                    return Some(light);
-                } else {
-                    return None;
-                }
-            }
-            None => None,
-        }
-    });
+    let direct_lighting = direct_illumination::calculate(&world, &point, &normal);
 
     let prm_material = match prm {
         Primitive::Sphere { material, .. } => material,
@@ -387,35 +374,11 @@ fn calculate_shading(world: &World, prm: &Primitive, point: &Vector) -> Color {
         Material::Reflective(color, _) => color,
     };
 
-    let color_intensity = incident_lights
-        .map(|light| {
-            let dot = normal.dot(&(light - &point).unit());
-            if dot < 0.0 {
-                return Color(0.0, 0.0, 0.0);
-            } else {
-                return Color(1.0, 1.0, 1.0) * dot;
-            }
-        })
-        .fold(Color(0.0, 0.0, 0.0), |acc, col| acc + col);
-
     Color(
-        prm_color.0 * color_intensity.0,
-        prm_color.1 * color_intensity.1,
-        prm_color.2 * color_intensity.2,
+        prm_color.0 * direct_lighting.0,
+        prm_color.1 * direct_lighting.1,
+        prm_color.2 * direct_lighting.2,
     )
-}
-
-fn find_shadow_primitive<'a>(
-    world: &World,
-    ray: &Ray,
-    prm_indexes: &[usize],
-    max_dist: f32,
-) -> bool {
-    let primitives = &world.primitives;
-    prm_indexes
-        .iter()
-        .filter_map(|idx| primitives[*idx].intersect(ray).map(|dist| dist))
-        .any(|dist| dist > 0.0001 && dist <= max_dist)
 }
 
 fn find_closest_primitive<'a>(
