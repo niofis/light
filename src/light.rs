@@ -260,7 +260,7 @@ impl World {
             }
         }
 
-        let point_lights = vec![Vector(0.0, 10.0, -20.0)];
+        let point_lights = vec![Vector(0.0, 10.0, -50.0)];
 
         //println!("{} total primitives", primitives.len());
         let tracer = AccStruct::new(&primitives);
