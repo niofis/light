@@ -226,7 +226,7 @@ impl World {
         let (models, _) = bunny_obj.unwrap();
         let mesh_trs = Transform::combine(&vec![
             Transform::scale(120.0, 120.0, 120.0),
-            Transform::translate(0.0, -10.0, 0.0),
+            Transform::translate(0.0, -11.0, 0.0),
         ]);
 
         for (_, m) in models.iter().enumerate() {
@@ -260,7 +260,7 @@ impl World {
             }
         }
 
-        let point_lights = vec![Vector(0.0, 10.0, -50.0)];
+        let point_lights = vec![Vector(0.0, 20.0, -50.0)];
 
         //println!("{} total primitives", primitives.len());
         let tracer = AccStruct::new(&primitives);
