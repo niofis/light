@@ -29,6 +29,13 @@ use transform::*;
 type AccStruct = BVH;
 //type AccStruct = BruteForce;
 
+pub struct RenderSection {
+    left: u32,
+    top: u32,
+    width: u32,
+    height: u32,
+}
+
 pub struct World {
     width: u32,
     height: u32,

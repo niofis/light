@@ -8,14 +8,14 @@ use std::error::Error;
 use std::f32::consts::PI;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let width: u32 = 320;
-    let height: u32 = 240;
+    let width: u32 = 640;
+    let height: u32 = 480;
     let bpp = 4;
     let sdl_context = sdl2::init()?;
     let video_subsystem = sdl_context.video()?;
     let window = video_subsystem
         .window("Light v2", width, height)
-        .fullscreen()
+        //.fullscreen()
         .position_centered()
         .build()?;
     sdl_context.mouse().show_cursor(false);
