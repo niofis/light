@@ -8,12 +8,13 @@ edition = "2018"
 criterion = "0.2"
 
 [dependencies]
+clap = "2"
 time = "0.1.42"
 rayon = "1.2"
 tobj = "1.0.0"
 
 [dependencies.sdl2]
-version = "0.32.2"
+version = "0.34"
 default-features = false
 features = ["gfx"]
 

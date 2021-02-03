@@ -36,8 +36,9 @@ impl Camera {
             eye,
         } = self;
 
-        let origin = left_top + &(delta_right * x) + (delta_down * y);
-        let direction = &origin - eye;
+        let origin = eye.clone();
+        let point = left_top + &(delta_right * x) + (delta_down * y);
+        let direction = &point - eye;
 
         Ray(origin, direction.unit())
     }
