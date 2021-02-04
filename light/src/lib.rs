@@ -1,1 +1,3 @@
-pub mod light;
+mod light;
+
+pub use light::World;
