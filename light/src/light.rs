@@ -1,6 +1,6 @@
 use rayon::prelude::*;
-use std::f32::consts::PI;
 use std::path::Path;
+use std::{f32::consts::PI, usize};
 
 mod bounding_box;
 mod trace;
@@ -25,8 +25,10 @@ mod direct_illumination;
 mod solids;
 mod transform;
 use transform::*;
+mod acc_struct;
+use acc_struct::AccStruct;
 
-type AccStruct = BVH;
+// type AccStruct = BVH;
 //type AccStruct = BruteForce;
 
 pub struct RenderSection {
@@ -96,7 +98,7 @@ impl World {
         let point_lights = vec![Vector(-10.0, 10.0, -10.0)];
 
         //println!("{} total primitives", primitives.len());
-        let tracer = AccStruct::new(&primitives);
+        let tracer = AccStruct::new_bounding_volume_hierarchy(&primitives);
 
         //println!("{:?} in bvh", tracer.stats());
         let buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
@@ -156,7 +158,7 @@ impl World {
         let point_lights = vec![Vector(-10.0, 10.0, -10.0)];
 
         //println!("{} total primitives", primitives.len());
-        let tracer = AccStruct::new(&primitives);
+        let tracer = AccStruct::new_bounding_volume_hierarchy(&primitives);
 
         //println!("{:?} in bvh", tracer.stats());
         let buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
@@ -192,7 +194,7 @@ impl World {
         let point_lights = vec![Vector(0.0, 0.0, -10.0)];
 
         //println!("{} total primitives", primitives.len());
-        let tracer = AccStruct::new(&primitives);
+        let tracer = AccStruct::new_bounding_volume_hierarchy(&primitives);
 
         //println!("{:?} in bvh", tracer.stats());
         let buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
@@ -271,7 +273,7 @@ impl World {
         let point_lights = vec![Vector(0.0, 20.0, -50.0)];
 
         //println!("{} total primitives", primitives.len());
-        let tracer = AccStruct::new(&primitives);
+        let tracer = AccStruct::new_bounding_volume_hierarchy(&primitives);
 
         //println!("{:?} in bvh", tracer.stats());
         let buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
@@ -406,4 +408,10 @@ fn find_closest_primitive<'a>(
             Some(res) if dist < res.1 => Some((pr, dist)),
             _ => closest,
         })
+}
+
+pub struct RenderJob {
+    pub width: usize,
+    pub height: usize,
+    pub acc_struct: AccStruct,
 }

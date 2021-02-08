@@ -7,8 +7,6 @@ edition = "2018"
 [dependencies]
 clap = "2"
 time = "0.1.42"
-rayon = "1.2"
-tobj = "1.0.0"
 light = { path = "../light" }
 
 [dependencies.sdl2]

@@ -1,10 +1,10 @@
 [package]
-name = "light"
+name = "photon"
 version = "0.1.0"
 authors = ["Enrique <niofis@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-rayon = "1.2"
-tobj = "1.0.0"
-
+clap = "2"
+time = "0.1.42"
+light = { path = "../light" }

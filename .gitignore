@@ -3,3 +3,4 @@
 **/*.rs.bk
 light/target
 screen/target
+photon/target
