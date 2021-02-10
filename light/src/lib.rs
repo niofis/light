@@ -1,4 +1,3 @@
 mod light;
-
-pub use light::RenderJob;
+pub use light::renderer::Renderer;
 pub use light::World;

@@ -5,10 +5,8 @@ use std::{f32::consts::PI, usize};
 mod bounding_box;
 mod trace;
 use trace::*;
-mod brute_force;
-use brute_force::*;
 mod bounding_volume_hierarchy;
-use bounding_volume_hierarchy::*;
+mod brute_force;
 mod material;
 use material::*;
 mod color;
@@ -25,11 +23,8 @@ mod direct_illumination;
 mod solids;
 mod transform;
 use transform::*;
-mod acc_struct;
-use acc_struct::AccStruct;
-
-// type AccStruct = BVH;
-//type AccStruct = BruteForce;
+mod acc_structure;
+use acc_structure::AccStructure;
 
 pub struct RenderSection {
     left: u32,
@@ -38,12 +33,21 @@ pub struct RenderSection {
     height: u32,
 }
 
+pub struct Renderer {
+    pub width: usize,
+    pub height: usize,
+    pub acc_structure: AccStructure,
+    pub camera: Camera,
+    pub lights: Vec<LightSource>,
+    pub objects: Vec<Solid>,
+}
+
 pub struct World {
     width: u32,
     height: u32,
     camera: Camera,
     point_lights: Vec<Vector>,
-    tracer: AccStruct,
+    tracer: AccStructure,
     buffer: Vec<u8>,
     primitives: Vec<Primitive>,
 }
@@ -98,7 +102,7 @@ impl World {
         let point_lights = vec![Vector(-10.0, 10.0, -10.0)];
 
         //println!("{} total primitives", primitives.len());
-        let tracer = AccStruct::new_bounding_volume_hierarchy(&primitives);
+        let tracer = AccStructure::new_bounding_volume_hierarchy(&primitives);
 
         //println!("{:?} in bvh", tracer.stats());
         let buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
@@ -158,7 +162,7 @@ impl World {
         let point_lights = vec![Vector(-10.0, 10.0, -10.0)];
 
         //println!("{} total primitives", primitives.len());
-        let tracer = AccStruct::new_bounding_volume_hierarchy(&primitives);
+        let tracer = AccStructure::new_bounding_volume_hierarchy(&primitives);
 
         //println!("{:?} in bvh", tracer.stats());
         let buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
@@ -194,7 +198,7 @@ impl World {
         let point_lights = vec![Vector(0.0, 0.0, -10.0)];
 
         //println!("{} total primitives", primitives.len());
-        let tracer = AccStruct::new_bounding_volume_hierarchy(&primitives);
+        let tracer = AccStructure::new_bounding_volume_hierarchy(&primitives);
 
         //println!("{:?} in bvh", tracer.stats());
         let buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
@@ -273,7 +277,7 @@ impl World {
         let point_lights = vec![Vector(0.0, 20.0, -50.0)];
 
         //println!("{} total primitives", primitives.len());
-        let tracer = AccStruct::new_bounding_volume_hierarchy(&primitives);
+        let tracer = AccStructure::new_bounding_volume_hierarchy(&primitives);
 
         //println!("{:?} in bvh", tracer.stats());
         let buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
@@ -408,10 +412,4 @@ fn find_closest_primitive<'a>(
             Some(res) if dist < res.1 => Some((pr, dist)),
             _ => closest,
         })
-}
-
-pub struct RenderJob {
-    pub width: usize,
-    pub height: usize,
-    pub acc_struct: AccStruct,
 }
