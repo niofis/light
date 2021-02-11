@@ -20,11 +20,15 @@ use camera::*;
 mod primitive;
 use primitive::*;
 mod direct_illumination;
-mod solids;
+mod solid;
 mod transform;
 use transform::*;
 mod acc_structure;
 use acc_structure::AccStructure;
+use light::Light;
+
+use self::solid::Solid;
+mod light;
 
 pub struct RenderSection {
     left: u32,
@@ -38,7 +42,7 @@ pub struct Renderer {
     pub height: usize,
     pub acc_structure: AccStructure,
     pub camera: Camera,
-    pub lights: Vec<LightSource>,
+    pub lights: Vec<Light>,
     pub objects: Vec<Solid>,
 }
 
@@ -84,19 +88,19 @@ impl World {
             Transform::scale(3.0, 3.0, 3.0),
             Transform::translate(-10.0, -2.0, 0.0),
         ];
-        let mut cube = solids::cube(&Transform::combine(&cube_trs));
+        let mut cube = solid::cube(&Transform::combine(&cube_trs));
         primitives.append(&mut cube);
         //cornell box
         let cornell_trs = vec![
             Transform::scale(42.0, 30.0, 50.0),
             Transform::translate(0.0, 7.5, 0.0),
         ];
-        let mut cornell = solids::cornell_box(&Transform::combine(&cornell_trs));
+        let mut cornell = solid::cornell_box(&Transform::combine(&cornell_trs));
         primitives.append(&mut cornell);
 
         //this is a donut
         let donut_trs = vec![Transform::rotate(PI / -4.0, 0.0, 0.0)];
-        let mut donut = solids::torus(1.5, 4.0, 30, 50, &Transform::combine(&donut_trs));
+        let mut donut = solid::torus(1.5, 4.0, 30, 50, &Transform::combine(&donut_trs));
         primitives.append(&mut donut);
 
         let point_lights = vec![Vector(-10.0, 10.0, -10.0)];
@@ -148,15 +152,15 @@ impl World {
             Transform::scale(3.0, 3.0, 3.0),
             Transform::translate(-10.0, -2.0, 0.0),
         ];
-        let mut cube = solids::cube(&Transform::combine(&cube_trs));
+        let mut cube = solid::cube(&Transform::combine(&cube_trs));
         primitives.append(&mut cube);
         //this is a donut
         let donut_trs = vec![Transform::rotate(PI / -4.0, 0.0, 0.0)];
-        let mut donut = solids::torus(1.5, 4.0, 30, 50, &Transform::combine(&donut_trs));
+        let mut donut = solid::torus(1.5, 4.0, 30, 50, &Transform::combine(&donut_trs));
         primitives.append(&mut donut);
 
         let sphere_trs = vec![Transform::translate(-16.0, -2.0, 10.0)];
-        let mut sphere = solids::sphere(2.0, 20, &Transform::combine(&sphere_trs));
+        let mut sphere = solid::sphere(2.0, 20, &Transform::combine(&sphere_trs));
         primitives.append(&mut sphere);
 
         let point_lights = vec![Vector(-10.0, 10.0, -10.0)];

@@ -4,7 +4,35 @@ use crate::light::transform::*;
 use crate::light::vector::*;
 use std::f32::consts::PI;
 
-pub fn cube(transform: &Transform) -> Vec<Primitive> {
+pub enum Solid {
+    Triangle(Vector, Vector, Vector),
+    Sphere(Vector, f32),
+    Cube(Transform),
+    CornellBox(Transform),
+    GeodesicSphere(f32, usize, Transform),
+    Torus(f32, f32, usize, usize, Transform),
+}
+
+impl Into<Vec<Primitive>> for Solid {
+    fn into(self) -> Vec<Primitive> {
+        match self {
+            Solid::Triangle(pt1, pt2, pt3) => {
+                vec![Primitive::new_triangle(pt1, pt2, pt3, Material::blue())]
+            }
+            Solid::Sphere(center, radius) => vec![Primitive::Sphere {
+                center,
+                radius,
+                material: Material::blue(),
+            }],
+            Solid::Cube(transform) => cube(&transform),
+            Solid::CornellBox(transform) => cornell_box(&transform),
+            Solid::GeodesicSphere(radius, sc1, transform) => sphere(radius, sc1, &transform),
+            Solid::Torus(rd1, rd2, sc1, sc2, transform) => torus(rd1, rd2, sc1, sc2, &transform),
+        }
+    }
+}
+
+fn cube(transform: &Transform) -> Vec<Primitive> {
     let pt1 = || transform.apply(&Vector(-0.5, 0.5, -0.5));
     let pt2 = || transform.apply(&Vector(0.5, 0.5, -0.5));
     let pt3 = || transform.apply(&Vector(0.5, -0.5, -0.5));
@@ -35,7 +63,7 @@ pub fn cube(transform: &Transform) -> Vec<Primitive> {
     ]
 }
 
-pub fn cornell_box(transform: &Transform) -> Vec<Primitive> {
+fn cornell_box(transform: &Transform) -> Vec<Primitive> {
     let pt1 = || transform.apply(&Vector(-0.5, 0.5, -0.5));
     let pt2 = || transform.apply(&Vector(0.5, 0.5, -0.5));
     let pt3 = || transform.apply(&Vector(0.5, -0.5, -0.5));
@@ -63,7 +91,7 @@ pub fn cornell_box(transform: &Transform) -> Vec<Primitive> {
     ]
 }
 
-pub fn torus(rd1: f32, rd2: f32, sc1: usize, sc2: usize, transform: &Transform) -> Vec<Primitive> {
+fn torus(rd1: f32, rd2: f32, sc1: usize, sc2: usize, transform: &Transform) -> Vec<Primitive> {
     let pt = Vector(0.0, rd1, 0.0);
     let rt1 = 2.0 * PI / (sc1 as f32);
     let rt2 = 2.0 * PI / (sc2 as f32);
@@ -99,8 +127,8 @@ pub fn torus(rd1: f32, rd2: f32, sc1: usize, sc2: usize, transform: &Transform) 
     triangles
 }
 
-pub fn sphere(radious: f32, sc1: usize, transform: &Transform) -> Vec<Primitive> {
-    let pt = Vector(0.0, radious, 0.0);
+fn sphere(radius: f32, sc1: usize, transform: &Transform) -> Vec<Primitive> {
+    let pt = Vector(0.0, radius, 0.0);
     let sc2 = sc1 * 2;
     let rt1 = PI / (sc1 as f32);
     let rt2 = 2.0 * PI / (sc2 as f32);
