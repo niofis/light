@@ -11,6 +11,7 @@ pub enum Solid {
     CornellBox(Transform),
     GeodesicSphere(f32, usize, Transform),
     Torus(f32, f32, usize, usize, Transform),
+    Mesh(Vec<Primitive>),
 }
 
 impl Into<Vec<Primitive>> for Solid {
@@ -28,6 +29,7 @@ impl Into<Vec<Primitive>> for Solid {
             Solid::CornellBox(transform) => cornell_box(&transform),
             Solid::GeodesicSphere(radius, sc1, transform) => sphere(radius, sc1, &transform),
             Solid::Torus(rd1, rd2, sc1, sc2, transform) => torus(rd1, rd2, sc1, sc2, &transform),
+            Solid::Mesh(primitives) => primitives,
         }
     }
 }
