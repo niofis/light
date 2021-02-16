@@ -1,7 +1,6 @@
 mod light;
-pub use light::demos;
-pub use light::renderer::Renderer;
 pub use light::world::World;
+pub use light::{demos, renderer::Renderer};
 
 /*
 World::new()

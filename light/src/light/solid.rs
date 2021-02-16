@@ -5,8 +5,8 @@ use crate::light::vector::*;
 use std::f32::consts::PI;
 
 pub enum Solid {
-    Triangle(Vector, Vector, Vector),
-    Sphere(Vector, f32),
+    Triangle(Vector, Vector, Vector, Material),
+    Sphere(Vector, f32, Material),
     Cube(Transform),
     CornellBox(Transform),
     GeodesicSphere(f32, usize, Transform),
@@ -14,22 +14,29 @@ pub enum Solid {
     Mesh(Vec<Primitive>),
 }
 
-impl Into<Vec<Primitive>> for Solid {
-    fn into(self) -> Vec<Primitive> {
+impl Solid {
+    pub fn primitives(&self) -> Vec<Primitive> {
         match self {
-            Solid::Triangle(pt1, pt2, pt3) => {
-                vec![Primitive::new_triangle(pt1, pt2, pt3, Material::blue())]
+            Solid::Triangle(pt1, pt2, pt3, material) => {
+                vec![Primitive::new_triangle(
+                    pt1.clone(),
+                    pt2.clone(),
+                    pt3.clone(),
+                    *material,
+                )]
             }
-            Solid::Sphere(center, radius) => vec![Primitive::Sphere {
-                center,
-                radius,
-                material: Material::blue(),
+            Solid::Sphere(center, radius, material) => vec![Primitive::Sphere {
+                center: *center,
+                radius: *radius,
+                material: *material,
             }],
             Solid::Cube(transform) => cube(&transform),
             Solid::CornellBox(transform) => cornell_box(&transform),
-            Solid::GeodesicSphere(radius, sc1, transform) => sphere(radius, sc1, &transform),
-            Solid::Torus(rd1, rd2, sc1, sc2, transform) => torus(rd1, rd2, sc1, sc2, &transform),
-            Solid::Mesh(primitives) => primitives,
+            Solid::GeodesicSphere(radius, sc1, transform) => sphere(*radius, *sc1, &transform),
+            Solid::Torus(rd1, rd2, sc1, sc2, transform) => {
+                torus(*rd1, *rd2, *sc1, *sc2, &transform)
+            }
+            Solid::Mesh(primitives) => *primitives,
         }
     }
 }

@@ -9,6 +9,15 @@ pub struct Camera {
 }
 
 impl Camera {
+    pub fn default() -> Camera {
+        Camera {
+            eye: Vector::default(),
+            left_top: Vector::default(),
+            delta_right: Vector::default(),
+            delta_down: Vector::default(),
+        }
+    }
+
     pub fn new(
         eye: Vector,
         left_top: Vector,

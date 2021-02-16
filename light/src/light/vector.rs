@@ -80,6 +80,9 @@ impl ops::Div<f32> for &Vector {
 }
 
 impl Vector {
+    pub fn default() -> Vector {
+        Vector(0.0, 0.0, 0.0)
+    }
     pub fn clone(&self) -> Vector {
         Vector(self.0, self.1, self.2)
     }

@@ -13,6 +13,14 @@ pub struct Renderer {
 }
 
 impl Renderer {
+    pub fn build() -> Renderer {
+        Renderer {
+            width: 0,
+            height: 0,
+            accelerator: Accelerator::BruteForce(),
+            world: World::default(),
+        }
+    }
     pub fn render(&mut self) -> Vec<u8> {
         let height = self.height;
         let width = self.width;

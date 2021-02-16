@@ -16,19 +16,31 @@ pub fn cornell(width: u32, height: u32) -> World {
         width as f32,
         height as f32,
     );
-    let mut primitives = vec![
-        Primitive::Sphere {
-            center: Vector(16.0, -2.0, 10.0),
-            radius: 5.0,
-            material: Material::Reflective(Color(0.0, 0.0, 1.0), 1.0),
-        },
-        Primitive::new_triangle(
-            Vector(-8.0, 0.0, 0.0),
-            Vector(-7.0, 2.0, 0.0),
-            Vector(-6.0, 0.0, 0.0),
-            Material::Simple(Color(0.0, 1.0, 0.0)),
-        ),
-    ];
+    // let mut primitives = vec![
+    //     Primitive::Sphere {
+    //         center: Vector(16.0, -2.0, 10.0),
+    //         radius: 5.0,
+    //         material: Material::Reflective(Color(0.0, 0.0, 1.0), 1.0),
+    //     },
+    //     Primitive::new_triangle(
+    //         Vector(-8.0, 0.0, 0.0),
+    //         Vector(-7.0, 2.0, 0.0),
+    //         Vector(-6.0, 0.0, 0.0),
+    //         Material::Simple(Color(0.0, 1.0, 0.0)),
+    //     ),
+    // ];
+
+    let simple_sphere = Solid::Sphere(
+        Vector(16.0, -2.0, 10.0),
+        5.0,
+        Material::Reflective(Color(0.0, 0.0, 1.0), 1.0),
+    );
+    let simple_triangle = Solid::Triangle(
+        Vector(-8.0, 0.0, 0.0),
+        Vector(-7.0, 2.0, 0.0),
+        Vector(-6.0, 0.0, 0.0),
+        Material::Simple(Color(0.0, 1.0, 0.0)),
+    );
 
     // cube thingy
     let cube_trs = vec![
@@ -61,7 +73,7 @@ pub fn cornell(width: u32, height: u32) -> World {
     World::build()
         .camera(camera)
         .lights(lights)
-        .objects(vec![cube, cornell, donut])
+        .objects(vec![simple_sphere, simple_triangle, cube, cornell, donut])
         .finish()
 }
 pub fn simple(width: u32, height: u32) -> World {
@@ -135,12 +147,12 @@ pub fn shader_bench(width: u32, height: u32) -> World {
         width as f32,
         height as f32,
     );
-    let primitives = vec![Primitive::new_triangle(
-        Vector(-100.0, -100.0, 0.0),
-        Vector(0.0, 100.0, 0.0),
-        Vector(100.0, -100.0, 0.0),
-        Material::Simple(Color(1.0, 1.0, 1.0)),
-    )];
+    // let primitives = vec![Primitive::new_triangle(
+    //     Vector(-100.0, -100.0, 0.0),
+    //     Vector(0.0, 100.0, 0.0),
+    //     Vector(100.0, -100.0, 0.0),
+    //     Material::Simple(Color(1.0, 1.0, 1.0)),
+    // )];
 
     // let point_lights = vec![Vector(0.0, 0.0, -10.0)];
     let lights = vec![Light::Point(Vector(0.0, 0.0, -10.0))];
@@ -158,6 +170,7 @@ pub fn shader_bench(width: u32, height: u32) -> World {
             Vector(-100.0, -100.0, 0.0),
             Vector(0.0, 100.0, 0.0),
             Vector(100.0, -100.0, 0.0),
+            Material::Simple(Color(1.0, 1.0, 1.0)),
         )])
         .finish()
 }
@@ -172,9 +185,18 @@ pub fn bunny(width: u32, height: u32) -> World {
         width as f32,
         height as f32,
     );
-    let mut primitives = Vec::new();
+    // let mut primitives = Vec::new();
 
-    primitives.push(Primitive::new_triangle(
+    // primitives.push(Primitive::new_triangle(
+    //     Vector(-800.0, -7.0, -800.0),
+    //     Vector(0.0, -7.0, 800.0),
+    //     Vector(800.0, -7.0, -800.0),
+    //     Material::Simple(Color(1.0, 1.0, 1.0)),
+    // ));
+
+    let mut solids: Vec<Solid> = Vec::new();
+
+    solids.push(Solid::Triangle(
         Vector(-800.0, -7.0, -800.0),
         Vector(0.0, -7.0, 800.0),
         Vector(800.0, -7.0, -800.0),
@@ -213,7 +235,7 @@ pub fn bunny(width: u32, height: u32) -> World {
                 mesh.positions[x + 1],
                 mesh.positions[x + 2],
             );
-            primitives.push(Primitive::new_triangle(
+            solids.push(Solid::Triangle(
                 mesh_trs.apply(&pt1),
                 mesh_trs.apply(&pt3),
                 mesh_trs.apply(&pt2),
@@ -234,10 +256,6 @@ pub fn bunny(width: u32, height: u32) -> World {
     World::build()
         .camera(camera)
         .lights(lights)
-        .objects(vec![Solid::Triangle(
-            Vector(-100.0, -100.0, 0.0),
-            Vector(0.0, 100.0, 0.0),
-            Vector(100.0, -100.0, 0.0),
-        )])
+        .objects(solids)
         .finish()
 }
