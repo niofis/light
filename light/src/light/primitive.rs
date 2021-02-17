@@ -3,7 +3,7 @@ use crate::light::material::*;
 use crate::light::ray::*;
 use crate::light::vector::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Primitive {
     Sphere {
         center: Vector,

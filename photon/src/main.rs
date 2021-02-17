@@ -31,9 +31,10 @@ fn main() {
         if let Some(scene) = matches.value_of("scene") {
             match scene {
                 "simple" => {
-                    let mut world = World::demo2(640, 480);
-                    let buffer = world.render();
-                    print_ppm(buffer, 640, 480);
+                    let world = light::demos::simple(640, 480);
+                    let mut renderer = light::Renderer::build().width(640).height(480).world(world);
+                    let buffer = renderer.render();
+                    print_ppm(&buffer, 640, 480);
                 }
                 _ => println!("scene not found!"),
             }

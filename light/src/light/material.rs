@@ -1,6 +1,6 @@
 use crate::light::color::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Material {
     Simple(Color),
     Reflective(Color, f32),

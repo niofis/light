@@ -17,15 +17,15 @@ impl World {
             objects: Vec::new(),
         }
     }
-    pub fn camera(&mut self, camera: Camera) -> &mut World {
+    pub fn camera(mut self, camera: Camera) -> World {
         self.camera = camera;
         self
     }
-    pub fn lights(&mut self, lights: Vec<Light>) -> &mut World {
+    pub fn lights(mut self, lights: Vec<Light>) -> World {
         self.lights = lights;
         self
     }
-    pub fn objects(&mut self, objects: Vec<Solid>) -> &mut World {
+    pub fn objects(mut self, objects: Vec<Solid>) -> World {
         self.objects = objects;
         self
     }

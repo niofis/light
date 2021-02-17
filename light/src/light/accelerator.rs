@@ -4,6 +4,7 @@ use super::{
 };
 
 pub enum Accelerator {
+    None,
     BruteForce(BruteForce),
     BoundingVolumeHierarchy(BVH),
 }
@@ -21,6 +22,7 @@ impl Accelerator {
         match self {
             Accelerator::BruteForce(tracer) => tracer.trace(ray),
             Accelerator::BoundingVolumeHierarchy(tracer) => tracer.trace(ray),
+            Accelerator::None => None,
         }
     }
 }

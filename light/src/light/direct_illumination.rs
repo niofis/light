@@ -1,30 +1,32 @@
-use super::World;
-use crate::light::Color;
-use crate::light::Ray;
-use crate::light::Trace;
-use crate::light::Vector;
+use crate::Renderer;
+
+use super::{color::Color, primitive::Primitive, ray::Ray, vector::Vector};
 
 fn find_shadow_primitive<'a>(
-    world: &World,
+    primitives: &Vec<Primitive>,
     ray: &Ray,
-    prm_indexes: &[usize],
+    prm_indexes: &Vec<usize>,
     max_dist: f32,
 ) -> bool {
-    let primitives = &world.primitives;
     prm_indexes
         .iter()
         .filter_map(|idx| primitives[*idx].intersect(ray).map(|dist| dist))
         .any(|dist| dist > 0.0001 && dist <= max_dist)
 }
 
-pub fn calculate(world: &World, point: &Vector, normal: &Vector) -> Color {
-    let incident_lights = world.point_lights.iter().filter_map(|light| {
+pub fn calculate(renderer: &Renderer, point: &Vector, normal: &Vector) -> Color {
+    let incident_lights = renderer.world.lights.iter().filter_map(|ll| {
+        let light = match ll {
+            super::light::Light::Point(pos) => pos,
+        };
         let direction = light - point;
         let ray = Ray::new(point, &(direction.unit()));
-        match world.tracer.trace(&ray) {
+        match renderer.accelerator.trace(&ray) {
             Some(prm_idxs) => {
                 let light_distance = direction.norm();
-                if find_shadow_primitive(world, &ray, &prm_idxs, light_distance) == false {
+                if find_shadow_primitive(&renderer.primitives, &ray, &prm_idxs, light_distance)
+                    == false
+                {
                     return Some(light);
                 } else {
                     return None;

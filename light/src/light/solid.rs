@@ -22,13 +22,13 @@ impl Solid {
                     pt1.clone(),
                     pt2.clone(),
                     pt3.clone(),
-                    *material,
+                    material.clone(),
                 )]
             }
             Solid::Sphere(center, radius, material) => vec![Primitive::Sphere {
                 center: *center,
                 radius: *radius,
-                material: *material,
+                material: material.clone(),
             }],
             Solid::Cube(transform) => cube(&transform),
             Solid::CornellBox(transform) => cornell_box(&transform),
@@ -36,7 +36,7 @@ impl Solid {
             Solid::Torus(rd1, rd2, sc1, sc2, transform) => {
                 torus(*rd1, *rd2, *sc1, *sc2, &transform)
             }
-            Solid::Mesh(primitives) => *primitives,
+            Solid::Mesh(primitives) => primitives.clone(),
         }
     }
 }
