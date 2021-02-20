@@ -2,30 +2,17 @@ use std::{f32::consts::PI, path::Path};
 
 use crate::{Camera, Color, Light, Material, Solid, Transform, Vector, World};
 
-pub fn cornell(width: u32, height: u32) -> World {
-    let gw = 20.0;
-    let gh = 15.0;
-    let camera = Camera::new(
-        Vector(0.0, gh / 2.0, -75.0),
-        Vector(-gw / 2.0, gh, -50.0),
-        Vector(-gw / 2.0, 0.0, -50.0),
-        Vector(gw / 2.0, gh, -50.0),
-        width as f32,
-        height as f32,
-    );
-    // let mut primitives = vec![
-    //     Primitive::Sphere {
-    //         center: Vector(16.0, -2.0, 10.0),
-    //         radius: 5.0,
-    //         material: Material::Reflective(Color(0.0, 0.0, 1.0), 1.0),
-    //     },
-    //     Primitive::new_triangle(
-    //         Vector(-8.0, 0.0, 0.0),
-    //         Vector(-7.0, 2.0, 0.0),
-    //         Vector(-6.0, 0.0, 0.0),
-    //         Material::Simple(Color(0.0, 1.0, 0.0)),
-    //     ),
-    // ];
+pub fn cornell() -> World {
+    // let gw = 20.0;
+    // let gh = 15.0;
+    // let camera = Camera::new(
+    //     Vector(0.0, gh / 2.0, -75.0),
+    //     Vector(-gw / 2.0, gh, -50.0),
+    //     Vector(-gw / 2.0, 0.0, -50.0),
+    //     Vector(gw / 2.0, gh, -50.0),
+    //     width as f32,
+    //     height as f32,
+    // );
 
     let simple_sphere = Solid::Sphere(
         Vector(16.0, -2.0, 10.0),
@@ -46,29 +33,21 @@ pub fn cornell(width: u32, height: u32) -> World {
         Transform::translate(-10.0, -2.0, 0.0),
     ];
     let cube = Solid::Cube(Transform::combine(&cube_trs)).into();
-    // primitives.append(&mut cube);
+
     //cornell box
     let cornell_trs = vec![
         Transform::scale(42.0, 30.0, 50.0),
         Transform::translate(0.0, 7.5, 0.0),
     ];
     let cornell = Solid::CornellBox(Transform::combine(&cornell_trs)).into();
-    // primitives.append(&mut cornell);
 
     //this is a donut
     let donut_trs = vec![Transform::rotate(PI / -4.0, 0.0, 0.0)];
     let donut = Solid::Torus(1.5, 4.0, 30, 50, Transform::combine(&donut_trs)).into();
-    // primitives.append(&mut donut);
 
     let lights = vec![Light::Point(Vector(-10.0, 10.0, -10.0))];
 
-    //println!("{} total primitives", primitives.len());
-    //let tracer = Accelerator::new_bounding_volume_hierarchy(&primitives);
-
-    //println!("{:?} in bvh", tracer.stats());
-
     let world = World::build()
-        .camera(camera)
         .lights(lights)
         .objects(vec![simple_sphere, simple_triangle, cube, cornell, donut])
         .finish();
@@ -76,17 +55,17 @@ pub fn cornell(width: u32, height: u32) -> World {
     world
 }
 
-pub fn simple(width: u32, height: u32) -> World {
-    let gw = 20.0;
-    let gh = 15.0;
-    let camera = Camera::new(
-        Vector(0.0, gh / 2.0, -75.0),
-        Vector(-gw / 2.0, gh, -50.0),
-        Vector(-gw / 2.0, 0.0, -50.0),
-        Vector(gw / 2.0, gh, -50.0),
-        width as f32,
-        height as f32,
-    );
+pub fn simple() -> World {
+    // let gw = 20.0;
+    // let gh = 15.0;
+    // let camera = Camera::new(
+    //     Vector(0.0, gh / 2.0, -75.0),
+    //     Vector(-gw / 2.0, gh, -50.0),
+    //     Vector(-gw / 2.0, 0.0, -50.0),
+    //     Vector(gw / 2.0, gh, -50.0),
+    //     width as f32,
+    //     height as f32,
+    // );
 
     let simple_sphere = Solid::Sphere(
         Vector(16.0, -2.0, 10.0),
@@ -97,7 +76,7 @@ pub fn simple(width: u32, height: u32) -> World {
         Vector(-800.0, -7.0, -800.0),
         Vector(0.0, -7.0, 800.0),
         Vector(800.0, -7.0, -800.0),
-        Material::Simple(Color(0.0, 1.0, 0.0)),
+        Material::Simple(Color(1.0, 1.0, 1.0)),
     );
 
     // cube thingy
@@ -107,29 +86,15 @@ pub fn simple(width: u32, height: u32) -> World {
         Transform::translate(-10.0, -2.0, 0.0),
     ];
     let cube = Solid::Cube(Transform::combine(&cube_trs)).into();
-    // primitives.append(&mut cube);
+
     //this is a donut
     let donut_trs = vec![Transform::rotate(PI / -4.0, 0.0, 0.0)];
     let donut = Solid::Torus(1.5, 4.0, 30, 50, Transform::combine(&donut_trs)).into();
-    // primitives.append(&mut donut);
-
     let sphere_trs = vec![Transform::translate(-16.0, -2.0, 10.0)];
     let geo_sphere = Solid::GeodesicSphere(2.0, 20, Transform::combine(&sphere_trs));
-    // let mut sphere: Vec<Primitive> =
-    //     Solid::GeodesicSphere(2.0, 20, Transform::combine(&sphere_trs)).into();
-    // primitives.append(&mut sphere);
-
-    // let point_lights = vec![Vector(-10.0, 10.0, -10.0)];
     let lights = vec![Light::Point(Vector(-10.0, 10.0, -10.0))];
 
-    //println!("{} total primitives", primitives.len());
-    // let tracer = Accelerator::new_bounding_volume_hierarchy(&primitives);
-
-    //println!("{:?} in bvh", tracer.stats());
-    // let buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
-
     World::build()
-        .camera(camera)
         .lights(lights)
         .objects(vec![
             simple_sphere,
@@ -141,35 +106,20 @@ pub fn simple(width: u32, height: u32) -> World {
         .finish()
 }
 
-pub fn shader_bench(width: u32, height: u32) -> World {
-    let gw = 20.0;
-    let gh = 15.0;
-    let camera = Camera::new(
-        Vector(0.0, gh / 2.0, -75.0),
-        Vector(-gw / 2.0, gh, -50.0),
-        Vector(-gw / 2.0, 0.0, -50.0),
-        Vector(gw / 2.0, gh, -50.0),
-        width as f32,
-        height as f32,
-    );
-    // let primitives = vec![Primitive::new_triangle(
-    //     Vector(-100.0, -100.0, 0.0),
-    //     Vector(0.0, 100.0, 0.0),
-    //     Vector(100.0, -100.0, 0.0),
-    //     Material::Simple(Color(1.0, 1.0, 1.0)),
-    // )];
-
-    // let point_lights = vec![Vector(0.0, 0.0, -10.0)];
+pub fn shader_bench() -> World {
+    // let gw = 20.0;
+    // let gh = 15.0;
+    // let camera = Camera::new(
+    //     Vector(0.0, gh / 2.0, -75.0),
+    //     Vector(-gw / 2.0, gh, -50.0),
+    //     Vector(-gw / 2.0, 0.0, -50.0),
+    //     Vector(gw / 2.0, gh, -50.0),
+    //     width as f32,
+    //     height as f32,
+    // );
     let lights = vec![Light::Point(Vector(0.0, 0.0, -10.0))];
 
-    //println!("{} total primitives", primitives.len());
-    // let tracer = Accelerator::new_bounding_volume_hierarchy(&primitives);
-
-    //println!("{:?} in bvh", tracer.stats());
-    // let buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
-
     World::build()
-        .camera(camera)
         .lights(lights)
         .objects(vec![Solid::Triangle(
             Vector(-100.0, -100.0, 0.0),
@@ -180,25 +130,17 @@ pub fn shader_bench(width: u32, height: u32) -> World {
         .finish()
 }
 
-pub fn bunny(width: u32, height: u32) -> World {
-    let gw = 20.0;
-    let gh = 15.0;
-    let camera = Camera::new(
-        Vector(0.0, gh / 2.0, -75.0),
-        Vector(-gw / 2.0, gh, -50.0),
-        Vector(-gw / 2.0, 0.0, -50.0),
-        Vector(gw / 2.0, gh, -50.0),
-        width as f32,
-        height as f32,
-    );
-    // let mut primitives = Vec::new();
-
-    // primitives.push(Primitive::new_triangle(
-    //     Vector(-800.0, -7.0, -800.0),
-    //     Vector(0.0, -7.0, 800.0),
-    //     Vector(800.0, -7.0, -800.0),
-    //     Material::Simple(Color(1.0, 1.0, 1.0)),
-    // ));
+pub fn bunny() -> World {
+    // let gw = 20.0;
+    // let gh = 15.0;
+    // let camera = Camera::new(
+    //     Vector(0.0, gh / 2.0, -75.0),
+    //     Vector(-gw / 2.0, gh, -50.0),
+    //     Vector(-gw / 2.0, 0.0, -50.0),
+    //     Vector(gw / 2.0, gh, -50.0),
+    //     width as f32,
+    //     height as f32,
+    // );
 
     let mut solids: Vec<Solid> = Vec::new();
 
@@ -249,19 +191,7 @@ pub fn bunny(width: u32, height: u32) -> World {
             ));
         }
     }
-
-    // let point_lights = vec![Vector(0.0, 20.0, -50.0)];
     let lights = vec![Light::Point(Vector(0.0, 20.0, -50.0))];
 
-    //println!("{} total primitives", primitives.len());
-    // let tracer = Accelerator::new_bounding_volume_hierarchy(&primitives);
-
-    //println!("{:?} in bvh", tracer.stats());
-    // let buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
-
-    World::build()
-        .camera(camera)
-        .lights(lights)
-        .objects(solids)
-        .finish()
+    World::build().lights(lights).objects(solids).finish()
 }

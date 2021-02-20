@@ -1,16 +1,24 @@
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 use super::{
-    accelerator::Accelerator, color::Color, direct_illumination, material::Material,
-    primitive::Primitive, ray::Ray, transform::Transform, vector::Vector, world::World,
+    accelerator::{Accelerator, AcceleratorInstance},
+    camera::Camera,
+    color::Color,
+    direct_illumination,
+    material::Material,
+    primitive::Primitive,
+    ray::Ray,
+    vector::Vector,
+    world::World,
 };
 // use rayon::prelude::*;
 pub struct Renderer {
     pub width: usize,
     pub height: usize,
-    pub accelerator: Accelerator,
+    pub accelerator: AcceleratorInstance,
     pub world: World,
     pub primitives: Vec<Primitive>,
+    pub camera: Camera,
 }
 
 impl Renderer {
@@ -18,7 +26,8 @@ impl Renderer {
         Renderer {
             width: 0,
             height: 0,
-            accelerator: Accelerator::None,
+            accelerator: AcceleratorInstance::None,
+            camera: Camera::default(),
             world: World::default(),
             primitives: Vec::new(),
         }
@@ -31,23 +40,33 @@ impl Renderer {
         self.height = height;
         self
     }
-    pub fn accelerator(mut self, accelerator: Accelerator) -> Renderer {
-        self.accelerator = accelerator;
+    pub fn camera(mut self, camera: Camera) -> Renderer {
+        self.camera = camera;
+        self.camera.init(self.width as f32, self.height as f32);
         self
     }
     pub fn world(mut self, world: World) -> Renderer {
         self.world = world;
+        self.primitives = self.world.primitives();
         self
     }
-    pub fn finish(mut self) -> Renderer {
-        self.primitives = self.world.primitives();
+    pub fn accelerator(mut self, accelerator: Accelerator) -> Renderer {
+        self.accelerator = match accelerator {
+            Accelerator::BruteForce => AcceleratorInstance::new_brute_force(&self.primitives),
+            Accelerator::BoundingVolumeHierarchy => {
+                AcceleratorInstance::new_bounding_volume_hierarchy(&self.primitives)
+            }
+        };
+        self
+    }
+    pub fn finish(self) -> Renderer {
         self
     }
 
     pub fn render(&mut self) -> Vec<u8> {
         let height = self.height;
         let width = self.width;
-        let camera = &self.world.camera;
+        let camera = &self.camera;
 
         let pixels = (0..height * width)
             .into_par_iter()
@@ -72,14 +91,14 @@ impl Renderer {
         buffer
     }
 
-    pub fn rotate_camera(&mut self, rads: f32) {
-        let rotation = Transform::rotate(0.0, rads, 0.0);
-        let mut camera = &mut self.world.camera;
-        camera.left_top = rotation.apply(&camera.left_top);
-        camera.delta_down = rotation.apply(&camera.delta_down);
-        camera.delta_right = rotation.apply(&camera.delta_right);
-        camera.eye = rotation.apply(&camera.eye);
-    }
+    // pub fn rotate_camera(&mut self, rads: f32) {
+    //     let rotation = Transform::rotate(0.0, rads, 0.0);
+    //     let mut camera = &mut self.camera;
+    //     camera.left_top = rotation.apply(&camera.left_top);
+    //     camera.delta_down = rotation.apply(&camera.delta_down);
+    //     camera.delta_right = rotation.apply(&camera.delta_right);
+    //     camera.eye = rotation.apply(&camera.eye);
+    // }
 
     // pub fn rotate_light(&mut self, rads: f32) {
     //     let rotation = Transform::rotate(0.0, rads, 0.0);
@@ -87,7 +106,7 @@ impl Renderer {
     //     point_lights[0] = rotation.apply(&point_lights[0]);
     // }
 
-    fn trace_ray(&self, tracer: &Accelerator, world: &World, ray: Ray, depth: u8) -> Color {
+    fn trace_ray(&self, tracer: &AcceleratorInstance, world: &World, ray: Ray, depth: u8) -> Color {
         if depth > 10 {
             return Color(0.0, 0.0, 0.0);
         }

@@ -1,7 +1,6 @@
 use super::{camera::Camera, light::Light, primitive::Primitive, solid::Solid};
 
 pub struct World {
-    pub camera: Camera,
     pub lights: Vec<Light>,
     pub objects: Vec<Solid>,
 }
@@ -12,14 +11,9 @@ impl World {
     }
     pub fn build() -> World {
         World {
-            camera: Camera::default(),
             lights: Vec::new(),
             objects: Vec::new(),
         }
-    }
-    pub fn camera(mut self, camera: Camera) -> World {
-        self.camera = camera;
-        self
     }
     pub fn lights(mut self, lights: Vec<Light>) -> World {
         self.lights = lights;

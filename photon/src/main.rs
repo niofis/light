@@ -1,5 +1,6 @@
 use clap::{App, AppSettings, Arg, SubCommand};
-use light::World;
+use light::Accelerator;
+use light::{Camera, Vector};
 
 fn print_ppm(data: &[u8], width: usize, height: usize) {
     println!("P3\n{} {}\n255", width, height);
@@ -31,8 +32,18 @@ fn main() {
         if let Some(scene) = matches.value_of("scene") {
             match scene {
                 "simple" => {
-                    let world = light::demos::simple(640, 480);
-                    let mut renderer = light::Renderer::build().width(640).height(480).world(world);
+                    let mut renderer = light::Renderer::build()
+                        .width(640)
+                        .height(480)
+                        .world(light::demos::simple())
+                        .camera(Camera::new(
+                            Vector(0.0, 15.0 / 2.0, -75.0),
+                            Vector(-20.0 / 2.0, 15.0, -50.0),
+                            Vector(-20.0 / 2.0, 0.0, -50.0),
+                            Vector(20.0 / 2.0, 15.0, -50.0),
+                        ))
+                        .accelerator(Accelerator::BoundingVolumeHierarchy)
+                        .finish();
                     let buffer = renderer.render();
                     print_ppm(&buffer, 640, 480);
                 }

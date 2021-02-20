@@ -1,4 +1,4 @@
-mod accelerator;
+pub(crate) mod accelerator;
 mod bounding_box;
 mod bounding_volume_hierarchy;
 mod brute_force;

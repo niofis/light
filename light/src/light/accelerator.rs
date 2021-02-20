@@ -4,25 +4,29 @@ use super::{
 };
 
 pub enum Accelerator {
+    BruteForce,
+    BoundingVolumeHierarchy,
+}
+pub enum AcceleratorInstance {
     None,
     BruteForce(BruteForce),
     BoundingVolumeHierarchy(BVH),
 }
 
-impl Accelerator {
-    pub fn new_brute_force(primitives: &Vec<Primitive>) -> Accelerator {
+impl AcceleratorInstance {
+    pub fn new_brute_force(primitives: &Vec<Primitive>) -> AcceleratorInstance {
         let tracer = BruteForce::new(primitives);
-        Accelerator::BruteForce(tracer)
+        AcceleratorInstance::BruteForce(tracer)
     }
-    pub fn new_bounding_volume_hierarchy(primitives: &Vec<Primitive>) -> Accelerator {
+    pub fn new_bounding_volume_hierarchy(primitives: &Vec<Primitive>) -> AcceleratorInstance {
         let tracer = BVH::new(primitives);
-        Accelerator::BoundingVolumeHierarchy(tracer)
+        AcceleratorInstance::BoundingVolumeHierarchy(tracer)
     }
     pub fn trace(&self, ray: &Ray) -> Option<Vec<usize>> {
         match self {
-            Accelerator::BruteForce(tracer) => tracer.trace(ray),
-            Accelerator::BoundingVolumeHierarchy(tracer) => tracer.trace(ray),
-            Accelerator::None => None,
+            AcceleratorInstance::BruteForce(tracer) => tracer.trace(ray),
+            AcceleratorInstance::BoundingVolumeHierarchy(tracer) => tracer.trace(ray),
+            AcceleratorInstance::None => None,
         }
     }
 }
