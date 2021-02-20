@@ -35,7 +35,7 @@ fn main() {
                     let mut renderer = light::Renderer::build()
                         .width(640)
                         .height(480)
-                        .world(light::demos::simple())
+                        .world(light::demos::cornell())
                         .camera(Camera::new(
                             Vector(0.0, 15.0 / 2.0, -75.0),
                             Vector(-20.0 / 2.0, 15.0, -50.0),

@@ -83,9 +83,9 @@ impl Renderer {
         let mut offset = 0;
         for pixel in pixels {
             let Color(r, g, b) = pixel;
-            buffer[offset] = if b > 1.0 { 255 } else { (b * 255.99) as u8 };
+            buffer[offset] = if r > 1.0 { 255 } else { (r * 255.99) as u8 };
             buffer[offset + 1] = if g > 1.0 { 255 } else { (g * 255.99) as u8 };
-            buffer[offset + 2] = if r > 1.0 { 255 } else { (r * 255.99) as u8 };
+            buffer[offset + 2] = if b > 1.0 { 255 } else { (b * 255.99) as u8 };
             offset = offset + 4;
         }
         buffer
