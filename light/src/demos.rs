@@ -1,19 +1,8 @@
 use std::{f32::consts::PI, path::Path};
 
-use crate::{Camera, Color, Light, Material, Solid, Transform, Vector, World};
+use crate::{Color, Light, Material, Solid, Transform, Vector, World};
 
 pub fn cornell() -> World {
-    // let gw = 20.0;
-    // let gh = 15.0;
-    // let camera = Camera::new(
-    //     Vector(0.0, gh / 2.0, -75.0),
-    //     Vector(-gw / 2.0, gh, -50.0),
-    //     Vector(-gw / 2.0, 0.0, -50.0),
-    //     Vector(gw / 2.0, gh, -50.0),
-    //     width as f32,
-    //     height as f32,
-    // );
-
     let simple_sphere = Solid::Sphere(
         Vector(16.0, -2.0, 10.0),
         5.0,
@@ -56,17 +45,6 @@ pub fn cornell() -> World {
 }
 
 pub fn simple() -> World {
-    // let gw = 20.0;
-    // let gh = 15.0;
-    // let camera = Camera::new(
-    //     Vector(0.0, gh / 2.0, -75.0),
-    //     Vector(-gw / 2.0, gh, -50.0),
-    //     Vector(-gw / 2.0, 0.0, -50.0),
-    //     Vector(gw / 2.0, gh, -50.0),
-    //     width as f32,
-    //     height as f32,
-    // );
-
     let simple_sphere = Solid::Sphere(
         Vector(16.0, -2.0, 10.0),
         5.0,
@@ -107,16 +85,6 @@ pub fn simple() -> World {
 }
 
 pub fn shader_bench() -> World {
-    // let gw = 20.0;
-    // let gh = 15.0;
-    // let camera = Camera::new(
-    //     Vector(0.0, gh / 2.0, -75.0),
-    //     Vector(-gw / 2.0, gh, -50.0),
-    //     Vector(-gw / 2.0, 0.0, -50.0),
-    //     Vector(gw / 2.0, gh, -50.0),
-    //     width as f32,
-    //     height as f32,
-    // );
     let lights = vec![Light::Point(Vector(0.0, 0.0, -10.0))];
 
     World::build()
@@ -131,17 +99,6 @@ pub fn shader_bench() -> World {
 }
 
 pub fn bunny() -> World {
-    // let gw = 20.0;
-    // let gh = 15.0;
-    // let camera = Camera::new(
-    //     Vector(0.0, gh / 2.0, -75.0),
-    //     Vector(-gw / 2.0, gh, -50.0),
-    //     Vector(-gw / 2.0, 0.0, -50.0),
-    //     Vector(gw / 2.0, gh, -50.0),
-    //     width as f32,
-    //     height as f32,
-    // );
-
     let mut solids: Vec<Solid> = Vec::new();
 
     solids.push(Solid::Triangle(

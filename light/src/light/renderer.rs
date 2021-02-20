@@ -123,16 +123,14 @@ impl Renderer {
                         };
 
                         match prm_material {
-                            Material::Simple(_) => {
-                                self.calculate_shading(world, &primitive, &point)
-                            }
+                            Material::Simple(_) => self.calculate_shading(&primitive, &point),
                             Material::Reflective(_, idx) => {
                                 let normal = primitive.normal(&point);
                                 let ri = ray.1.unit();
                                 let dot = ri.dot(&normal) * 2.0;
                                 let new_dir = &ri - &(&normal * dot);
                                 let reflected_ray = Ray::new(&point, &new_dir.unit());
-                                (self.calculate_shading(world, &primitive, &point) * (1.0 - idx))
+                                (self.calculate_shading(&primitive, &point) * (1.0 - idx))
                                     + self.trace_ray(tracer, world, reflected_ray, depth + 1) * *idx
                             }
                         }
@@ -144,7 +142,7 @@ impl Renderer {
         }
     }
 
-    fn calculate_shading(&self, world: &World, prm: &Primitive, point: &Vector) -> Color {
+    fn calculate_shading(&self, prm: &Primitive, point: &Vector) -> Color {
         let normal = prm.normal(point);
         let direct_lighting = direct_illumination::calculate(self, &point, &normal);
 

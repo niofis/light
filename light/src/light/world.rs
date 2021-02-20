@@ -1,4 +1,4 @@
-use super::{camera::Camera, light::Light, primitive::Primitive, solid::Solid};
+use super::{light::Light, primitive::Primitive, solid::Solid};
 
 pub struct World {
     pub lights: Vec<Light>,
