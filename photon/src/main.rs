@@ -30,25 +30,30 @@ fn main() {
 
     if let Some(matches) = matches.subcommand_matches("demo") {
         if let Some(scene) = matches.value_of("scene") {
+            let mut renderer = light::Renderer::build();
+            renderer.width(640).height(480).camera(Camera::new(
+                Vector(0.0, 15.0 / 2.0, -75.0),
+                Vector(-20.0 / 2.0, 15.0, -50.0),
+                Vector(-20.0 / 2.0, 0.0, -50.0),
+                Vector(20.0 / 2.0, 15.0, -50.0),
+            ));
             match scene {
                 "simple" => {
-                    let mut renderer = light::Renderer::build()
-                        .width(640)
-                        .height(480)
-                        .world(light::demos::cornell())
-                        .camera(Camera::new(
-                            Vector(0.0, 15.0 / 2.0, -75.0),
-                            Vector(-20.0 / 2.0, 15.0, -50.0),
-                            Vector(-20.0 / 2.0, 0.0, -50.0),
-                            Vector(20.0 / 2.0, 15.0, -50.0),
-                        ))
-                        .accelerator(Accelerator::BoundingVolumeHierarchy)
-                        .finish();
-                    let buffer = renderer.render();
-                    print_ppm(&buffer, 640, 480);
+                    renderer.world(light::demos::simple());
                 }
-                _ => println!("scene not found!"),
+                "cornell" => {
+                    renderer.world(light::demos::cornell());
+                }
+                "shader_bench" => {
+                    renderer.world(light::demos::shader_bench());
+                }
+                _ => return println!("scene not found!"),
             }
+            renderer
+                .accelerator(Accelerator::BoundingVolumeHierarchy)
+                .finish();
+            let buffer = renderer.render();
+            print_ppm(&buffer, 640, 480);
         }
     }
 }

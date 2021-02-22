@@ -32,25 +32,25 @@ impl Renderer {
             primitives: Vec::new(),
         }
     }
-    pub fn width(mut self, width: usize) -> Renderer {
+    pub fn width<'a>(&'a mut self, width: usize) -> &'a mut Renderer {
         self.width = width;
         self
     }
-    pub fn height(mut self, height: usize) -> Renderer {
+    pub fn height<'a>(&'a mut self, height: usize) -> &'a mut Renderer {
         self.height = height;
         self
     }
-    pub fn camera(mut self, camera: Camera) -> Renderer {
+    pub fn camera<'a>(&'a mut self, camera: Camera) -> &'a mut Renderer {
         self.camera = camera;
         self.camera.init(self.width as f32, self.height as f32);
         self
     }
-    pub fn world(mut self, world: World) -> Renderer {
+    pub fn world<'a>(&'a mut self, world: World) -> &'a mut Renderer {
         self.world = world;
         self.primitives = self.world.primitives();
         self
     }
-    pub fn accelerator(mut self, accelerator: Accelerator) -> Renderer {
+    pub fn accelerator<'a>(&'a mut self, accelerator: Accelerator) -> &'a mut Renderer {
         self.accelerator = match accelerator {
             Accelerator::BruteForce => AcceleratorInstance::new_brute_force(&self.primitives),
             Accelerator::BoundingVolumeHierarchy => {
@@ -59,7 +59,7 @@ impl Renderer {
         };
         self
     }
-    pub fn finish(self) -> Renderer {
+    pub fn finish(&mut self) -> &Renderer {
         self
     }
 

@@ -36,12 +36,10 @@ pub fn cornell() -> World {
 
     let lights = vec![Light::Point(Vector(-10.0, 10.0, -10.0))];
 
-    let world = World::build()
+    World::build()
         .lights(lights)
         .objects(vec![simple_sphere, simple_triangle, cube, cornell, donut])
-        .finish();
-
-    world
+        .finish()
 }
 
 pub fn simple() -> World {
