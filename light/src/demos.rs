@@ -96,7 +96,7 @@ pub fn shader_bench() -> World {
         .finish()
 }
 
-pub fn bunny() -> World {
+pub fn obj(file: &str) -> World {
     let mut solids: Vec<Solid> = Vec::new();
 
     solids.push(Solid::Triangle(
@@ -106,7 +106,7 @@ pub fn bunny() -> World {
         Material::Simple(Color(1.0, 1.0, 1.0)),
     ));
 
-    let bunny_obj = tobj::load_obj(&Path::new("models/bunny_res2.obj"));
+    let bunny_obj = tobj::load_obj(&Path::new(file));
     if bunny_obj.is_ok() == false {
         panic!("obj model is not valid!");
     }

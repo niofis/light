@@ -59,6 +59,15 @@ impl Renderer {
         };
         self
     }
+    pub fn threads<'a>(&'a mut self, count: usize) -> &'a mut Renderer {
+        if count > 0 {
+            rayon::ThreadPoolBuilder::new()
+                .num_threads(count)
+                .build_global()
+                .unwrap();
+        }
+        self
+    }
     pub fn finish(&mut self) -> &Renderer {
         self
     }

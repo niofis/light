@@ -1,5 +1,5 @@
 use clap::{App, AppSettings, Arg, SubCommand};
-use light::Accelerator;
+use light::{demos::obj, Accelerator};
 use light::{Camera, Vector};
 
 fn print_ppm(data: &[u8], width: usize, height: usize) {
@@ -15,45 +15,93 @@ fn main() {
         .version("0.1")
         .author("Enrique <niofis@gmail.com>")
         .about("Renders a scene using the light engine")
-        .subcommand(
-            SubCommand::with_name("demo")
-                .about("renders one of the demo scenes: simple, cornell, bunny")
-                .arg(
-                    Arg::with_name("scene")
-                        .required(true)
-                        .help("one of the following: simple, cornell, bunny")
-                        .takes_value(true),
-                ),
+        .arg(
+            Arg::with_name("threads")
+                .short("t")
+                .long("threads")
+                .takes_value(true)
+                .multiple(false)
+                .help("specify the number of threads to use, defaults to the number of cpus available"),
         )
+        .arg(
+            Arg::with_name("accelerator")
+                .short("a")
+                .long("accelerator")
+                .takes_value(true)
+                .multiple(false)
+                .possible_values(&["brute_force", "bvh"])
+                .default_value("bvh")
+                .help("specify the accelerator structure to use, defaults to bvh"))
+        .arg(
+            Arg::with_name("demo")
+                .short("d")
+                .long("demo")
+                .takes_value(true)
+                .multiple(false)
+                .possible_values(&["simple", "cornell", "bunny"])
+                .help("renders one of the demo scenes"))
+        .arg(
+            Arg::with_name("obj")
+            .short("o")
+            .long("obj")
+            .takes_value(true)
+            .multiple(false)
+            .conflicts_with("demo")
+            .help("renders the specified obj file"))
         .setting(AppSettings::ArgRequiredElseHelp)
         .get_matches();
 
-    if let Some(matches) = matches.subcommand_matches("demo") {
-        if let Some(scene) = matches.value_of("scene") {
-            let mut renderer = light::Renderer::build();
-            renderer.width(640).height(480).camera(Camera::new(
-                Vector(0.0, 15.0 / 2.0, -75.0),
-                Vector(-20.0 / 2.0, 15.0, -50.0),
-                Vector(-20.0 / 2.0, 0.0, -50.0),
-                Vector(20.0 / 2.0, 15.0, -50.0),
-            ));
-            match scene {
-                "simple" => {
-                    renderer.world(light::demos::simple());
-                }
-                "cornell" => {
-                    renderer.world(light::demos::cornell());
-                }
-                "shader_bench" => {
-                    renderer.world(light::demos::shader_bench());
-                }
-                _ => return println!("scene not found!"),
+    let mut renderer = light::Renderer::build();
+    renderer.width(640).height(480).camera(Camera::new(
+        Vector(0.0, 15.0 / 2.0, -75.0),
+        Vector(-20.0 / 2.0, 15.0, -50.0),
+        Vector(-20.0 / 2.0, 0.0, -50.0),
+        Vector(20.0 / 2.0, 15.0, -50.0),
+    ));
+
+    if let Some(scene) = matches.value_of("demo") {
+        match scene {
+            "simple" => {
+                renderer.world(light::demos::simple());
             }
-            renderer
-                .accelerator(Accelerator::BoundingVolumeHierarchy)
-                .finish();
-            let buffer = renderer.render();
-            print_ppm(&buffer, 640, 480);
+            "cornell" => {
+                renderer.world(light::demos::cornell());
+            }
+            "shader_bench" => {
+                renderer.world(light::demos::shader_bench());
+            }
+            _ => return println!("scene not found!"),
         }
     }
+
+    if let Some(val) = matches.value_of("obj") {
+        renderer.world(light::demos::obj(val));
+    }
+
+    if let Some(val) = matches.value_of("accelerator") {
+        match val {
+            "brute_force" => {
+                renderer.accelerator(Accelerator::BruteForce);
+            }
+            "bvh" => {
+                renderer.accelerator(Accelerator::BoundingVolumeHierarchy);
+            }
+            _ => {}
+        }
+    }
+
+    if let Some(val) = matches.value_of("threads") {
+        if let Ok(threads) = val.parse() {
+            renderer.threads(threads);
+        } else {
+            eprintln!("invalid threads value!");
+        }
+    }
+
+    let start = time::precise_time_s();
+    renderer.finish();
+    let buffer = renderer.render();
+    let elapsed = time::precise_time_s() - start;
+    eprintln!("Rendering time: {}s", elapsed);
+    print_ppm(&buffer, 640, 480);
 }
