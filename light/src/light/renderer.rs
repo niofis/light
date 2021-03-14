@@ -11,7 +11,12 @@ use super::{
     vector::Vector,
     world::World,
 };
-// use rayon::prelude::*;
+
+pub enum RenderMethod {
+    Pixels,
+    Squares,
+}
+
 pub struct Renderer {
     pub width: usize,
     pub height: usize,
@@ -19,6 +24,7 @@ pub struct Renderer {
     pub world: World,
     pub primitives: Vec<Primitive>,
     pub camera: Camera,
+    pub render_method: RenderMethod,
 }
 
 impl Renderer {
@@ -30,6 +36,7 @@ impl Renderer {
             camera: Camera::default(),
             world: World::default(),
             primitives: Vec::new(),
+            render_method: RenderMethod::Pixels,
         }
     }
     pub fn width<'a>(&'a mut self, width: usize) -> &'a mut Renderer {
@@ -48,6 +55,10 @@ impl Renderer {
     pub fn world<'a>(&'a mut self, world: World) -> &'a mut Renderer {
         self.world = world;
         self.primitives = self.world.primitives();
+        self
+    }
+    pub fn render_method<'a>(&'a mut self, render_method: RenderMethod) -> &'a mut Renderer {
+        self.render_method = render_method;
         self
     }
     pub fn accelerator<'a>(&'a mut self, accelerator: Accelerator) -> &'a mut Renderer {
@@ -71,8 +82,14 @@ impl Renderer {
     pub fn finish(&mut self) -> &Renderer {
         self
     }
-
     pub fn render(&mut self) -> Vec<u8> {
+        match self.render_method {
+            RenderMethod::Pixels => self.render_pixels(),
+            RenderMethod::Squares => self.render_squares(),
+        }
+    }
+
+    pub fn render_pixels(&mut self) -> Vec<u8> {
         let height = self.height;
         let width = self.width;
         let camera = &self.camera;
@@ -84,7 +101,7 @@ impl Renderer {
                 let y = (pixel / width) as f32;
                 let ray = camera.get_ray(x, y);
 
-                self.trace_ray(&self.accelerator, &self.world, ray, 0)
+                self.trace_ray(&ray, 0)
             })
             .collect::<Vec<Color>>();
 
@@ -96,6 +113,48 @@ impl Renderer {
             buffer[offset + 1] = if g > 1.0 { 255 } else { (g * 255.99) as u8 };
             buffer[offset + 2] = if b > 1.0 { 255 } else { (b * 255.99) as u8 };
             offset = offset + 4;
+        }
+        buffer
+    }
+
+    pub fn render_squares(&mut self) -> Vec<u8> {
+        let height = self.height;
+        let width = self.width;
+        let camera = &self.camera;
+        let section_size = 16;
+        let sections_v = height / section_size;
+        let sections_h = width / section_size;
+        let pixels_per_section = section_size * section_size;
+        let results = (0..sections_v * sections_h)
+            .into_par_iter()
+            .map(|section| {
+                let left = (section % sections_h) * section_size;
+                let top = (section / sections_h) * section_size;
+                let right = left + section_size;
+                let bottom = top + section_size;
+                let mut pixels = Vec::with_capacity(pixels_per_section);
+                for y in top..bottom {
+                    for x in left..right {
+                        let ray = camera.get_ray(x as f32, y as f32);
+                        let pixel = self.trace_ray(&ray, 0);
+                        pixels.push(pixel);
+                    }
+                }
+                (left, top, pixels)
+            })
+            .collect::<Vec<(usize, usize, Vec<Color>)>>();
+        let mut buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
+        for (sx, sy, pixels) in results {
+            for p in 0..(pixels_per_section) {
+                let x = p % section_size;
+                let y = p / section_size;
+                let pixel = &pixels[p];
+                let Color(r, g, b) = pixel;
+                let offset = ((sy + y) * width + sx + x) * 4;
+                buffer[offset] = if *r > 1.0 { 255 } else { (r * 255.99) as u8 };
+                buffer[offset + 1] = if *g > 1.0 { 255 } else { (g * 255.99) as u8 };
+                buffer[offset + 2] = if *b > 1.0 { 255 } else { (b * 255.99) as u8 };
+            }
         }
         buffer
     }
@@ -115,7 +174,8 @@ impl Renderer {
     //     point_lights[0] = rotation.apply(&point_lights[0]);
     // }
 
-    fn trace_ray(&self, tracer: &AcceleratorInstance, world: &World, ray: Ray, depth: u8) -> Color {
+    fn trace_ray(&self, ray: &Ray, depth: u8) -> Color {
+        let tracer = &self.accelerator;
         if depth > 10 {
             return Color(0.0, 0.0, 0.0);
         }
@@ -140,7 +200,7 @@ impl Renderer {
                                 let new_dir = &ri - &(&normal * dot);
                                 let reflected_ray = Ray::new(&point, &new_dir.unit());
                                 (self.calculate_shading(&primitive, &point) * (1.0 - idx))
-                                    + self.trace_ray(tracer, world, reflected_ray, depth + 1) * *idx
+                                    + self.trace_ray(&reflected_ray, depth + 1) * *idx
                             }
                         }
                     }

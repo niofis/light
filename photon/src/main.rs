@@ -50,14 +50,20 @@ fn main() {
             .help("renders the specified obj file"))
         .setting(AppSettings::ArgRequiredElseHelp)
         .get_matches();
+    let width = 640;
+    let height = 480;
 
     let mut renderer = light::Renderer::build();
-    renderer.width(640).height(480).camera(Camera::new(
-        Vector(0.0, 15.0 / 2.0, -75.0),
-        Vector(-20.0 / 2.0, 15.0, -50.0),
-        Vector(-20.0 / 2.0, 0.0, -50.0),
-        Vector(20.0 / 2.0, 15.0, -50.0),
-    ));
+    renderer
+        .width(width)
+        .height(height)
+        .camera(Camera::new(
+            Vector(0.0, 15.0 / 2.0, -75.0),
+            Vector(-20.0 / 2.0, 15.0, -50.0),
+            Vector(-20.0 / 2.0, 0.0, -50.0),
+            Vector(20.0 / 2.0, 15.0, -50.0),
+        ))
+        .render_method(light::RenderMethod::Squares);
 
     if let Some(scene) = matches.value_of("demo") {
         match scene {
@@ -103,5 +109,5 @@ fn main() {
     let buffer = renderer.render();
     let elapsed = time::precise_time_s() - start;
     eprintln!("Rendering time: {}s", elapsed);
-    print_ppm(&buffer, 640, 480);
+    print_ppm(&buffer, width, height);
 }

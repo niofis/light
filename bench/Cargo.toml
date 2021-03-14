@@ -1,0 +1,13 @@
+[package]
+name = "bench"
+version = "0.1.0"
+authors = ["Enrique <niofis@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = "2"
+time = "0.1.42"
+light = { path = "../light" }
+num_cpus = "1.0"

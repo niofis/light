@@ -45,7 +45,7 @@ fn rec_trace(bvh: &BVHNode, ray: &Ray, prm_vec: &mut Vec<usize>) {
 impl Trace for BVH {
     fn trace(&self, ray: &Ray) -> Option<Vec<usize>> {
         let BVH { root } = self;
-        let mut idx_vec: Vec<usize> = Vec::new();
+        let mut idx_vec: Vec<usize> = Vec::with_capacity(256);
 
         rec_trace(&root, &ray, &mut idx_vec);
 

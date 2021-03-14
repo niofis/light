@@ -5,6 +5,7 @@ pub use light::camera::Camera;
 pub use light::color::Color;
 pub use light::light::Light;
 pub use light::material::Material;
+pub use light::renderer::RenderMethod;
 pub use light::renderer::Renderer;
 pub use light::solid::Solid;
 pub use light::transform::Transform;
