@@ -7,6 +7,7 @@ pub use light::light::Light;
 pub use light::material::Material;
 pub use light::renderer::RenderMethod;
 pub use light::renderer::Renderer;
+pub use light::section::Section;
 pub use light::solid::Solid;
 pub use light::transform::Transform;
 pub use light::vector::Vector;

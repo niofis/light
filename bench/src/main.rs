@@ -1,5 +1,5 @@
 use clap::{App, Arg};
-use light::Accelerator;
+use light::{Accelerator, Section};
 use light::{Camera, Vector};
 
 fn main() {
@@ -58,9 +58,10 @@ fn main() {
     let mut max = f64::NEG_INFINITY;
     let mut sum: f64 = 0.;
     let iterations = 10;
+    let section = Section::new(0, 0, width, height);
     for _i in 0..iterations {
         let start = time::precise_time_s();
-        let _buffer = renderer.render();
+        let _buffer = renderer.render(&section);
         let elapsed = time::precise_time_s() - start;
         min = min.min(elapsed);
         max = max.max(elapsed);

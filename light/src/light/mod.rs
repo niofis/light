@@ -10,6 +10,7 @@ pub(crate) mod material;
 mod primitive;
 mod ray;
 pub(crate) mod renderer;
+pub(crate) mod section;
 pub(crate) mod solid;
 mod trace;
 pub(crate) mod transform;

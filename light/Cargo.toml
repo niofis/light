@@ -5,5 +5,5 @@ authors = ["Enrique <niofis@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-rayon = "1.2"
+rayon = "1.5"
 tobj = "1.0.0"

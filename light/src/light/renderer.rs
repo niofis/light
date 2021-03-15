@@ -1,5 +1,7 @@
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
+use crate::Section;
+
 use super::{
     accelerator::{Accelerator, AcceleratorInstance},
     camera::Camera,
@@ -82,44 +84,34 @@ impl Renderer {
     pub fn finish(&mut self) -> &Renderer {
         self
     }
-    pub fn render(&mut self) -> Vec<u8> {
+    pub fn render(&mut self, section: &Section) -> Vec<Color> {
         match self.render_method {
-            RenderMethod::Pixels => self.render_pixels(),
-            RenderMethod::Squares => self.render_squares(),
+            RenderMethod::Pixels => self.render_pixels(section),
+            RenderMethod::Squares => self.render_squares(section),
         }
     }
-
-    pub fn render_pixels(&mut self) -> Vec<u8> {
-        let height = self.height;
-        let width = self.width;
+    fn render_pixels(&mut self, section: &Section) -> Vec<Color> {
+        let height = section.height;
+        let width = section.width;
+        let left = section.x;
+        let top = section.y;
         let camera = &self.camera;
 
         let pixels = (0..height * width)
             .into_par_iter()
             .map(|pixel| {
-                let x = (pixel % width) as f32;
-                let y = (pixel / width) as f32;
+                let x = (left + pixel % width) as f32;
+                let y = (top + pixel / width) as f32;
                 let ray = camera.get_ray(x, y);
 
                 self.trace_ray(&ray, 0)
             })
             .collect::<Vec<Color>>();
-
-        let mut buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
-        let mut offset = 0;
-        for pixel in pixels {
-            let Color(r, g, b) = pixel;
-            buffer[offset] = if r > 1.0 { 255 } else { (r * 255.99) as u8 };
-            buffer[offset + 1] = if g > 1.0 { 255 } else { (g * 255.99) as u8 };
-            buffer[offset + 2] = if b > 1.0 { 255 } else { (b * 255.99) as u8 };
-            offset = offset + 4;
-        }
-        buffer
+        return pixels;
     }
-
-    pub fn render_squares(&mut self) -> Vec<u8> {
-        let height = self.height;
-        let width = self.width;
+    fn render_squares(&mut self, section: &Section) -> Vec<Color> {
+        let height = section.height;
+        let width = section.width;
         let camera = &self.camera;
         let section_size = 16;
         let sections_v = height / section_size;
@@ -127,9 +119,9 @@ impl Renderer {
         let pixels_per_section = section_size * section_size;
         let results = (0..sections_v * sections_h)
             .into_par_iter()
-            .map(|section| {
-                let left = (section % sections_h) * section_size;
-                let top = (section / sections_h) * section_size;
+            .map(|idx| {
+                let left = section.x + (idx % sections_h) * section_size;
+                let top = section.y + (idx / sections_h) * section_size;
                 let right = left + section_size;
                 let bottom = top + section_size;
                 let mut pixels = Vec::with_capacity(pixels_per_section);
@@ -140,23 +132,20 @@ impl Renderer {
                         pixels.push(pixel);
                     }
                 }
-                (left, top, pixels)
+                pixels
             })
-            .collect::<Vec<(usize, usize, Vec<Color>)>>();
-        let mut buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
-        for (sx, sy, pixels) in results {
-            for p in 0..(pixels_per_section) {
-                let x = p % section_size;
-                let y = p / section_size;
-                let pixel = &pixels[p];
-                let Color(r, g, b) = pixel;
-                let offset = ((sy + y) * width + sx + x) * 4;
-                buffer[offset] = if *r > 1.0 { 255 } else { (r * 255.99) as u8 };
-                buffer[offset + 1] = if *g > 1.0 { 255 } else { (g * 255.99) as u8 };
-                buffer[offset + 2] = if *b > 1.0 { 255 } else { (b * 255.99) as u8 };
+            .collect::<Vec<Vec<Color>>>();
+        let mut pixels: Vec<Color> = vec![Color::default(); width * height];
+        for (section, colors) in results.into_iter().enumerate() {
+            let start_x = (section % sections_h) * section_size;
+            let start_y = (section / sections_h) * section_size;
+            for (idx, color) in colors.into_iter().enumerate() {
+                let x = idx % section_size;
+                let y = idx / section_size;
+                pixels[(start_y + y) * width + start_x + x] = color;
             }
         }
-        buffer
+        return pixels;
     }
 
     // pub fn rotate_camera(&mut self, rads: f32) {

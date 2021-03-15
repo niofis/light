@@ -1,5 +1,5 @@
 use clap::{App, AppSettings, Arg, SubCommand};
-use light::{demos::obj, Accelerator};
+use light::{demos::obj, Accelerator, Color};
 use light::{Camera, Vector};
 
 fn print_ppm(data: &[u8], width: usize, height: usize) {
@@ -63,6 +63,7 @@ fn main() {
             Vector(-20.0 / 2.0, 0.0, -50.0),
             Vector(20.0 / 2.0, 15.0, -50.0),
         ))
+        // .render_method(light::RenderMethod::Pixels);
         .render_method(light::RenderMethod::Squares);
 
     if let Some(scene) = matches.value_of("demo") {
@@ -104,9 +105,22 @@ fn main() {
         }
     }
 
-    let start = time::precise_time_s();
+    let section = light::Section::new(0, 0, width, height);
     renderer.finish();
-    let buffer = renderer.render();
+
+    let mut buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
+    let start = time::precise_time_s();
+    let pixels = renderer.render(&section);
+    for (idx, pixel) in pixels.into_iter().enumerate() {
+        let x = section.x + (idx % section.width);
+        let y = section.y + (idx / section.width);
+        let offset = (y * width + x) * 4;
+        let Color(r, g, b) = pixel;
+        buffer[offset] = if r > 1.0 { 255 } else { (r * 255.99) as u8 };
+        buffer[offset + 1] = if g > 1.0 { 255 } else { (g * 255.99) as u8 };
+        buffer[offset + 2] = if b > 1.0 { 255 } else { (b * 255.99) as u8 };
+    }
+
     let elapsed = time::precise_time_s() - start;
     eprintln!("Rendering time: {}s", elapsed);
     print_ppm(&buffer, width, height);
