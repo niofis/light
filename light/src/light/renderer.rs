@@ -16,7 +16,7 @@ use super::{
 
 pub enum RenderMethod {
     Pixels,
-    Squares,
+    Tiles,
 }
 
 pub struct Renderer {
@@ -87,7 +87,7 @@ impl Renderer {
     pub fn render(&mut self, section: &Section) -> Vec<Color> {
         match self.render_method {
             RenderMethod::Pixels => self.render_pixels(section),
-            RenderMethod::Squares => self.render_squares(section),
+            RenderMethod::Tiles => self.render_tiles(section),
         }
     }
     fn render_pixels(&mut self, section: &Section) -> Vec<Color> {
@@ -109,7 +109,7 @@ impl Renderer {
             .collect::<Vec<Color>>();
         return pixels;
     }
-    fn render_squares(&mut self, section: &Section) -> Vec<Color> {
+    fn render_tiles(&mut self, section: &Section) -> Vec<Color> {
         let height = section.height;
         let width = section.width;
         let camera = &self.camera;

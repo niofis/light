@@ -64,7 +64,7 @@ fn main() {
             Vector(20.0 / 2.0, 15.0, -50.0),
         ))
         // .render_method(light::RenderMethod::Pixels);
-        .render_method(light::RenderMethod::Squares);
+        .render_method(light::RenderMethod::Tiles);
 
     if let Some(scene) = matches.value_of("demo") {
         match scene {

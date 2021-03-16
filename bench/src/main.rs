@@ -49,7 +49,7 @@ fn main() {
         ))
         .world(light::demos::cornell())
         .accelerator(Accelerator::BoundingVolumeHierarchy)
-        .render_method(light::RenderMethod::Squares)
+        .render_method(light::RenderMethod::Tiles)
         // .render_method(light::RenderMethod::Pixels)
         .threads(threads)
         .finish();
