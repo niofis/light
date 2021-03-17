@@ -1,4 +1,6 @@
-use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use rayon::iter::{
+    IndexedParallelIterator, IntoParallelIterator, IntoParallelRefMutIterator, ParallelIterator,
+};
 
 use crate::Section;
 
@@ -97,7 +99,8 @@ impl Renderer {
         let top = section.y;
         let camera = &self.camera;
 
-        let pixels = (0..height * width)
+        let mut pixels = vec![Color::default(); height * width];
+        (0..height * width)
             .into_par_iter()
             .map(|pixel| {
                 let x = (left + pixel % width) as f32;
@@ -106,42 +109,44 @@ impl Renderer {
 
                 self.trace_ray(&ray, 0)
             })
-            .collect::<Vec<Color>>();
+            .collect_into_vec(&mut pixels);
         return pixels;
     }
     fn render_tiles(&mut self, section: &Section) -> Vec<Color> {
         let height = section.height;
         let width = section.width;
         let camera = &self.camera;
-        let section_size = 16;
-        let sections_v = height / section_size;
-        let sections_h = width / section_size;
-        let pixels_per_section = section_size * section_size;
-        let results = (0..sections_v * sections_h)
+        let tile_size = 16;
+        let sections_v = height / tile_size;
+        let sections_h = width / tile_size;
+        let pixels_per_tile = tile_size * tile_size;
+
+        let tiles = (0..sections_v * sections_h)
             .into_par_iter()
             .map(|idx| {
-                let left = section.x + (idx % sections_h) * section_size;
-                let top = section.y + (idx / sections_h) * section_size;
-                let right = left + section_size;
-                let bottom = top + section_size;
-                let mut pixels = Vec::with_capacity(pixels_per_section);
-                for y in top..bottom {
-                    for x in left..right {
-                        let ray = camera.get_ray(x as f32, y as f32);
-                        let pixel = self.trace_ray(&ray, 0);
-                        pixels.push(pixel);
+                let x = section.x + (idx % sections_h) * tile_size;
+                let y = section.y + (idx / sections_h) * tile_size;
+                let pixels: Vec<Color> = Vec::with_capacity(pixels_per_tile);
+                (x, y, pixels)
+            })
+            .map(|(x, y, mut pixels)| {
+                for yy in 0..tile_size {
+                    for xx in 0..tile_size {
+                        let ray = camera.get_ray((x + xx) as f32, (y + yy) as f32);
+                        pixels.push(self.trace_ray(&ray, 0));
                     }
                 }
                 pixels
             })
             .collect::<Vec<Vec<Color>>>();
+
         let mut pixels: Vec<Color> = vec![Color::default(); width * height];
-        for (section, colors) in results.into_iter().enumerate() {
-            let start_x = (section % sections_h) * section_size;
-            let start_y = (section / sections_h) * section_size;
+        for (section, colors) in tiles.into_iter().enumerate() {
+            let start_x = (section % sections_h) * tile_size;
+            let start_y = (section / sections_h) * tile_size;
             for (idx, color) in colors.into_iter().enumerate() {
-                let x = idx % section_size;
-                let y = idx / section_size;
+                let x = idx % tile_size;
+                let y = idx / tile_size;
                 pixels[(start_y + y) * width + start_x + x] = color;
             }
         }
