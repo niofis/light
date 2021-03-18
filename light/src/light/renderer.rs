@@ -7,7 +7,7 @@ use crate::Section;
 use super::{
     accelerator::{Accelerator, AcceleratorInstance},
     camera::Camera,
-    color::Color,
+    color::{self, Color},
     direct_illumination,
     material::Material,
     primitive::Primitive,
@@ -21,6 +21,11 @@ pub enum RenderMethod {
     Tiles,
 }
 
+pub enum Illumination {
+    Direct,
+    PathTracing,
+}
+
 pub struct Renderer {
     pub width: usize,
     pub height: usize,
@@ -29,6 +34,7 @@ pub struct Renderer {
     pub primitives: Vec<Primitive>,
     pub camera: Camera,
     pub render_method: RenderMethod,
+    pub illumination: Illumination,
 }
 
 impl Renderer {
@@ -41,6 +47,7 @@ impl Renderer {
             world: World::default(),
             primitives: Vec::new(),
             render_method: RenderMethod::Pixels,
+            illumination: Illumination::Direct,
         }
     }
     pub fn width<'a>(&'a mut self, width: usize) -> &'a mut Renderer {
@@ -63,6 +70,10 @@ impl Renderer {
     }
     pub fn render_method<'a>(&'a mut self, render_method: RenderMethod) -> &'a mut Renderer {
         self.render_method = render_method;
+        self
+    }
+    pub fn illumination<'a>(&'a mut self, illumination: Illumination) -> &'a mut Renderer {
+        self.illumination = illumination;
         self
     }
     pub fn accelerator<'a>(&'a mut self, accelerator: Accelerator) -> &'a mut Renderer {
@@ -153,28 +164,13 @@ impl Renderer {
         return pixels;
     }
 
-    // pub fn rotate_camera(&mut self, rads: f32) {
-    //     let rotation = Transform::rotate(0.0, rads, 0.0);
-    //     let mut camera = &mut self.camera;
-    //     camera.left_top = rotation.apply(&camera.left_top);
-    //     camera.delta_down = rotation.apply(&camera.delta_down);
-    //     camera.delta_right = rotation.apply(&camera.delta_right);
-    //     camera.eye = rotation.apply(&camera.eye);
-    // }
-
-    // pub fn rotate_light(&mut self, rads: f32) {
-    //     let rotation = Transform::rotate(0.0, rads, 0.0);
-    //     let point_lights = &mut self.world.lights;
-    //     point_lights[0] = rotation.apply(&point_lights[0]);
-    // }
-
     fn trace_ray(&self, ray: &Ray, depth: u8) -> Color {
-        let tracer = &self.accelerator;
+        let accelerator = &self.accelerator;
         if depth > 10 {
-            return Color(0.0, 0.0, 0.0);
+            return color::BLACK;
         }
 
-        match tracer.trace(&ray) {
+        match accelerator.trace(&ray) {
             Some(prm_idxs) => {
                 let closest = self.find_closest_primitive(&ray, &prm_idxs);
                 match closest {
@@ -198,10 +194,10 @@ impl Renderer {
                             }
                         }
                     }
-                    None => Color(0.0, 0.0, 0.0),
+                    None => color::BLACK,
                 }
             }
-            None => Color(0.0, 0.0, 0.0),
+            None => color::BLACK,
         }
     }
 

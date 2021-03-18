@@ -1,9 +1,18 @@
-use super::World;
-use crate::light::Color;
-use crate::light::Ray;
-use crate::light::Trace;
-use crate::light::Vector;
-use rand::{Rng, SeedableRng};
+use super::{color::Color, primitive::Primitive, ray::Ray, vector::Vector};
+use super::{color::BLACK, World};
+use crate::Renderer;
+
+fn find_shadow_primitive<'a>(
+    primitives: &Vec<Primitive>,
+    ray: &Ray,
+    prm_indexes: &Vec<usize>,
+    max_dist: f32,
+) -> bool {
+    prm_indexes
+        .iter()
+        .filter_map(|idx| primitives[*idx].intersect(ray).map(|dist| dist))
+        .any(|dist| dist > 0.0001 && dist <= max_dist)
+}
 
 fn random_dome<R: Rng>(rng: &mut R, normal: V3) -> V3 {
     rng.gen_iter::<(f32, f32, f32)>()
@@ -74,12 +83,12 @@ pub fn calculate(world: &World, point: &Vector, normal: &Vector) -> Color {
         .map(|light| {
             let dot = normal.dot(&(light - &point).unit());
             if dot < 0.0 {
-                return Color(0.0, 0.0, 0.0);
+                return BLACK;
             } else {
                 return Color(1.0, 1.0, 1.0) * dot;
             }
         })
-        .fold(Color(0.0, 0.0, 0.0), |acc, col| acc + col);
+        .fold(BLACK, |acc, col| acc + col);
 
     color_intensity
 }

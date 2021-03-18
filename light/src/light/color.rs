@@ -3,6 +3,8 @@ use std::ops;
 #[derive(Debug, Clone, Default)]
 pub struct Color(pub f32, pub f32, pub f32); //r,g,b
 
+pub const BLACK: Color = Color(0., 0., 0.);
+
 impl ops::Mul<f32> for Color {
     type Output = Color;
 

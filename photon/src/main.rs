@@ -1,5 +1,5 @@
-use clap::{App, AppSettings, Arg, SubCommand};
-use light::{demos::obj, Accelerator, Color};
+use clap::{App, AppSettings, Arg};
+use light::{Accelerator, Color};
 use light::{Camera, Vector};
 
 fn print_ppm(data: &[u8], width: usize, height: usize) {
