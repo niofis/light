@@ -1,8 +1,7 @@
-use crate::light::material::*;
-use crate::light::primitive::*;
-use crate::light::transform::*;
-use crate::light::vector::*;
+use crate::{Color, Material, Transform, Vector};
 use std::f32::consts::PI;
+
+use super::primitive::Primitive;
 
 pub enum Solid {
     Triangle(Vector, Vector, Vector, Material),
@@ -92,8 +91,18 @@ fn cornell_box(transform: &Transform) -> Vec<Primitive> {
         Primitive::new_triangle(pt1(), pt5(), pt8(), Material::red()),
         Primitive::new_triangle(pt1(), pt8(), pt4(), Material::red()),
         //top
-        Primitive::new_triangle(pt6(), pt5(), pt2(), Material::white()),
-        Primitive::new_triangle(pt5(), pt1(), pt2(), Material::white()),
+        Primitive::new_triangle(
+            pt6(),
+            pt5(),
+            pt2(),
+            Material::Emissive(Color(1.0, 1.0, 1.0)),
+        ),
+        Primitive::new_triangle(
+            pt5(),
+            pt1(),
+            pt2(),
+            Material::Emissive(Color(1.0, 1.0, 1.0)),
+        ),
         //bottom
         Primitive::new_triangle(pt3(), pt4(), pt8(), Material::white()),
         Primitive::new_triangle(pt7(), pt3(), pt8(), Material::white()),

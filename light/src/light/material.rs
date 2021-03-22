@@ -4,6 +4,7 @@ use crate::light::color::*;
 pub enum Material {
     Simple(Color),
     Reflective(Color, f32),
+    Emissive(Color),
 }
 
 impl Material {

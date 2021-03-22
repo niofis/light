@@ -1,28 +1,23 @@
-use rayon::iter::{
-    IndexedParallelIterator, IntoParallelIterator, IntoParallelRefMutIterator, ParallelIterator,
-};
-
-use crate::Section;
+use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
 
 use super::{
     accelerator::{Accelerator, AcceleratorInstance},
     camera::Camera,
-    color::{self, Color},
-    direct_illumination,
-    material::Material,
+    color::Color,
+    path_tracing,
     primitive::Primitive,
-    ray::Ray,
-    vector::Vector,
+    whitted,
     world::World,
 };
+use crate::Section;
 
 pub enum RenderMethod {
     Pixels,
     Tiles,
 }
 
-pub enum Illumination {
-    Direct,
+pub enum Algorithm {
+    Whitted,
     PathTracing,
 }
 
@@ -34,7 +29,7 @@ pub struct Renderer {
     pub primitives: Vec<Primitive>,
     pub camera: Camera,
     pub render_method: RenderMethod,
-    pub illumination: Illumination,
+    pub algorithm: Algorithm,
 }
 
 impl Renderer {
@@ -47,7 +42,7 @@ impl Renderer {
             world: World::default(),
             primitives: Vec::new(),
             render_method: RenderMethod::Pixels,
-            illumination: Illumination::Direct,
+            algorithm: Algorithm::PathTracing,
         }
     }
     pub fn width<'a>(&'a mut self, width: usize) -> &'a mut Renderer {
@@ -72,8 +67,8 @@ impl Renderer {
         self.render_method = render_method;
         self
     }
-    pub fn illumination<'a>(&'a mut self, illumination: Illumination) -> &'a mut Renderer {
-        self.illumination = illumination;
+    pub fn illumination<'a>(&'a mut self, algorithm: Algorithm) -> &'a mut Renderer {
+        self.algorithm = algorithm;
         self
     }
     pub fn accelerator<'a>(&'a mut self, accelerator: Accelerator) -> &'a mut Renderer {
@@ -110,16 +105,23 @@ impl Renderer {
         let top = section.y;
         let camera = &self.camera;
 
+        let trace = match self.algorithm {
+            Algorithm::Whitted => whitted::trace_ray,
+            Algorithm::PathTracing => path_tracing::trace_ray,
+        };
+
         let mut pixels = vec![Color::default(); height * width];
         (0..height * width)
             .into_par_iter()
-            .map(|pixel| {
-                let x = (left + pixel % width) as f32;
-                let y = (top + pixel / width) as f32;
-                let ray = camera.get_ray(x, y);
-
-                self.trace_ray(&ray, 0)
-            })
+            .map_init(
+                || rand::thread_rng(),
+                |rng, pixel| {
+                    let x = (left + pixel % width) as f32;
+                    let y = (top + pixel / width) as f32;
+                    let ray = camera.get_ray(x, y);
+                    trace(&self, rng, &ray, 0)
+                },
+            )
             .collect_into_vec(&mut pixels);
         return pixels;
     }
@@ -132,6 +134,11 @@ impl Renderer {
         let sections_h = width / tile_size;
         let pixels_per_tile = tile_size * tile_size;
 
+        let trace = match self.algorithm {
+            Algorithm::Whitted => whitted::trace_ray,
+            Algorithm::PathTracing => path_tracing::trace_ray,
+        };
+
         let tiles = (0..sections_v * sections_h)
             .into_par_iter()
             .map(|idx| {
@@ -140,15 +147,18 @@ impl Renderer {
                 let pixels: Vec<Color> = Vec::with_capacity(pixels_per_tile);
                 (x, y, pixels)
             })
-            .map(|(x, y, mut pixels)| {
-                for yy in 0..tile_size {
-                    for xx in 0..tile_size {
-                        let ray = camera.get_ray((x + xx) as f32, (y + yy) as f32);
-                        pixels.push(self.trace_ray(&ray, 0));
+            .map_init(
+                || rand::thread_rng(),
+                |rnd, (x, y, mut pixels)| {
+                    for yy in 0..tile_size {
+                        for xx in 0..tile_size {
+                            let ray = camera.get_ray((x + xx) as f32, (y + yy) as f32);
+                            pixels.push(trace(&self, rnd, &ray, 0));
+                        }
                     }
-                }
-                pixels
-            })
+                    pixels
+                },
+            )
             .collect::<Vec<Vec<Color>>>();
 
         let mut pixels: Vec<Color> = vec![Color::default(); width * height];
@@ -162,83 +172,5 @@ impl Renderer {
             }
         }
         return pixels;
-    }
-
-    fn trace_ray(&self, ray: &Ray, depth: u8) -> Color {
-        let accelerator = &self.accelerator;
-        if depth > 10 {
-            return color::BLACK;
-        }
-
-        match accelerator.trace(&ray) {
-            Some(prm_idxs) => {
-                let closest = self.find_closest_primitive(&ray, &prm_idxs);
-                match closest {
-                    Some((primitive, distance)) => {
-                        let point = ray.point(distance);
-                        let prm_material = match primitive {
-                            Primitive::Sphere { material, .. } => material,
-                            Primitive::Triangle { material, .. } => material,
-                        };
-
-                        match prm_material {
-                            Material::Simple(_) => self.calculate_shading(&primitive, &point),
-                            Material::Reflective(_, idx) => {
-                                let normal = primitive.normal(&point);
-                                let ri = ray.1.unit();
-                                let dot = ri.dot(&normal) * 2.0;
-                                let new_dir = &ri - &(&normal * dot);
-                                let reflected_ray = Ray::new(&point, &new_dir.unit());
-                                (self.calculate_shading(&primitive, &point) * (1.0 - idx))
-                                    + self.trace_ray(&reflected_ray, depth + 1) * *idx
-                            }
-                        }
-                    }
-                    None => color::BLACK,
-                }
-            }
-            None => color::BLACK,
-        }
-    }
-
-    fn calculate_shading(&self, prm: &Primitive, point: &Vector) -> Color {
-        let normal = prm.normal(point);
-        let direct_lighting = direct_illumination::calculate(self, &point, &normal);
-
-        let prm_material = match prm {
-            Primitive::Sphere { material, .. } => material,
-            Primitive::Triangle { material, .. } => material,
-        };
-
-        let prm_color = match prm_material {
-            Material::Simple(color) => color,
-            Material::Reflective(color, _) => color,
-        };
-
-        Color(
-            prm_color.0 * direct_lighting.0,
-            prm_color.1 * direct_lighting.1,
-            prm_color.2 * direct_lighting.2,
-        )
-    }
-
-    fn find_closest_primitive<'a>(
-        &'a self,
-        ray: &Ray,
-        prm_indexes: &[usize],
-    ) -> Option<(&'a Primitive, f32)> {
-        let primitives = &self.primitives;
-        prm_indexes
-            .iter()
-            .filter_map(|idx| {
-                primitives[*idx]
-                    .intersect(ray)
-                    .map(|dist| (&primitives[*idx], dist))
-            })
-            .fold(None, |closest, (pr, dist)| match closest {
-                None => Some((pr, dist)),
-                Some(res) if dist < res.1 => Some((pr, dist)),
-                _ => closest,
-            })
     }
 }
