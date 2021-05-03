@@ -26,7 +26,7 @@ fn main() {
         .arg(
             Arg::with_name("comment")
                 .short("C")
-                .long("compare")
+                .long("comment")
                 .takes_value(true)
                 .multiple(false)
                 .help("adds a comment to the saved result"),

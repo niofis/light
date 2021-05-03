@@ -101,14 +101,20 @@ fn calculate_direct_lighting(renderer: &Renderer, point: &Vector, normal: &Vecto
             super::light::Light::Point(pos) => pos,
         };
         let direction = light - point;
-        let ray = Ray::new(point, &(direction.unit()));
+        let unit_dir = direction.unit();
+        let dot = normal.dot(&unit_dir);
+        if dot <= 0.0 {
+            return None;
+        }
+
+        let ray = Ray::new(point, &(unit_dir));
         match renderer.accelerator.trace(&ray) {
             Some(prm_idxs) => {
                 let light_distance = direction.norm();
                 if find_shadow_primitive(&renderer.primitives, &ray, &prm_idxs, light_distance)
                     == false
                 {
-                    return Some(light);
+                    return Some(Color(1.0, 1.0, 1.0) * dot);
                 } else {
                     return None;
                 }
@@ -117,16 +123,7 @@ fn calculate_direct_lighting(renderer: &Renderer, point: &Vector, normal: &Vecto
         }
     });
 
-    let color_intensity = incident_lights
-        .map(|light| {
-            let dot = normal.dot(&(light - &point).unit());
-            if dot < 0.0 {
-                return Color(0.0, 0.0, 0.0);
-            } else {
-                return Color(1.0, 1.0, 1.0) * dot;
-            }
-        })
-        .fold(Color(0.0, 0.0, 0.0), |acc, col| acc + col);
+    let color_intensity = incident_lights.fold(Color(0.0, 0.0, 0.0), |acc, col| acc + col);
 
     color_intensity
 }

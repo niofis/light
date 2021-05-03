@@ -42,7 +42,7 @@ impl Renderer {
             world: World::default(),
             primitives: Vec::new(),
             render_method: RenderMethod::Pixels,
-            algorithm: Algorithm::PathTracing,
+            algorithm: Algorithm::Whitted,
         }
     }
     pub fn width<'a>(&'a mut self, width: usize) -> &'a mut Renderer {
@@ -125,6 +125,7 @@ impl Renderer {
             .collect_into_vec(&mut pixels);
         return pixels;
     }
+
     fn render_tiles(&mut self, section: &Section) -> Vec<Color> {
         let height = section.height;
         let width = section.width;
