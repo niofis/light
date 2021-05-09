@@ -1,11 +1,12 @@
-use crate::light::ray::*;
-use crate::light::vector::*;
+use crate::light::point::Point;
+use crate::light::ray::Ray;
+use crate::light::vector::Vector;
 
 pub struct Camera {
-    pub eye: Vector,
-    pub left_top: Vector,
-    pub left_bottom: Vector,
-    pub right_top: Vector,
+    pub eye: Point,
+    pub left_top: Point,
+    pub left_bottom: Point,
+    pub right_top: Point,
     delta_right: Vector,
     delta_down: Vector,
 }
@@ -13,16 +14,16 @@ pub struct Camera {
 impl Camera {
     pub fn default() -> Camera {
         Camera {
-            eye: Vector::default(),
-            left_top: Vector::default(),
-            left_bottom: Vector::default(),
-            right_top: Vector::default(),
+            eye: Point::default(),
+            left_top: Point::default(),
+            left_bottom: Point::default(),
+            right_top: Point::default(),
             delta_right: Vector::default(),
             delta_down: Vector::default(),
         }
     }
 
-    pub fn new(eye: Vector, left_top: Vector, left_bottom: Vector, right_top: Vector) -> Camera {
+    pub fn new(eye: Point, left_top: Point, left_bottom: Point, right_top: Point) -> Camera {
         Camera {
             eye,
             left_top,
@@ -50,7 +51,7 @@ impl Camera {
         } = self;
 
         let origin = eye.clone();
-        let point = left_top + &(delta_right * x) + (delta_down * y);
+        let point = left_top + &(delta_right * x + delta_down * y);
         let direction = &point - eye;
 
         Ray(origin, direction.unit())

@@ -1,5 +1,5 @@
-use super::vector::Vector;
+use crate::light::point::Point;
 
 pub enum Light {
-    Point(Vector),
+    Point(Point),
 }

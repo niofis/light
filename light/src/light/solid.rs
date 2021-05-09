@@ -1,11 +1,11 @@
-use crate::{Color, Material, Transform, Vector};
+use crate::{Color, Material, Point, Transform, Vector};
 use std::f32::consts::PI;
 
 use super::primitive::Primitive;
 
 pub enum Solid {
-    Triangle(Vector, Vector, Vector, Material),
-    Sphere(Vector, f32, Material),
+    Triangle(Point, Point, Point, Material),
+    Sphere(Point, f32, Material),
     Cube(Transform),
     CornellBox(Transform),
     GeodesicSphere(f32, usize, Transform),
@@ -41,14 +41,14 @@ impl Solid {
 }
 
 fn cube(transform: &Transform) -> Vec<Primitive> {
-    let pt1 = || transform.apply(&Vector(-0.5, 0.5, -0.5));
-    let pt2 = || transform.apply(&Vector(0.5, 0.5, -0.5));
-    let pt3 = || transform.apply(&Vector(0.5, -0.5, -0.5));
-    let pt4 = || transform.apply(&Vector(-0.5, -0.5, -0.5));
-    let pt5 = || transform.apply(&Vector(-0.5, 0.5, 0.5));
-    let pt6 = || transform.apply(&Vector(0.5, 0.5, 0.5));
-    let pt7 = || transform.apply(&Vector(0.5, -0.5, 0.5));
-    let pt8 = || transform.apply(&Vector(-0.5, -0.5, 0.5));
+    let pt1 = || transform.apply(&Point(-0.5, 0.5, -0.5));
+    let pt2 = || transform.apply(&Point(0.5, 0.5, -0.5));
+    let pt3 = || transform.apply(&Point(0.5, -0.5, -0.5));
+    let pt4 = || transform.apply(&Point(-0.5, -0.5, -0.5));
+    let pt5 = || transform.apply(&Point(-0.5, 0.5, 0.5));
+    let pt6 = || transform.apply(&Point(0.5, 0.5, 0.5));
+    let pt7 = || transform.apply(&Point(0.5, -0.5, 0.5));
+    let pt8 = || transform.apply(&Point(-0.5, -0.5, 0.5));
     vec![
         //frontside
         Primitive::new_triangle(pt1(), pt2(), pt4(), Material::red()),
@@ -72,14 +72,14 @@ fn cube(transform: &Transform) -> Vec<Primitive> {
 }
 
 fn cornell_box(transform: &Transform) -> Vec<Primitive> {
-    let pt1 = || transform.apply(&Vector(-0.5, 0.5, -0.5));
-    let pt2 = || transform.apply(&Vector(0.5, 0.5, -0.5));
-    let pt3 = || transform.apply(&Vector(0.5, -0.5, -0.5));
-    let pt4 = || transform.apply(&Vector(-0.5, -0.5, -0.5));
-    let pt5 = || transform.apply(&Vector(-0.5, 0.5, 0.5));
-    let pt6 = || transform.apply(&Vector(0.5, 0.5, 0.5));
-    let pt7 = || transform.apply(&Vector(0.5, -0.5, 0.5));
-    let pt8 = || transform.apply(&Vector(-0.5, -0.5, 0.5));
+    let pt1 = || transform.apply(&Point(-0.5, 0.5, -0.5));
+    let pt2 = || transform.apply(&Point(0.5, 0.5, -0.5));
+    let pt3 = || transform.apply(&Point(0.5, -0.5, -0.5));
+    let pt4 = || transform.apply(&Point(-0.5, -0.5, -0.5));
+    let pt5 = || transform.apply(&Point(-0.5, 0.5, 0.5));
+    let pt6 = || transform.apply(&Point(0.5, 0.5, 0.5));
+    let pt7 = || transform.apply(&Point(0.5, -0.5, 0.5));
+    let pt8 = || transform.apply(&Point(-0.5, -0.5, 0.5));
     vec![
         ////right
         Primitive::new_triangle(pt6(), pt2(), pt7(), Material::green()),
@@ -110,20 +110,20 @@ fn cornell_box(transform: &Transform) -> Vec<Primitive> {
 }
 
 fn torus(rd1: f32, rd2: f32, sc1: usize, sc2: usize, transform: &Transform) -> Vec<Primitive> {
-    let pt = Vector(0.0, rd1, 0.0);
+    let pt = Point(0.0, rd1, 0.0);
     let rt1 = 2.0 * PI / (sc1 as f32);
     let rt2 = 2.0 * PI / (sc2 as f32);
     let mut triangles: Vec<Primitive> = Vec::new();
     let mut cur = (0..=sc1)
         .map(|x| Transform::rotate((x as f32) * rt1, 0.0, 0.0).apply(&pt))
         .map(|p| Transform::translate(0.0, 0.0, -rd2).apply(&p))
-        .collect::<Vec<Vector>>();
+        .collect::<Vec<Point>>();
 
     for _ in 0..sc2 {
         let next = cur
             .iter()
             .map(|p| Transform::rotate(0.0, rt2, 0.0).apply(p))
-            .collect::<Vec<Vector>>();
+            .collect::<Vec<Point>>();
 
         for n in 0..sc1 {
             triangles.push(Primitive::new_triangle(
@@ -146,20 +146,20 @@ fn torus(rd1: f32, rd2: f32, sc1: usize, sc2: usize, transform: &Transform) -> V
 }
 
 fn sphere(radius: f32, sc1: usize, transform: &Transform) -> Vec<Primitive> {
-    let pt = Vector(0.0, radius, 0.0);
+    let pt = Point(0.0, radius, 0.0);
     let sc2 = sc1 * 2;
     let rt1 = PI / (sc1 as f32);
     let rt2 = 2.0 * PI / (sc2 as f32);
     let mut triangles: Vec<Primitive> = Vec::new();
     let mut cur = (0..=sc1)
         .map(|x| Transform::rotate((x as f32) * rt1, 0.0, 0.0).apply(&pt))
-        .collect::<Vec<Vector>>();
+        .collect::<Vec<Point>>();
 
     for _ in 0..sc2 {
         let next = cur
             .iter()
             .map(|p| Transform::rotate(0.0, rt2, 0.0).apply(p))
-            .collect::<Vec<Vector>>();
+            .collect::<Vec<Point>>();
         for n in 0..sc1 {
             triangles.push(Primitive::new_triangle(
                 transform.apply(&cur[n]),

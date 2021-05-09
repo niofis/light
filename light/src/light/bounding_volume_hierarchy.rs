@@ -1,8 +1,9 @@
-use crate::light::bounding_box::*;
-use crate::light::primitive::*;
-use crate::light::ray::*;
-use crate::light::trace::*;
-use crate::light::vector::*;
+use crate::light::bounding_box::BoundingBox;
+use crate::light::point::Point;
+use crate::light::primitive::Primitive;
+use crate::light::ray::Ray;
+use crate::light::trace::Trace;
+use crate::light::vector::Vector;
 
 #[derive(Debug)]
 pub enum BVHNode {
@@ -57,7 +58,7 @@ impl Trace for BVH {
     }
 }
 
-fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
+fn octree_grouping(items: &Vec<(Point, usize)>) -> BVHNode {
     if items.len() == 0 {
         return BVHNode::Empty;
     }
@@ -79,7 +80,7 @@ fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
     let mut maxz = std::f32::MIN;
 
     for item in items {
-        let (Vector(x, y, z), _) = item;
+        let (Point(x, y, z), _) = item;
         minx = if *x < minx { *x } else { minx };
         miny = if *y < miny { *y } else { miny };
         minz = if *z < minz { *z } else { minz };
@@ -95,7 +96,7 @@ fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
         (minz + maxz) / 2.0,
     );
 
-    let sector = |c: &Vector| if c.0 >= center.0 { 1 } else { 0 } +
+    let sector = |c: &Point| if c.0 >= center.0 { 1 } else { 0 } +
         if c.1 >= center.1 { 2 } else { 0 } +
         if c.2 >= center.2 { 4 } else { 0 };
 
@@ -103,7 +104,7 @@ fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
         items
             .iter()
             .filter_map(|x| if sector(&x.0) == s { Some(*x) } else { None })
-            .collect::<Vec<(Vector, usize)>>()
+            .collect::<Vec<(Point, usize)>>()
     };
 
     let sectors = [
@@ -139,7 +140,7 @@ fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
                             None
                         }
                     })
-                    .collect::<Vec<(Vector, usize)>>(),
+                    .collect::<Vec<(Point, usize)>>(),
             )),
             right: Box::new(octree_grouping(
                 &items
@@ -151,7 +152,7 @@ fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
                             None
                         }
                     })
-                    .collect::<Vec<(Vector, usize)>>(),
+                    .collect::<Vec<(Point, usize)>>(),
             )),
         };
     } else if ydiff <= xdiff && ydiff <= zdiff {
@@ -168,7 +169,7 @@ fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
                             None
                         }
                     })
-                    .collect::<Vec<(Vector, usize)>>(),
+                    .collect::<Vec<(Point, usize)>>(),
             )),
             right: Box::new(octree_grouping(
                 &items
@@ -180,7 +181,7 @@ fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
                             None
                         }
                     })
-                    .collect::<Vec<(Vector, usize)>>(),
+                    .collect::<Vec<(Point, usize)>>(),
             )),
         };
     } else {
@@ -197,7 +198,7 @@ fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
                             None
                         }
                     })
-                    .collect::<Vec<(Vector, usize)>>(),
+                    .collect::<Vec<(Point, usize)>>(),
             )),
             right: Box::new(octree_grouping(
                 &items
@@ -209,7 +210,7 @@ fn octree_grouping(items: &Vec<(Vector, usize)>) -> BVHNode {
                             None
                         }
                     })
-                    .collect::<Vec<(Vector, usize)>>(),
+                    .collect::<Vec<(Point, usize)>>(),
             )),
         };
     }
@@ -267,8 +268,8 @@ impl BVH {
         }
 
         let indexes: Vec<usize> = (0..len).collect();
-        let centroid: Vec<Vector> = primitives.iter().map(|x| x.centroid()).collect();
-        let mut items: Vec<(Vector, usize)> =
+        let centroid: Vec<Point> = primitives.iter().map(|x| x.centroid()).collect();
+        let mut items: Vec<(Point, usize)> =
             centroid.into_iter().zip(indexes.into_iter()).collect();
         let root = octree_grouping(&mut items);
         let root = rebuild(&primitives, root);

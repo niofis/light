@@ -1,17 +1,17 @@
 use std::{f32::consts::PI, path::Path};
 
-use crate::{Color, Light, Material, Solid, Transform, Vector, World};
+use crate::{Color, Light, Material, Point, Solid, Transform, Vector, World};
 
 pub fn cornell() -> World {
     let simple_sphere = Solid::Sphere(
-        Vector(16.0, -2.0, 10.0),
+        Point(16.0, -2.0, 10.0),
         5.0,
         Material::Reflective(Color(0.0, 0.0, 1.0), 1.0),
     );
     let simple_triangle = Solid::Triangle(
-        Vector(-8.0, 0.0, 0.0),
-        Vector(-7.0, 2.0, 0.0),
-        Vector(-6.0, 0.0, 0.0),
+        Point(-8.0, 0.0, 0.0),
+        Point(-7.0, 2.0, 0.0),
+        Point(-6.0, 0.0, 0.0),
         Material::Simple(Color(0.0, 1.0, 0.0)),
     );
 
@@ -34,7 +34,7 @@ pub fn cornell() -> World {
     let donut_trs = vec![Transform::rotate(PI / -4.0, 0.0, 0.0)];
     let donut = Solid::Torus(1.5, 4.0, 30, 50, Transform::combine(&donut_trs)).into();
 
-    let lights = vec![Light::Point(Vector(-10.0, 10.0, -10.0))];
+    let lights = vec![Light::Point(Point(-10.0, 10.0, -10.0))];
 
     World::build()
         .lights(lights)
@@ -44,14 +44,14 @@ pub fn cornell() -> World {
 
 pub fn simple() -> World {
     let simple_sphere = Solid::Sphere(
-        Vector(16.0, -2.0, 10.0),
+        Point(16.0, -2.0, 10.0),
         5.0,
         Material::Reflective(Color(0.0, 0.0, 1.0), 1.0),
     );
     let simple_triangle = Solid::Triangle(
-        Vector(-800.0, -7.0, -800.0),
-        Vector(0.0, -7.0, 800.0),
-        Vector(800.0, -7.0, -800.0),
+        Point(-800.0, -7.0, -800.0),
+        Point(0.0, -7.0, 800.0),
+        Point(800.0, -7.0, -800.0),
         Material::Simple(Color(1.0, 1.0, 1.0)),
     );
 
@@ -68,7 +68,7 @@ pub fn simple() -> World {
     let donut = Solid::Torus(1.5, 4.0, 30, 50, Transform::combine(&donut_trs)).into();
     let sphere_trs = vec![Transform::translate(-16.0, -2.0, 10.0)];
     let geo_sphere = Solid::GeodesicSphere(2.0, 20, Transform::combine(&sphere_trs));
-    let lights = vec![Light::Point(Vector(-10.0, 10.0, -10.0))];
+    let lights = vec![Light::Point(Point(-10.0, 10.0, -10.0))];
 
     World::build()
         .lights(lights)
@@ -83,14 +83,14 @@ pub fn simple() -> World {
 }
 
 pub fn shader_bench() -> World {
-    let lights = vec![Light::Point(Vector(0.0, 0.0, -10.0))];
+    let lights = vec![Light::Point(Point(0.0, 0.0, -10.0))];
 
     World::build()
         .lights(lights)
         .objects(vec![Solid::Triangle(
-            Vector(-100.0, -100.0, 0.0),
-            Vector(0.0, 100.0, 0.0),
-            Vector(100.0, -100.0, 0.0),
+            Point(-100.0, -100.0, 0.0),
+            Point(0.0, 100.0, 0.0),
+            Point(100.0, -100.0, 0.0),
             Material::Simple(Color(1.0, 1.0, 1.0)),
         )])
         .finish()
@@ -100,9 +100,9 @@ pub fn obj(file: &str) -> World {
     let mut solids: Vec<Solid> = Vec::new();
 
     solids.push(Solid::Triangle(
-        Vector(-800.0, -7.0, -800.0),
-        Vector(0.0, -7.0, 800.0),
-        Vector(800.0, -7.0, -800.0),
+        Point(-800.0, -7.0, -800.0),
+        Point(0.0, -7.0, 800.0),
+        Point(800.0, -7.0, -800.0),
         Material::Simple(Color(1.0, 1.0, 1.0)),
     ));
 
@@ -121,19 +121,19 @@ pub fn obj(file: &str) -> World {
         for f in 0..mesh.indices.len() / 3 {
             let i = 3 * f;
             let x = 3 * mesh.indices[i] as usize;
-            let pt1 = Vector(
+            let pt1 = Point(
                 -mesh.positions[x],
                 mesh.positions[x + 1],
                 mesh.positions[x + 2],
             );
             let x = 3 * mesh.indices[i + 1] as usize;
-            let pt2 = Vector(
+            let pt2 = Point(
                 -mesh.positions[x],
                 mesh.positions[x + 1],
                 mesh.positions[x + 2],
             );
             let x = 3 * mesh.indices[i + 2] as usize;
-            let pt3 = Vector(
+            let pt3 = Point(
                 -mesh.positions[x],
                 mesh.positions[x + 1],
                 mesh.positions[x + 2],
@@ -146,7 +146,7 @@ pub fn obj(file: &str) -> World {
             ));
         }
     }
-    let lights = vec![Light::Point(Vector(0.0, 20.0, -50.0))];
+    let lights = vec![Light::Point(Point(0.0, 20.0, -50.0))];
 
     World::build().lights(lights).objects(solids).finish()
 }

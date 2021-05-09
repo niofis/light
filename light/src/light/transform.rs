@@ -1,4 +1,4 @@
-use crate::light::vector::*;
+use crate::light::point::Point;
 
 type Matrix = [f32; 16];
 pub struct Transform(pub Matrix);
@@ -79,10 +79,10 @@ impl Transform {
         Transform(matrix)
     }
 
-    pub fn apply(&self, pt: &Vector) -> Vector {
-        let Vector(x, y, z) = pt;
+    pub fn apply(&self, pt: &Point) -> Point {
+        let Point(x, y, z) = pt;
         let Transform(m) = self;
-        Vector(
+        Point(
             m[0] * x + m[1] * y + m[2] * z + m[3],
             m[4] * x + m[5] * y + m[6] * z + m[7],
             m[8] * x + m[9] * y + m[10] * z + m[11],

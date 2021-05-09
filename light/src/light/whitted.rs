@@ -1,7 +1,7 @@
 use rand::prelude::ThreadRng;
 
 use super::{color, primitive::Primitive, ray::Ray};
-use crate::{Color, Material, Renderer, Vector};
+use crate::{Color, Material, Point, Renderer, Vector};
 
 pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8) -> Color {
     let accelerator = &renderer.accelerator;
@@ -41,7 +41,7 @@ pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8)
     }
 }
 
-fn calculate_shading(renderer: &Renderer, prm: &Primitive, point: &Vector) -> Color {
+fn calculate_shading(renderer: &Renderer, prm: &Primitive, point: &Point) -> Color {
     let normal = prm.normal(point);
     let direct_lighting = calculate_direct_lighting(renderer, &point, &normal);
 
@@ -95,7 +95,7 @@ fn find_shadow_primitive<'a>(
         .any(|dist| dist > 0.0001 && dist <= max_dist)
 }
 
-fn calculate_direct_lighting(renderer: &Renderer, point: &Vector, normal: &Vector) -> Color {
+fn calculate_direct_lighting(renderer: &Renderer, point: &Point, normal: &Vector) -> Color {
     let incident_lights = renderer.world.lights.iter().filter_map(|ll| {
         let light = match ll {
             super::light::Light::Point(pos) => pos,

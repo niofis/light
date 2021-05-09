@@ -5,6 +5,8 @@ authors = ["Enrique <niofis@gmail.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[profile.dev]
+split-debuginfo = "unpacked"
 
 [dependencies]
 clap = "2"

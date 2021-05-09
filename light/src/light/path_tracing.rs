@@ -1,6 +1,5 @@
-use rand::{prelude::ThreadRng, Rng};
-
 use crate::{Color, Material, Renderer, Vector};
+use rand::{prelude::ThreadRng, Rng};
 
 use super::{color, primitive::Primitive, ray::Ray};
 

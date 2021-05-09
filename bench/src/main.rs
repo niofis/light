@@ -1,6 +1,6 @@
 use clap::{App, Arg};
 use light::{Accelerator, Section};
-use light::{Camera, Vector};
+use light::{Camera, Point};
 
 fn main() {
     let _matches = App::new("Bench")
@@ -42,10 +42,10 @@ fn main() {
         .width(width)
         .height(height)
         .camera(Camera::new(
-            Vector(0.0, 15.0 / 2.0, -75.0),
-            Vector(-20.0 / 2.0, 15.0, -50.0),
-            Vector(-20.0 / 2.0, 0.0, -50.0),
-            Vector(20.0 / 2.0, 15.0, -50.0),
+            Point(0.0, 15.0 / 2.0, -75.0),
+            Point(-20.0 / 2.0, 15.0, -50.0),
+            Point(-20.0 / 2.0, 0.0, -50.0),
+            Point(20.0 / 2.0, 15.0, -50.0),
         ))
         .world(light::demos::cornell())
         .accelerator(Accelerator::BoundingVolumeHierarchy)

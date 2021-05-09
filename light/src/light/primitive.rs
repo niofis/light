@@ -1,33 +1,35 @@
-use crate::light::bounding_box::*;
-use crate::light::material::*;
-use crate::light::ray::*;
-use crate::light::vector::*;
+use crate::light::bounding_box::BoundingBox;
+use crate::light::material::Material;
+use crate::light::normal::Normal;
+use crate::light::point::Point;
+use crate::light::ray::Ray;
+use crate::light::vector::Vector;
 
 #[derive(Debug, Clone)]
 pub enum Primitive {
     Sphere {
-        center: Vector,
+        center: Point,
         radius: f32,
         material: Material,
     },
     Triangle {
-        origin: Vector,
+        origin: Point,
         edge1: Vector,
         edge2: Vector,
         normal: Vector,
         material: Material,
-        pt2: Vector,
-        pt3: Vector,
-        centroid: Vector,
+        pt2: Point,
+        pt3: Point,
+        centroid: Point,
     },
 }
 
 impl Primitive {
-    pub fn new_triangle(pt1: Vector, pt2: Vector, pt3: Vector, material: Material) -> Primitive {
+    pub fn new_triangle(pt1: Point, pt2: Point, pt3: Point, material: Material) -> Primitive {
         let edge1 = &pt2 - &pt1;
         let edge2 = &pt3 - &pt1;
         let normal = edge1.cross(&edge2).unit();
-        let centroid = (&(&pt1 + &pt2) + &pt3) / 3.0;
+        let centroid = &(&(&pt1 + &pt2) + &pt3) / 3.0;
 
         Primitive::Triangle {
             origin: pt1,
@@ -41,7 +43,7 @@ impl Primitive {
         }
     }
 
-    pub fn normal(&self, point: &Vector) -> Vector {
+    pub fn normal(&self, point: &Point) -> Vector {
         match self {
             Primitive::Sphere { center, .. } => ((point - center).unit()),
             Primitive::Triangle { normal, .. } => Vector(normal.0, normal.1, normal.2),
@@ -83,7 +85,7 @@ impl Primitive {
         }
     }
 
-    pub fn centroid(&self) -> Vector {
+    pub fn centroid(&self) -> Point {
         match self {
             Primitive::Sphere { center, .. } => center.clone(),
             Primitive::Triangle { centroid, .. } => centroid.clone(),
@@ -91,7 +93,7 @@ impl Primitive {
     }
 }
 
-fn sphere_intersect(sphere: (&Vector, &f32), ray: &Ray) -> Option<f32> {
+fn sphere_intersect(sphere: (&Point, &f32), ray: &Ray) -> Option<f32> {
     let (center, radius) = sphere;
     let Ray(origin, direction) = ray;
     let oc = origin - &center;
@@ -117,7 +119,7 @@ fn sphere_intersect(sphere: (&Vector, &f32), ray: &Ray) -> Option<f32> {
     None
 }
 
-fn triangle_intersect(triangle: (&Vector, &Vector, &Vector), ray: &Ray) -> Option<f32> {
+fn triangle_intersect(triangle: (&Point, &Vector, &Vector), ray: &Ray) -> Option<f32> {
     let (v0, edge1, edge2) = triangle;
     let Ray(origin, direction) = ray;
     let pvec = direction.cross(edge2);

@@ -1,6 +1,6 @@
 use clap::{App, AppSettings, Arg};
 use light::{Accelerator, Color};
-use light::{Camera, Vector};
+use light::{Camera, Point};
 
 fn print_ppm(data: &[u8], width: usize, height: usize) {
     println!("P3\n{} {}\n255", width, height);
@@ -58,10 +58,10 @@ fn main() {
         .width(width)
         .height(height)
         .camera(Camera::new(
-            Vector(0.0, 15.0 / 2.0, -75.0),
-            Vector(-20.0 / 2.0, 15.0, -50.0),
-            Vector(-20.0 / 2.0, 0.0, -50.0),
-            Vector(20.0 / 2.0, 15.0, -50.0),
+            Point(0.0, 15.0 / 2.0, -75.0),
+            Point(-20.0 / 2.0, 15.0, -50.0),
+            Point(-20.0 / 2.0, 0.0, -50.0),
+            Point(20.0 / 2.0, 15.0, -50.0),
         ))
         // .render_method(light::RenderMethod::Pixels);
         .render_method(light::RenderMethod::Tiles);
