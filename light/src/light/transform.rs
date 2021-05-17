@@ -1,6 +1,9 @@
+use std::ops;
+
 use crate::light::point::Point;
 
 type Matrix = [f32; 16];
+
 pub struct Transform(pub Matrix);
 
 fn combine(mts: &Vec<Matrix>) -> Matrix {

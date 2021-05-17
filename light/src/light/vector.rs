@@ -1,16 +1,32 @@
+use crate::light::generic_vector::GVector4;
 use crate::light::normal::Normal;
 use std::ops;
-
 #[derive(Copy, Clone, Debug)]
 pub struct Vector(pub f32, pub f32, pub f32); //x,y,z
+
+impl From<GVector4> for Vector {
+    fn from(gv: GVector4) -> Self {
+        Vector(gv.0, gv.1, gv.2)
+    }
+}
+
+impl From<Vector> for GVector4 {
+    fn from(vc: Vector) -> Self {
+        GVector4(vc.0, vc.1, vc.2, 0.0)
+    }
+}
+
+impl From<&Vector> for GVector4 {
+    fn from(vc: &Vector) -> Self {
+        GVector4(vc.0, vc.1, vc.2, 0.0)
+    }
+}
 
 impl ops::Add<Vector> for Vector {
     type Output = Vector;
 
     fn add(self, rhs: Vector) -> Self::Output {
-        let Vector(x0, y0, z0) = self;
-        let Vector(x1, y1, z1) = rhs;
-        Vector(x0 + x1, y0 + y1, z0 + z1)
+        Vector::from(GVector4::from(self) + GVector4::from(rhs))
     }
 }
 
@@ -18,9 +34,7 @@ impl ops::Add<&Vector> for &Vector {
     type Output = Vector;
 
     fn add(self, rhs: &Vector) -> Self::Output {
-        let Vector(x0, y0, z0) = self;
-        let Vector(x1, y1, z1) = rhs;
-        Vector(x0 + x1, y0 + y1, z0 + z1)
+        Vector::from(GVector4::from(self) + GVector4::from(rhs))
     }
 }
 
@@ -28,9 +42,7 @@ impl ops::Sub<Vector> for Vector {
     type Output = Vector;
 
     fn sub(self, rhs: Vector) -> Self::Output {
-        let Vector(x0, y0, z0) = self;
-        let Vector(x1, y1, z1) = rhs;
-        Vector(x0 - x1, y0 - y1, z0 - z1)
+        Vector::from(GVector4::from(self) - GVector4::from(rhs))
     }
 }
 
@@ -38,9 +50,7 @@ impl ops::Sub<&Vector> for &Vector {
     type Output = Vector;
 
     fn sub(self, rhs: &Vector) -> Self::Output {
-        let Vector(x0, y0, z0) = self;
-        let Vector(x1, y1, z1) = rhs;
-        Vector(x0 - x1, y0 - y1, z0 - z1)
+        Vector::from(GVector4::from(self) - GVector4::from(rhs))
     }
 }
 
@@ -48,8 +58,7 @@ impl ops::Mul<f32> for Vector {
     type Output = Vector;
 
     fn mul(self, rhs: f32) -> Self::Output {
-        let Vector(x, y, z) = self;
-        Vector(x * rhs, y * rhs, z * rhs)
+        Vector::from(GVector4::from(self) * rhs)
     }
 }
 
@@ -57,8 +66,7 @@ impl ops::Mul<f32> for &Vector {
     type Output = Vector;
 
     fn mul(self, rhs: f32) -> Self::Output {
-        let Vector(x, y, z) = self;
-        Vector(x * rhs, y * rhs, z * rhs)
+        Vector::from(GVector4::from(self) * rhs)
     }
 }
 
@@ -66,9 +74,7 @@ impl ops::Div<f32> for Vector {
     type Output = Vector;
 
     fn div(self, rhs: f32) -> Self::Output {
-        let Vector(x, y, z) = self;
-        let inv: f32 = 1.0 / rhs;
-        Vector(x * inv, y * inv, z * inv)
+        Vector::from(GVector4::from(self) / rhs)
     }
 }
 
@@ -76,9 +82,7 @@ impl ops::Div<f32> for &Vector {
     type Output = Vector;
 
     fn div(self, rhs: f32) -> Self::Output {
-        let Vector(x, y, z) = self;
-        let inv: f32 = 1.0 / rhs;
-        Vector(x * inv, y * inv, z * inv)
+        Vector::from(GVector4::from(self) / rhs)
     }
 }
 
@@ -86,17 +90,26 @@ impl ops::Index<usize> for Vector {
     type Output = f32;
 
     fn index(&self, rhs: usize) -> &Self::Output {
-        if rhs == 0 {
-            return &self.0;
+        match rhs {
+            0 => &self.0,
+            1 => &self.1,
+            _ => &self.2,
         }
-        if rhs == 1 {
-            return &self.1;
-        }
-        return &self.2;
+    }
+}
+
+impl ops::Neg for Vector {
+    type Output = Vector;
+
+    fn neg(self) -> Self::Output {
+        Vector(-self.0, -self.1, -self.2)
     }
 }
 
 impl Vector {
+    pub fn new(x: f32, y: f32, z: f32) -> Vector {
+        Vector(x, y, z)
+    }
     pub fn default() -> Vector {
         Vector(0.0, 0.0, 0.0)
     }
