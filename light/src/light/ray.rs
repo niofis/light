@@ -9,8 +9,6 @@ pub struct Ray {
 
 impl Ray {
     pub fn new(origin: Point, direction: Vector, max_distance: f32) -> Ray {
-        let Point(ox, oy, oz) = origin;
-        let Vector(dx, dy, dz) = direction;
         Ray {
             origin,
             direction,
