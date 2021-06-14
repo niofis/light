@@ -17,7 +17,11 @@ impl BoundingBox {
     }
 
     pub fn intersect(&self, ray: &Ray) -> bool {
-        let Ray(origin, direction) = ray;
+        let Ray {
+            origin,
+            direction,
+            max_distance: _,
+        } = ray;
         let BoundingBox { min, max } = self;
         let dxi: f32 = 1.0 / direction.0;
         let dyi: f32 = 1.0 / direction.1;

@@ -1,17 +1,29 @@
 use crate::light::point::Point;
 use crate::light::vector::Vector;
 
-pub struct Ray(pub Point, pub Vector); //origin, direction
+pub struct Ray {
+    pub origin: Point,
+    pub direction: Vector,
+    pub max_distance: f32,
+}
 
 impl Ray {
-    pub fn new(origin: &Point, direction: &Vector) -> Ray {
+    pub fn new(origin: Point, direction: Vector, max_distance: f32) -> Ray {
         let Point(ox, oy, oz) = origin;
         let Vector(dx, dy, dz) = direction;
-        Ray(Point(*ox, *oy, *oz), Vector(*dx, *dy, *dz))
+        Ray {
+            origin,
+            direction,
+            max_distance,
+        }
     }
 
     pub fn point(&self, rhs: f32) -> Point {
-        let Ray(origin, direction) = self;
+        let Ray {
+            origin,
+            direction,
+            max_distance: _,
+        } = self;
         origin + &(direction * rhs)
     }
 }

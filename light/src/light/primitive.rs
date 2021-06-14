@@ -95,8 +95,12 @@ impl Primitive {
 
 fn sphere_intersect(sphere: (&Point, &f32), ray: &Ray) -> Option<f32> {
     let (center, radius) = sphere;
-    let Ray(origin, direction) = ray;
-    let oc = origin - &center;
+    let Ray {
+        origin,
+        direction,
+        max_distance: _,
+    } = ray;
+    let oc = origin - center;
     let a = direction.dot(direction);
     let b = oc.dot(direction);
     let c = oc.dot(&oc) - radius * radius;
@@ -121,7 +125,11 @@ fn sphere_intersect(sphere: (&Point, &f32), ray: &Ray) -> Option<f32> {
 
 fn triangle_intersect(triangle: (&Point, &Vector, &Vector), ray: &Ray) -> Option<f32> {
     let (v0, edge1, edge2) = triangle;
-    let Ray(origin, direction) = ray;
+    let Ray {
+        origin,
+        direction,
+        max_distance: _,
+    } = ray;
     let pvec = direction.cross(edge2);
     let epsilon = 0.007;
 

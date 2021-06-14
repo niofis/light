@@ -1,3 +1,5 @@
+use std::f32::INFINITY;
+
 use rand::prelude::ThreadRng;
 
 use super::{color, primitive::Primitive, ray::Ray};
@@ -24,10 +26,10 @@ pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8)
                         Material::Simple(_) => calculate_shading(&renderer, &primitive, &point),
                         Material::Reflective(_, idx) => {
                             let normal = primitive.normal(&point);
-                            let ri = ray.1.unit();
+                            let ri = ray.direction.unit();
                             let dot = ri.dot(&normal) * 2.0;
                             let new_dir = &ri - &(&normal * dot);
-                            let reflected_ray = Ray::new(&point, &new_dir.unit());
+                            let reflected_ray = Ray::new(point, new_dir.unit(), f32::INFINITY);
                             (calculate_shading(&renderer, &primitive, &point) * (1.0 - idx))
                                 + trace_ray(renderer, rng, &reflected_ray, depth + 1) * *idx
                         }
@@ -107,7 +109,7 @@ fn calculate_direct_lighting(renderer: &Renderer, point: &Point, normal: &Vector
             return None;
         }
 
-        let ray = Ray::new(point, &(unit_dir));
+        let ray = Ray::new(point.clone(), unit_dir, f32::INFINITY);
         match renderer.accelerator.trace(&ray) {
             Some(prm_idxs) => {
                 let light_distance = direction.norm();

@@ -24,15 +24,15 @@ pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8)
                         Material::Simple(color) => {
                             let normal = primitive.normal(&point);
                             let new_dir = random_dome(rng, &normal);
-                            let path_ray = Ray::new(&point, &new_dir);
+                            let path_ray = Ray::new(point, new_dir.unit(), f32::INFINITY);
                             color.clone() * trace_ray(renderer, rng, &path_ray, depth + 1)
                         }
                         Material::Reflective(_, idx) => {
                             let normal = primitive.normal(&point);
-                            let ri = ray.1.unit();
+                            let ri = ray.direction.unit();
                             let dot = ri.dot(&normal) * 2.0;
                             let new_dir = &ri - &(&normal * dot);
-                            let reflected_ray = Ray::new(&point, &new_dir.unit());
+                            let reflected_ray = Ray::new(point, new_dir.unit(), f32::INFINITY);
                             trace_ray(renderer, rng, &reflected_ray, depth + 1) * *idx
                         }
                         Material::Emissive(color) => color.clone(),

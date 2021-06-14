@@ -167,6 +167,16 @@ impl Vector {
     pub fn permute(&self, x: usize, y: usize, z: usize) -> Vector {
         Vector(self[x], self[y], self[z])
     }
+    pub fn coordinate_system(&self) -> (Vector, Vector) {
+        let Vector(x, y, z) = self;
+        let v2 = if x.abs() > y.abs() {
+            Vector::new(-z, 0.0, *x) / (x * x + z * z)
+        } else {
+            Vector::new(0.0, *z, -y) / (y * y + z * z)
+        };
+        let v3 = self.cross(&v2);
+        (v2, v3)
+    }
 }
 
 impl From<&Normal> for Vector {

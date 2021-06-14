@@ -54,6 +54,6 @@ impl Camera {
         let point = left_top + &(delta_right * x + delta_down * y);
         let direction = &point - eye;
 
-        Ray(origin, direction.unit())
+        Ray::new(origin, direction.unit(), f32::INFINITY)
     }
 }
