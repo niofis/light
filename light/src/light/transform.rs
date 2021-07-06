@@ -1,5 +1,3 @@
-use std::ops;
-
 use crate::light::point::Point;
 
 type Matrix = [f32; 16];
@@ -8,7 +6,7 @@ pub struct Transform(pub Matrix);
 
 fn combine(mts: &Vec<Matrix>) -> Matrix {
     let roxcol = |a: &Matrix, b: &Matrix, r: usize, c: usize| {
-        a[0 + r * 4] * b[0 + c]
+        a[r * 4] * b[c]
             + a[1 + r * 4] * b[4 + c]
             + a[2 + r * 4] * b[8 + c]
             + a[3 + r * 4] * b[12 + c]

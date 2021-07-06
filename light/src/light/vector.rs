@@ -156,7 +156,7 @@ impl Vector {
         } else if self.1 > self.2 {
             return 1;
         }
-        return 2;
+        2
     }
     pub fn min(&self, rhs: &Vector) -> Vector {
         Vector(self.0.min(rhs.0), self.1.min(rhs.1), self.2.min(rhs.2))

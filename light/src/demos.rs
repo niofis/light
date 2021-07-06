@@ -1,6 +1,6 @@
 use std::{f32::consts::PI, path::Path};
 
-use crate::{Color, Light, Material, Point, Solid, Transform, Vector, World};
+use crate::{Color, Light, Material, Point, Solid, Transform, World};
 
 pub fn cornell() -> World {
     let simple_sphere = Solid::Sphere(

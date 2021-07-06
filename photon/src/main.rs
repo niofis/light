@@ -48,6 +48,14 @@ fn main() {
             .multiple(false)
             .conflicts_with("demo")
             .help("renders the specified obj file"))
+        .arg(
+            Arg::with_name("stats")
+            .short("s")
+            .long("stats")
+            .takes_value(false)
+            .multiple(false)
+            .conflicts_with("threads")
+            .help("captures stats and prints them when done rendering. cannot be used with threads"))
         .setting(AppSettings::ArgRequiredElseHelp)
         .get_matches();
     let width = 640;
@@ -65,6 +73,10 @@ fn main() {
         ))
         // .render_method(light::RenderMethod::Pixels);
         .render_method(light::RenderMethod::Tiles);
+
+    if matches.is_present("stats") {
+        renderer.use_stats();
+    }
 
     if let Some(scene) = matches.value_of("demo") {
         match scene {
@@ -123,5 +135,8 @@ fn main() {
 
     let elapsed = time::precise_time_s() - start;
     eprintln!("Rendering time: {}s", elapsed);
+    if let Some(stats) = renderer.stats {
+        eprintln!("{:#?}", stats);
+    }
     print_ppm(&buffer, width, height);
 }

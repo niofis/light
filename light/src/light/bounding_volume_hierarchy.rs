@@ -16,6 +16,13 @@ pub enum BVHNode {
     },
 }
 
+#[derive(Debug, Default)]
+pub struct BVHStats {
+    pub height: usize,
+    pub nodes: usize,
+    pub leaves: usize,
+}
+
 #[derive(Debug)]
 pub struct BVH {
     root: BVHNode,
@@ -41,6 +48,30 @@ fn rec_trace(bvh: &BVHNode, ray: &Ray, prm_vec: &mut Vec<usize>) {
         }
         _ => {}
     };
+}
+
+fn in_order_walk(node: &BVHNode, mut stats: BVHStats) -> BVHStats {
+    match node {
+        BVHNode::Node {
+            left,
+            right,
+            primitives: _,
+            bounding_box: _,
+        } => {
+            stats.nodes = stats.nodes + 1;
+            let stats = in_order_walk(left, stats);
+            in_order_walk(right, stats)
+        }
+        _ => stats,
+    }
+}
+
+impl BVH {
+    pub fn stats(&self) -> BVHStats {
+        let BVH { root } = self;
+        let mut stats = BVHStats::default();
+        in_order_walk(&root, stats)
+    }
 }
 
 impl Trace for BVH {

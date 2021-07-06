@@ -1,5 +1,4 @@
-use crate::light::normal::Normal;
-use std::{convert::TryInto, ops};
+use std::ops;
 
 #[derive(Debug, Clone, Copy)]
 pub struct GVector4(pub f32, pub f32, pub f32, pub f32);

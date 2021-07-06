@@ -1,4 +1,4 @@
-use crate::{Color, Material, Point, Transform, Vector};
+use crate::{Color, Material, Point, Transform};
 use std::f32::consts::PI;
 
 use super::primitive::Primitive;
@@ -17,12 +17,7 @@ impl Solid {
     pub fn primitives(&self) -> Vec<Primitive> {
         match self {
             Solid::Triangle(pt1, pt2, pt3, material) => {
-                vec![Primitive::new_triangle(
-                    pt1.clone(),
-                    pt2.clone(),
-                    pt3.clone(),
-                    material.clone(),
-                )]
+                vec![Primitive::new_triangle(*pt1, *pt2, *pt3, material.clone())]
             }
             Solid::Sphere(center, radius, material) => vec![Primitive::Sphere {
                 center: *center,

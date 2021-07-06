@@ -1,6 +1,5 @@
 use crate::light::bounding_box::BoundingBox;
 use crate::light::material::Material;
-use crate::light::normal::Normal;
 use crate::light::point::Point;
 use crate::light::ray::Ray;
 use crate::light::vector::Vector;

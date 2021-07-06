@@ -1,7 +1,5 @@
-use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
-
 use super::{
-    accelerator::{Accelerator, AcceleratorInstance},
+    accelerator::{Accelerator, AcceleratorInstance, AcceleratorStats},
     camera::Camera,
     color::Color,
     path_tracing,
@@ -10,6 +8,7 @@ use super::{
     world::World,
 };
 use crate::Section;
+use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
 
 pub enum RenderMethod {
     Pixels,
@@ -21,6 +20,16 @@ pub enum Algorithm {
     PathTracing,
 }
 
+#[derive(Debug, Default)]
+pub struct Stats {
+    primitives: usize,
+    accelerator: Option<AcceleratorStats>,
+    bvh_nodes: usize,
+    bvh_height: usize,
+    bvh_leaves: usize,
+    bvh_ppn: usize,
+}
+
 pub struct Renderer {
     pub width: usize,
     pub height: usize,
@@ -30,6 +39,7 @@ pub struct Renderer {
     pub camera: Camera,
     pub render_method: RenderMethod,
     pub algorithm: Algorithm,
+    pub stats: Option<Stats>,
 }
 
 impl Renderer {
@@ -43,6 +53,7 @@ impl Renderer {
             primitives: Vec::new(),
             render_method: RenderMethod::Pixels,
             algorithm: Algorithm::Whitted,
+            stats: None,
         }
     }
     pub fn width<'a>(&'a mut self, width: usize) -> &'a mut Renderer {
@@ -61,6 +72,9 @@ impl Renderer {
     pub fn world<'a>(&'a mut self, world: World) -> &'a mut Renderer {
         self.world = world;
         self.primitives = self.world.primitives();
+        if let Some(mut stats) = self.stats.as_mut() {
+            stats.primitives = self.primitives.len();
+        }
         self
     }
     pub fn render_method<'a>(&'a mut self, render_method: RenderMethod) -> &'a mut Renderer {
@@ -75,7 +89,11 @@ impl Renderer {
         self.accelerator = match accelerator {
             Accelerator::BruteForce => AcceleratorInstance::new_brute_force(&self.primitives),
             Accelerator::BoundingVolumeHierarchy => {
-                AcceleratorInstance::new_bounding_volume_hierarchy(&self.primitives)
+                let acc = AcceleratorInstance::new_bounding_volume_hierarchy(&self.primitives);
+                if let Some(mut stats) = self.stats.as_mut() {
+                    stats.accelerator = Some(acc.stats());
+                }
+                acc
             }
         };
         self
@@ -87,6 +105,10 @@ impl Renderer {
                 .build_global()
                 .unwrap();
         }
+        self
+    }
+    pub fn use_stats<'a>(&'a mut self) -> &'a mut Renderer {
+        self.stats = Some(Stats::default());
         self
     }
     pub fn finish(&mut self) -> &Renderer {
@@ -125,7 +147,6 @@ impl Renderer {
             .collect_into_vec(&mut pixels);
         return pixels;
     }
-
     fn render_tiles(&mut self, section: &Section) -> Vec<Color> {
         let height = section.height;
         let width = section.width;

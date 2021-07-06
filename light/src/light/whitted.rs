@@ -1,5 +1,3 @@
-use std::f32::INFINITY;
-
 use rand::prelude::ThreadRng;
 
 use super::{color, primitive::Primitive, ray::Ray};
@@ -28,7 +26,7 @@ pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8)
                             let normal = primitive.normal(&point);
                             let ri = ray.direction.unit();
                             let dot = ri.dot(&normal) * 2.0;
-                            let new_dir = &ri - &(&normal * dot);
+                            let new_dir = ri - (normal * dot);
                             let reflected_ray = Ray::new(point, new_dir.unit(), f32::INFINITY);
                             (calculate_shading(&renderer, &primitive, &point) * (1.0 - idx))
                                 + trace_ray(renderer, rng, &reflected_ray, depth + 1) * *idx
@@ -85,23 +83,21 @@ fn find_closest_primitive<'a>(
         })
 }
 
-fn find_shadow_primitive<'a>(
-    primitives: &Vec<Primitive>,
+fn find_shadow_primitive(
+    primitives: &[Primitive],
     ray: &Ray,
-    prm_indexes: &Vec<usize>,
+    prm_indexes: &[usize],
     max_dist: f32,
 ) -> bool {
     prm_indexes
         .iter()
-        .filter_map(|idx| primitives[*idx].intersect(ray).map(|dist| dist))
+        .filter_map(|idx| primitives[*idx].intersect(ray))
         .any(|dist| dist > 0.0001 && dist <= max_dist)
 }
 
 fn calculate_direct_lighting(renderer: &Renderer, point: &Point, normal: &Vector) -> Color {
     let incident_lights = renderer.world.lights.iter().filter_map(|ll| {
-        let light = match ll {
-            super::light::Light::Point(pos) => pos,
-        };
+        let super::light::Light::Point(light) = ll;
         let direction = light - point;
         let unit_dir = direction.unit();
         let dot = normal.dot(&unit_dir);
@@ -109,23 +105,19 @@ fn calculate_direct_lighting(renderer: &Renderer, point: &Point, normal: &Vector
             return None;
         }
 
-        let ray = Ray::new(point.clone(), unit_dir, f32::INFINITY);
+        let ray = Ray::new(*point, unit_dir, f32::INFINITY);
         match renderer.accelerator.trace(&ray) {
             Some(prm_idxs) => {
                 let light_distance = direction.norm();
-                if find_shadow_primitive(&renderer.primitives, &ray, &prm_idxs, light_distance)
-                    == false
-                {
-                    return Some(Color(1.0, 1.0, 1.0) * dot);
+                if !find_shadow_primitive(&renderer.primitives, &ray, &prm_idxs, light_distance) {
+                    Some(Color(1.0, 1.0, 1.0) * dot)
                 } else {
-                    return None;
+                    None
                 }
             }
             None => None,
         }
     });
 
-    let color_intensity = incident_lights.fold(Color(0.0, 0.0, 0.0), |acc, col| acc + col);
-
-    color_intensity
+    incident_lights.fold(Color(0.0, 0.0, 0.0), |acc, col| acc + col)
 }

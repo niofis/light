@@ -43,10 +43,7 @@ impl BoundingBox {
         let tzmin = (params[sz].2 - origin.2) * dzi;
         let tzmax = (params[rsz].2 - origin.2) * dzi;
 
-        if tmin > tzmax || tzmin > tmax {
-            return false;
-        }
-        true
+        !(tmin > tzmax || tzmin > tmax)
     }
 
     pub fn combine(&self, rhs: &BoundingBox) -> BoundingBox {
