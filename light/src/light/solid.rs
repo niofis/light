@@ -24,12 +24,10 @@ impl Solid {
                 radius: *radius,
                 material: material.clone(),
             }],
-            Solid::Cube(transform) => cube(&transform),
-            Solid::CornellBox(transform) => cornell_box(&transform),
-            Solid::GeodesicSphere(radius, sc1, transform) => sphere(*radius, *sc1, &transform),
-            Solid::Torus(rd1, rd2, sc1, sc2, transform) => {
-                torus(*rd1, *rd2, *sc1, *sc2, &transform)
-            }
+            Solid::Cube(transform) => cube(transform),
+            Solid::CornellBox(transform) => cornell_box(transform),
+            Solid::GeodesicSphere(radius, sc1, transform) => sphere(*radius, *sc1, transform),
+            Solid::Torus(rd1, rd2, sc1, sc2, transform) => torus(*rd1, *rd2, *sc1, *sc2, transform),
             Solid::Mesh(primitives) => primitives.clone(),
         }
     }

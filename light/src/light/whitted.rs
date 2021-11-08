@@ -9,9 +9,9 @@ pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8)
         return color::BLACK;
     }
 
-    match accelerator.trace(&ray) {
+    match accelerator.trace(ray) {
         Some(prm_idxs) => {
-            let closest = find_closest_primitive(&renderer, &ray, &prm_idxs);
+            let closest = find_closest_primitive(renderer, ray, &prm_idxs);
             match closest {
                 Some((primitive, distance)) => {
                     let point = ray.point(distance);
@@ -21,14 +21,14 @@ pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8)
                     };
 
                     match prm_material {
-                        Material::Simple(_) => calculate_shading(&renderer, &primitive, &point),
+                        Material::Simple(_) => calculate_shading(renderer, &primitive, &point),
                         Material::Reflective(_, idx) => {
                             let normal = primitive.normal(&point);
                             let ri = ray.direction.unit();
                             let dot = ri.dot(&normal) * 2.0;
                             let new_dir = ri - (normal * dot);
                             let reflected_ray = Ray::new(point, new_dir.unit(), f32::INFINITY);
-                            (calculate_shading(&renderer, &primitive, &point) * (1.0 - idx))
+                            (calculate_shading(&renderer, primitive, &point) * (1.0 - idx))
                                 + trace_ray(renderer, rng, &reflected_ray, depth + 1) * *idx
                         }
                         Material::Emissive(color) => color.clone(),
@@ -43,7 +43,7 @@ pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8)
 
 fn calculate_shading(renderer: &Renderer, prm: &Primitive, point: &Point) -> Color {
     let normal = prm.normal(point);
-    let direct_lighting = calculate_direct_lighting(renderer, &point, &normal);
+    let direct_lighting = calculate_direct_lighting(renderer, point, &normal);
 
     let prm_material = match prm {
         Primitive::Sphere { material, .. } => material,

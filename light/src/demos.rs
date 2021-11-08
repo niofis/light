@@ -21,18 +21,18 @@ pub fn cornell() -> World {
         Transform::scale(3.0, 3.0, 3.0),
         Transform::translate(-10.0, -2.0, 0.0),
     ];
-    let cube = Solid::Cube(Transform::combine(&cube_trs)).into();
+    let cube = Solid::Cube(Transform::combine(&cube_trs));
 
     //cornell box
     let cornell_trs = vec![
         Transform::scale(42.0, 30.0, 50.0),
         Transform::translate(0.0, 7.5, 0.0),
     ];
-    let cornell = Solid::CornellBox(Transform::combine(&cornell_trs)).into();
+    let cornell = Solid::CornellBox(Transform::combine(&cornell_trs));
 
     //this is a donut
     let donut_trs = vec![Transform::rotate(PI / -4.0, 0.0, 0.0)];
-    let donut = Solid::Torus(1.5, 4.0, 30, 50, Transform::combine(&donut_trs)).into();
+    let donut = Solid::Torus(1.5, 4.0, 30, 50, Transform::combine(&donut_trs));
 
     let lights = vec![Light::Point(Point(-10.0, 10.0, -10.0))];
 
@@ -97,7 +97,7 @@ pub fn shader_bench() -> World {
 }
 
 pub fn obj(file: &str) -> World {
-    let mut solids: Vec<Solid> = Vec::new();
+    let mut solids: Vec<Solid> = vec![];
 
     solids.push(Solid::Triangle(
         Point(-800.0, -7.0, -800.0),
@@ -107,7 +107,7 @@ pub fn obj(file: &str) -> World {
     ));
 
     let bunny_obj = tobj::load_obj(&Path::new(file));
-    if bunny_obj.is_ok() == false {
+    if bunny_obj.is_err() {
         panic!("obj model is not valid!");
     }
     let (models, _) = bunny_obj.unwrap();

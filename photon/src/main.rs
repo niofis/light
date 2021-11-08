@@ -1,6 +1,5 @@
 use clap::{App, AppSettings, Arg};
-use light::{Accelerator, Color};
-use light::{Camera, Point};
+use light::{Accelerator, Camera, Color, Point, Renderer};
 
 fn print_ppm(data: &[u8], width: usize, height: usize) {
     println!("P3\n{} {}\n255", width, height);
@@ -61,7 +60,7 @@ fn main() {
     let width = 640;
     let height = 480;
 
-    let mut renderer = light::Renderer::build();
+    let mut renderer = Renderer::build();
     renderer
         .width(width)
         .height(height)
@@ -72,7 +71,8 @@ fn main() {
             Point(20.0 / 2.0, 15.0, -50.0),
         ))
         // .render_method(light::RenderMethod::Pixels);
-        .render_method(light::RenderMethod::Tiles);
+        //.render_method(light::RenderMethod::Tiles);
+        .render_method(light::RenderMethod::Scanlines);
 
     if matches.is_present("stats") {
         renderer.use_stats();
@@ -127,10 +127,18 @@ fn main() {
         let x = section.x + (idx % section.width);
         let y = section.y + (idx / section.width);
         let offset = (y * width + x) * 4;
-        let Color(r, g, b) = pixel;
-        buffer[offset] = if r > 1.0 { 255 } else { (r * 255.99) as u8 };
-        buffer[offset + 1] = if g > 1.0 { 255 } else { (g * 255.99) as u8 };
-        buffer[offset + 2] = if b > 1.0 { 255 } else { (b * 255.99) as u8 };
+        let Color(red, green, blue) = pixel;
+        buffer[offset] = if red > 1.0 { 255 } else { (red * 255.99) as u8 };
+        buffer[offset + 1] = if green > 1.0 {
+            255
+        } else {
+            (green * 255.99) as u8
+        };
+        buffer[offset + 2] = if blue > 1.0 {
+            255
+        } else {
+            (blue * 255.99) as u8
+        };
     }
 
     let elapsed = time::precise_time_s() - start;

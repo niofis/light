@@ -29,24 +29,22 @@ pub struct BVH {
 }
 
 fn rec_trace(bvh: &BVHNode, ray: &Ray, prm_vec: &mut Vec<usize>) {
-    match bvh {
-        BVHNode::Node {
-            primitives,
-            bounding_box,
-            left,
-            right,
-        } => {
-            if bounding_box.intersect(ray) {
-                if let Some(prms) = primitives {
-                    for p in prms {
-                        prm_vec.push(*p);
-                    }
+    if let BVHNode::Node {
+        primitives,
+        bounding_box,
+        left,
+        right,
+    } = bvh
+    {
+        if bounding_box.intersect(ray) {
+            if let Some(prms) = primitives {
+                for p in prms {
+                    prm_vec.push(*p);
                 }
-                rec_trace(&left, ray, prm_vec);
-                rec_trace(&right, ray, prm_vec);
             }
+            rec_trace(left, ray, prm_vec);
+            rec_trace(right, ray, prm_vec);
         }
-        _ => {}
     };
 }
 
@@ -58,7 +56,7 @@ fn in_order_walk(node: &BVHNode, mut stats: BVHStats) -> BVHStats {
             primitives: _,
             bounding_box: _,
         } => {
-            stats.nodes = stats.nodes + 1;
+            stats.nodes += 1;
             let stats = in_order_walk(left, stats);
             in_order_walk(right, stats)
         }
@@ -69,8 +67,8 @@ fn in_order_walk(node: &BVHNode, mut stats: BVHStats) -> BVHStats {
 impl BVH {
     pub fn stats(&self) -> BVHStats {
         let BVH { root } = self;
-        let mut stats = BVHStats::default();
-        in_order_walk(&root, stats)
+        let stats = BVHStats::default();
+        in_order_walk(root, stats)
     }
 }
 
@@ -79,7 +77,7 @@ impl Trace for BVH {
         let BVH { root } = self;
         let mut idx_vec: Vec<usize> = Vec::with_capacity(256);
 
-        rec_trace(&root, &ray, &mut idx_vec);
+        rec_trace(root, ray, &mut idx_vec);
 
         if idx_vec.is_empty() {
             None
@@ -89,8 +87,8 @@ impl Trace for BVH {
     }
 }
 
-fn octree_grouping(items: &Vec<(Point, usize)>) -> BVHNode {
-    if items.len() == 0 {
+fn octree_grouping(items: &[(Point, usize)]) -> BVHNode {
+    if items.is_empty() {
         return BVHNode::Empty;
     }
 
@@ -247,7 +245,7 @@ fn octree_grouping(items: &Vec<(Point, usize)>) -> BVHNode {
     }
 }
 
-fn rebuild(prms: &Vec<Primitive>, root: BVHNode) -> BVHNode {
+fn rebuild(prms: &[Primitive], root: BVHNode) -> BVHNode {
     match root {
         BVHNode::Empty => BVHNode::Empty,
         BVHNode::Node {
@@ -256,8 +254,8 @@ fn rebuild(prms: &Vec<Primitive>, root: BVHNode) -> BVHNode {
             right,
             ..
         } => {
-            let left = rebuild(&prms, *left);
-            let right = rebuild(&prms, *right);
+            let left = rebuild(prms, *left);
+            let right = rebuild(prms, *right);
             let mut bounding_box = BoundingBox::empty();
 
             if let Some(indexes) = &primitives {
@@ -269,14 +267,14 @@ fn rebuild(prms: &Vec<Primitive>, root: BVHNode) -> BVHNode {
                 bounding_box: lbb, ..
             } = &left
             {
-                bounding_box = bounding_box.combine(&lbb);
+                bounding_box = bounding_box.combine(lbb);
             }
 
             if let BVHNode::Node {
                 bounding_box: rbb, ..
             } = &right
             {
-                bounding_box = bounding_box.combine(&rbb);
+                bounding_box = bounding_box.combine(rbb);
             }
 
             BVHNode::Node {
@@ -290,7 +288,7 @@ fn rebuild(prms: &Vec<Primitive>, root: BVHNode) -> BVHNode {
 }
 
 impl BVH {
-    pub fn new(primitives: &Vec<Primitive>) -> BVH {
+    pub fn new(primitives: &[Primitive]) -> BVH {
         let len = primitives.len();
         if len == 0 {
             return BVH {
@@ -298,12 +296,11 @@ impl BVH {
             };
         }
 
-        let indexes: Vec<usize> = (0..len).collect();
-        let centroid: Vec<Point> = primitives.iter().map(|x| x.centroid()).collect();
-        let mut items: Vec<(Point, usize)> =
-            centroid.into_iter().zip(indexes.into_iter()).collect();
-        let root = octree_grouping(&mut items);
-        let root = rebuild(&primitives, root);
+        let indexes = 0..len;
+        let centroid = primitives.iter().map(|x| x.centroid());
+        let items: Vec<(Point, usize)> = centroid.zip(indexes).collect();
+        let root = octree_grouping(&items);
+        let root = rebuild(primitives, root);
 
         BVH { root }
     }
