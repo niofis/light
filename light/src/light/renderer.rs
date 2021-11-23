@@ -4,10 +4,11 @@ use super::{
     color::Color,
     path_tracing,
     primitive::Primitive,
+    section::{Section, SectionIterator},
+    tile::{Tile, TileIterator},
     whitted,
     world::World,
 };
-use crate::Section;
 use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
 
 pub enum RenderMethod {
@@ -128,6 +129,7 @@ impl Renderer {
         let left = section.x;
         let top = section.y;
         let camera = &self.camera;
+        let it = SectionIterator::new(left, top, width, height);
 
         let trace = match self.algorithm {
             Algorithm::Whitted => whitted::trace_ray,
@@ -135,12 +137,10 @@ impl Renderer {
         };
 
         let mut pixels = vec![Color::default(); height * width];
-        (0..height * width)
-            .into_par_iter()
+        //(0..height * width)
+        it.into_par_iter()
             .map_init(rand::thread_rng, |rng, pixel| {
-                let x = (left + pixel % width) as f32;
-                let y = (top + pixel / width) as f32;
-                let ray = camera.get_ray(x, y);
+                let ray = camera.get_ray(pixel.x, pixel.y);
                 trace(self, rng, &ray, 0)
             })
             .collect_into_vec(&mut pixels);
@@ -154,32 +154,25 @@ impl Renderer {
         let sections_v = height / tile_size;
         let sections_h = width / tile_size;
         let pixels_per_tile = tile_size * tile_size;
+        let it = TileIterator::new(section.x, section.y, section.width, section.height);
 
         let trace = match self.algorithm {
             Algorithm::Whitted => whitted::trace_ray,
             Algorithm::PathTracing => path_tracing::trace_ray,
         };
 
-        let tiles = (0..sections_v * sections_h)
+        let tiles = it
             .into_par_iter()
-            .map(|idx| {
-                let x = section.x + (idx % sections_h) * tile_size;
-                let y = section.y + (idx / sections_h) * tile_size;
-                let pixels: Vec<Color> = Vec::with_capacity(pixels_per_tile);
-                (x, y, pixels)
-            })
-            .map_init(
-                || rand::thread_rng(),
-                |rnd, (x, y, mut pixels)| {
-                    for yy in 0..tile_size {
-                        for xx in 0..tile_size {
-                            let ray = camera.get_ray((x + xx) as f32, (y + yy) as f32);
-                            pixels.push(trace(&self, rnd, &ray, 0));
-                        }
+            .map_init(rand::thread_rng, |rnd, Tile { x, y, size }| {
+                let mut pixels = vec![];
+                for yy in 0..size {
+                    for xx in 0..size {
+                        let ray = camera.get_ray((x + xx) as f32, (y + yy) as f32);
+                        pixels.push(trace(&self, rnd, &ray, 0));
                     }
-                    pixels
-                },
-            )
+                }
+                pixels
+            })
             .collect::<Vec<Vec<Color>>>();
 
         let mut pixels: Vec<Color> = vec![Color::default(); width * height];

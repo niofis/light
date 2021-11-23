@@ -70,9 +70,9 @@ fn main() {
             Point(-20.0 / 2.0, 0.0, -50.0),
             Point(20.0 / 2.0, 15.0, -50.0),
         ))
-        // .render_method(light::RenderMethod::Pixels);
-        //.render_method(light::RenderMethod::Tiles);
-        .render_method(light::RenderMethod::Scanlines);
+        //.render_method(light::RenderMethod::Pixels);
+        .render_method(light::RenderMethod::Tiles);
+    //.render_method(light::RenderMethod::Scanlines);
 
     if matches.is_present("stats") {
         renderer.use_stats();

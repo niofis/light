@@ -20,3 +20,6 @@ pub(crate) mod transform;
 pub(crate) mod vector;
 mod whitted;
 pub(crate) mod world;
+mod pixel;
+mod scanline;
+mod tile;
