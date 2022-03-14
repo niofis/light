@@ -34,11 +34,26 @@ pub fn cornell() -> World {
     let donut_trs = vec![Transform::rotate(PI / -4.0, 0.0, 0.0)];
     let donut = Solid::Torus(1.5, 4.0, 30, 50, Transform::combine(&donut_trs));
 
+    // bunny!
+    let bunny_trs = Transform::combine(&vec![
+        Transform::scale(50.0, 50.0, 50.0),
+        Transform::translate(-11.0, -11.0, 0.0),
+        Transform::rotate(0.0, PI, 0.0),
+    ]);
+    let bunny = Solid::File(String::from("../models/bunny_res2.obj"), bunny_trs);
+
     let lights = vec![Light::Point(Point(-10.0, 10.0, -10.0))];
 
     World::build()
         .lights(lights)
-        .objects(vec![simple_sphere, simple_triangle, cube, cornell, donut])
+        .objects(vec![
+            simple_sphere,
+            simple_triangle,
+            cube,
+            cornell,
+            donut,
+            bunny,
+        ])
         .finish()
 }
 
