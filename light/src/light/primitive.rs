@@ -97,6 +97,7 @@ fn sphere_intersect(sphere: (&Point, &f32), ray: &Ray) -> Option<f32> {
     let Ray {
         origin,
         direction,
+        direction_reciprocal: _,
         max_distance: _,
     } = ray;
     let oc = origin - center;
@@ -127,6 +128,7 @@ fn triangle_intersect(triangle: (&Point, &Vector, &Vector), ray: &Ray) -> Option
     let Ray {
         origin,
         direction,
+        direction_reciprocal: _,
         max_distance: _,
     } = ray;
     let pvec = direction.cross(edge2);

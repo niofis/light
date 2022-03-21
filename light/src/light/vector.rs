@@ -113,9 +113,6 @@ impl Vector {
     pub fn default() -> Vector {
         Vector(0.0, 0.0, 0.0)
     }
-    pub fn clone(&self) -> Vector {
-        Vector(self.0, self.1, self.2)
-    }
     pub fn dot(&self, rhs: &Vector) -> f32 {
         self.0 * rhs.0 + self.1 * rhs.1 + self.2 * rhs.2
     }

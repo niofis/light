@@ -57,8 +57,8 @@ fn main() {
             .help("captures stats and prints them when done rendering. cannot be used with threads"))
         .setting(AppSettings::ArgRequiredElseHelp)
         .get_matches();
-    let width = 640;
-    let height = 480;
+    let width = 1280;
+    let height = 960;
 
     let mut renderer = Renderer::build();
     renderer

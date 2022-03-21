@@ -97,7 +97,7 @@ fn find_shadow_primitive(
 
 fn calculate_direct_lighting(renderer: &Renderer, point: &Point, normal: &Vector) -> Color {
     let incident_lights = renderer.world.lights.iter().filter_map(|ll| {
-        let super::light::Light::Point(light) = ll;
+        let super::light::Light::Point(light, intensity) = ll;
         let direction = light - point;
         let unit_dir = direction.unit();
         let dot = normal.dot(&unit_dir);
@@ -110,7 +110,8 @@ fn calculate_direct_lighting(renderer: &Renderer, point: &Point, normal: &Vector
             Some(prm_idxs) => {
                 let light_distance = direction.norm();
                 if !find_shadow_primitive(&renderer.primitives, &ray, &prm_idxs, light_distance) {
-                    Some(Color(1.0, 1.0, 1.0) * dot)
+                    let it = f32::max(0.0, (intensity - light_distance) / intensity);
+                    Some(Color(1.0, 1.0, 1.0) * dot * it)
                 } else {
                     None
                 }

@@ -86,18 +86,8 @@ fn cornell_box(transform: &Transform) -> Vec<Primitive> {
         Primitive::new_triangle(pt1(), pt5(), pt8(), Material::red()),
         Primitive::new_triangle(pt1(), pt8(), pt4(), Material::red()),
         //top
-        Primitive::new_triangle(
-            pt6(),
-            pt5(),
-            pt2(),
-            Material::Emissive(Color(1.0, 1.0, 1.0)),
-        ),
-        Primitive::new_triangle(
-            pt5(),
-            pt1(),
-            pt2(),
-            Material::Emissive(Color(1.0, 1.0, 1.0)),
-        ),
+        Primitive::new_triangle(pt6(), pt5(), pt2(), Material::white()),
+        Primitive::new_triangle(pt5(), pt1(), pt2(), Material::white()),
         //bottom
         Primitive::new_triangle(pt3(), pt4(), pt8(), Material::white()),
         Primitive::new_triangle(pt7(), pt3(), pt8(), Material::white()),
@@ -160,13 +150,13 @@ fn sphere(radius: f32, sc1: usize, transform: &Transform) -> Vec<Primitive> {
                 transform.apply(&cur[n]),
                 transform.apply(&next[n + 1]),
                 transform.apply(&next[n]),
-                Material::green(),
+                Material::yellow(),
             ));
             triangles.push(Primitive::new_triangle(
                 transform.apply(&next[n + 1]),
                 transform.apply(&cur[n]),
                 transform.apply(&cur[n + 1]),
-                Material::green(),
+                Material::yellow(),
             ));
         }
         cur = next;

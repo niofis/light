@@ -1,5 +1,5 @@
 use crate::light::point::Point;
 
 pub enum Light {
-    Point(Point),
+    Point(Point, f32),
 }

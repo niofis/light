@@ -51,7 +51,7 @@ fn main() {
         .accelerator(Accelerator::BoundingVolumeHierarchy)
         .render_method(light::RenderMethod::Tiles)
         // .render_method(light::RenderMethod::Pixels)
-        .threads(threads)
+        .threads(1)
         .finish();
 
     let mut min = f64::INFINITY;

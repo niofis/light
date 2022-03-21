@@ -13,3 +13,6 @@ clap = "2"
 time = "0.1.42"
 light = { path = "../light" }
 num_cpus = "1.0"
+
+[profile.release]
+debug = true

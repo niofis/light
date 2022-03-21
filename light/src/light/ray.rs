@@ -4,6 +4,7 @@ use crate::light::vector::Vector;
 pub struct Ray {
     pub origin: Point,
     pub direction: Vector,
+    pub direction_reciprocal: Vector,
     pub max_distance: f32,
 }
 
@@ -12,6 +13,7 @@ impl Ray {
         Ray {
             origin,
             direction,
+            direction_reciprocal: Vector(1.0 / direction.0, 1.0 / direction.1, 1.0 / direction.2),
             max_distance,
         }
     }
@@ -20,6 +22,7 @@ impl Ray {
         let Ray {
             origin,
             direction,
+            direction_reciprocal: _,
             max_distance: _,
         } = self;
         origin + &(direction * rhs)

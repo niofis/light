@@ -19,7 +19,7 @@ pub fn cornell() -> World {
     let cube_trs = vec![
         Transform::rotate(0.0, PI / 4.0, PI / 4.0),
         Transform::scale(3.0, 3.0, 3.0),
-        Transform::translate(-10.0, -2.0, 0.0),
+        Transform::translate(10.0, -5.0, -20.0),
     ];
     let cube = Solid::Cube(Transform::combine(&cube_trs));
 
@@ -32,27 +32,35 @@ pub fn cornell() -> World {
 
     //this is a donut
     let donut_trs = vec![Transform::rotate(PI / -4.0, 0.0, 0.0)];
-    let donut = Solid::Torus(1.5, 4.0, 30, 50, Transform::combine(&donut_trs));
+    let donut = Solid::Torus(2.5, 7.0, 60, 100, Transform::combine(&donut_trs));
 
     // bunny!
     let bunny_trs = Transform::combine(&vec![
-        Transform::scale(50.0, 50.0, 50.0),
-        Transform::translate(-11.0, -11.0, 0.0),
+        Transform::scale(80.0, 80.0, 80.0),
+        Transform::translate(9.0, -11.0, 20.0),
         Transform::rotate(0.0, PI, 0.0),
     ]);
     let bunny = Solid::File(String::from("../models/bunny_res2.obj"), bunny_trs);
 
-    let lights = vec![Light::Point(Point(-10.0, 10.0, -10.0))];
+    // bunny!
+    let geo_trs = Transform::combine(&vec![Transform::translate(10.0, 10.0, -10.0)]);
+    let geo = Solid::GeodesicSphere(3.0, 20, geo_trs);
+
+    let lights = vec![
+        Light::Point(Point(0.0, 15.0, 0.0), 100.0),
+        Light::Point(Point(0.0, 10.0, -50.0), 100.0),
+    ];
 
     World::build()
         .lights(lights)
         .objects(vec![
             simple_sphere,
-            simple_triangle,
+            // simple_triangle,
             cube,
             cornell,
             donut,
             bunny,
+            geo,
         ])
         .finish()
 }
@@ -83,7 +91,7 @@ pub fn simple() -> World {
     let donut = Solid::Torus(1.5, 4.0, 30, 50, Transform::combine(&donut_trs)).into();
     let sphere_trs = vec![Transform::translate(-16.0, -2.0, 10.0)];
     let geo_sphere = Solid::GeodesicSphere(2.0, 20, Transform::combine(&sphere_trs));
-    let lights = vec![Light::Point(Point(-10.0, 10.0, -10.0))];
+    let lights = vec![Light::Point(Point(-10.0, 10.0, -10.0), 100.0)];
 
     World::build()
         .lights(lights)
@@ -98,7 +106,7 @@ pub fn simple() -> World {
 }
 
 pub fn shader_bench() -> World {
-    let lights = vec![Light::Point(Point(0.0, 0.0, -10.0))];
+    let lights = vec![Light::Point(Point(0.0, 0.0, -10.0), 100.0)];
 
     World::build()
         .lights(lights)
@@ -161,7 +169,7 @@ pub fn obj(file: &str) -> World {
             ));
         }
     }
-    let lights = vec![Light::Point(Point(0.0, 20.0, -50.0))];
+    let lights = vec![Light::Point(Point(0.0, 20.0, -50.0), 100.0)];
 
     World::build().lights(lights).objects(solids).finish()
 }
