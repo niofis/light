@@ -7,7 +7,7 @@ pub struct BruteForce {
 }
 
 impl BruteForce {
-    pub fn new(primitives: &Vec<Primitive>) -> BruteForce {
+    pub fn new(primitives: &[Primitive]) -> BruteForce {
         let primitives = (0..primitives.len()).collect();
         BruteForce { primitives }
     }
@@ -15,6 +15,6 @@ impl BruteForce {
 
 impl Trace for BruteForce {
     fn trace(&self, _ray: &Ray) -> Option<Vec<usize>> {
-        Some(self.primitives.iter().map(|x| *x).collect())
+        Some(self.primitives.to_vec())
     }
 }

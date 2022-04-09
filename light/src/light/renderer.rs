@@ -58,20 +58,24 @@ impl Renderer {
             stats: None,
         }
     }
-    pub fn width<'a>(&'a mut self, width: usize) -> &'a mut Renderer {
+    pub fn algorithm(&mut self, algorithm: Algorithm) -> &mut Renderer {
+        self.algorithm = algorithm;
+        self
+    }
+    pub fn width(&mut self, width: usize) -> &mut Renderer {
         self.width = width;
         self
     }
-    pub fn height<'a>(&'a mut self, height: usize) -> &'a mut Renderer {
+    pub fn height(&mut self, height: usize) -> &mut Renderer {
         self.height = height;
         self
     }
-    pub fn camera<'a>(&'a mut self, camera: Camera) -> &'a mut Renderer {
+    pub fn camera(&mut self, camera: Camera) -> &mut Renderer {
         self.camera = camera;
         self.camera.init(self.width as f32, self.height as f32);
         self
     }
-    pub fn world<'a>(&'a mut self, world: World) -> &'a mut Renderer {
+    pub fn world(&mut self, world: World) -> &mut Renderer {
         self.world = world;
         self.primitives = self.world.primitives();
         if let Some(mut stats) = self.stats.as_mut() {
@@ -79,15 +83,15 @@ impl Renderer {
         }
         self
     }
-    pub fn render_method<'a>(&'a mut self, render_method: RenderMethod) -> &'a mut Renderer {
+    pub fn render_method(&mut self, render_method: RenderMethod) -> &mut Renderer {
         self.render_method = render_method;
         self
     }
-    pub fn illumination<'a>(&'a mut self, algorithm: Algorithm) -> &'a mut Renderer {
+    pub fn illumination(&mut self, algorithm: Algorithm) -> &mut Renderer {
         self.algorithm = algorithm;
         self
     }
-    pub fn accelerator<'a>(&'a mut self, accelerator: Accelerator) -> &'a mut Renderer {
+    pub fn accelerator(&mut self, accelerator: Accelerator) -> &mut Renderer {
         self.accelerator = match accelerator {
             Accelerator::BruteForce => AcceleratorInstance::new_brute_force(&self.primitives),
             Accelerator::BoundingVolumeHierarchy => {
@@ -100,7 +104,7 @@ impl Renderer {
         };
         self
     }
-    pub fn threads<'a>(&'a mut self, count: usize) -> &'a mut Renderer {
+    pub fn threads(&mut self, count: usize) -> &mut Renderer {
         if count > 0 {
             rayon::ThreadPoolBuilder::new()
                 .num_threads(count)
@@ -109,7 +113,7 @@ impl Renderer {
         }
         self
     }
-    pub fn use_stats<'a>(&'a mut self) -> &'a mut Renderer {
+    pub fn use_stats(&mut self) -> &mut Renderer {
         self.stats = Some(Stats::default());
         self
     }
@@ -151,9 +155,7 @@ impl Renderer {
         let width = section.width;
         let camera = &self.camera;
         let tile_size = 16;
-        let sections_v = height / tile_size;
         let sections_h = width / tile_size;
-        let pixels_per_tile = tile_size * tile_size;
         let it = TileIterator::new(section.x, section.y, section.width, section.height);
 
         let trace = match self.algorithm {
@@ -168,7 +170,7 @@ impl Renderer {
                 for yy in 0..size {
                     for xx in 0..size {
                         let ray = camera.get_ray((x + xx) as f32, (y + yy) as f32);
-                        pixels.push(trace(&self, rnd, &ray, 0));
+                        pixels.push(trace(self, rnd, &ray, 0));
                     }
                 }
                 pixels

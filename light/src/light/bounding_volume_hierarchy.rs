@@ -24,7 +24,7 @@ pub struct BVHStats {
 }
 
 #[derive(Debug)]
-pub struct BVH {
+pub struct Bvh {
     root: BVHNode,
 }
 
@@ -64,17 +64,17 @@ fn in_order_walk(node: &BVHNode, mut stats: BVHStats) -> BVHStats {
     }
 }
 
-impl BVH {
+impl Bvh {
     pub fn stats(&self) -> BVHStats {
-        let BVH { root } = self;
+        let Bvh { root } = self;
         let stats = BVHStats::default();
         in_order_walk(root, stats)
     }
 }
 
-impl Trace for BVH {
+impl Trace for Bvh {
     fn trace(&self, ray: &Ray) -> Option<Vec<usize>> {
-        let BVH { root } = self;
+        let Bvh { root } = self;
         let mut idx_vec: Vec<usize> = Vec::with_capacity(256);
 
         rec_trace(root, ray, &mut idx_vec);
@@ -287,11 +287,11 @@ fn rebuild(prms: &[Primitive], root: BVHNode) -> BVHNode {
     }
 }
 
-impl BVH {
-    pub fn new(primitives: &[Primitive]) -> BVH {
+impl Bvh {
+    pub fn new(primitives: &[Primitive]) -> Bvh {
         let len = primitives.len();
         if len == 0 {
-            return BVH {
+            return Bvh {
                 root: BVHNode::Empty,
             };
         }
@@ -302,6 +302,6 @@ impl BVH {
         let root = octree_grouping(&items);
         let root = rebuild(primitives, root);
 
-        BVH { root }
+        Bvh { root }
     }
 }

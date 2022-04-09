@@ -1,4 +1,4 @@
-use crate::{Color, Material, Point, Transform};
+use crate::{Material, Point, Transform};
 use std::f32::consts::PI;
 
 use super::primitive::Primitive;
@@ -86,8 +86,18 @@ fn cornell_box(transform: &Transform) -> Vec<Primitive> {
         Primitive::new_triangle(pt1(), pt5(), pt8(), Material::red()),
         Primitive::new_triangle(pt1(), pt8(), pt4(), Material::red()),
         //top
-        Primitive::new_triangle(pt6(), pt5(), pt2(), Material::white()),
-        Primitive::new_triangle(pt5(), pt1(), pt2(), Material::white()),
+        Primitive::new_triangle(
+            pt6(),
+            pt5(),
+            pt2(),
+            Material::Emissive(crate::light::color::WHITE),
+        ),
+        Primitive::new_triangle(
+            pt5(),
+            pt1(),
+            pt2(),
+            Material::Emissive(crate::light::color::WHITE),
+        ),
         //bottom
         Primitive::new_triangle(pt3(), pt4(), pt8(), Material::white()),
         Primitive::new_triangle(pt7(), pt3(), pt8(), Material::white()),

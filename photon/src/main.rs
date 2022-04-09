@@ -57,8 +57,8 @@ fn main() {
             .help("captures stats and prints them when done rendering. cannot be used with threads"))
         .setting(AppSettings::ArgRequiredElseHelp)
         .get_matches();
-    let width = 1280;
-    let height = 960;
+    let width = 1280 / 4;
+    let height = 960 / 4;
 
     let mut renderer = Renderer::build();
     renderer
@@ -70,6 +70,7 @@ fn main() {
             Point(-20.0 / 2.0, 0.0, -50.0),
             Point(20.0 / 2.0, 15.0, -50.0),
         ))
+        .algorithm(light::Algorithm::PathTracing)
         //.render_method(light::RenderMethod::Pixels);
         .render_method(light::RenderMethod::Tiles);
     //.render_method(light::RenderMethod::Scanlines);

@@ -86,8 +86,8 @@ impl Primitive {
 
     pub fn centroid(&self) -> Point {
         match self {
-            Primitive::Sphere { center, .. } => center.clone(),
-            Primitive::Triangle { centroid, .. } => centroid.clone(),
+            Primitive::Sphere { center, .. } => *center,
+            Primitive::Triangle { centroid, .. } => *centroid,
         }
     }
 }

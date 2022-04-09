@@ -8,12 +8,6 @@ pub fn cornell() -> World {
         5.0,
         Material::Reflective(Color(0.0, 0.0, 1.0), 1.0),
     );
-    let simple_triangle = Solid::Triangle(
-        Point(-8.0, 0.0, 0.0),
-        Point(-7.0, 2.0, 0.0),
-        Point(-6.0, 0.0, 0.0),
-        Material::Simple(Color(0.0, 1.0, 0.0)),
-    );
 
     // cube thingy
     let cube_trs = vec![
@@ -84,11 +78,11 @@ pub fn simple() -> World {
         Transform::scale(3.0, 3.0, 3.0),
         Transform::translate(-10.0, -2.0, 0.0),
     ];
-    let cube = Solid::Cube(Transform::combine(&cube_trs)).into();
+    let cube = Solid::Cube(Transform::combine(&cube_trs));
 
     //this is a donut
     let donut_trs = vec![Transform::rotate(PI / -4.0, 0.0, 0.0)];
-    let donut = Solid::Torus(1.5, 4.0, 30, 50, Transform::combine(&donut_trs)).into();
+    let donut = Solid::Torus(1.5, 4.0, 30, 50, Transform::combine(&donut_trs));
     let sphere_trs = vec![Transform::translate(-16.0, -2.0, 10.0)];
     let geo_sphere = Solid::GeodesicSphere(2.0, 20, Transform::combine(&sphere_trs));
     let lights = vec![Light::Point(Point(-10.0, 10.0, -10.0), 100.0)];
@@ -120,14 +114,12 @@ pub fn shader_bench() -> World {
 }
 
 pub fn obj(file: &str) -> World {
-    let mut solids: Vec<Solid> = vec![];
-
-    solids.push(Solid::Triangle(
+    let mut solids: Vec<Solid> = vec![Solid::Triangle(
         Point(-800.0, -7.0, -800.0),
         Point(0.0, -7.0, 800.0),
         Point(800.0, -7.0, -800.0),
         Material::Simple(Color(1.0, 1.0, 1.0)),
-    ));
+    )];
 
     let bunny_obj = tobj::load_obj(&Path::new(file));
     if bunny_obj.is_err() {

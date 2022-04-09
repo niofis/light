@@ -89,7 +89,7 @@ impl Normal {
         self.0 * rhs.0 + self.1 * rhs.1 + self.2 * rhs.2
     }
     pub fn norm(&self) -> f32 {
-        self.dot(&self).sqrt()
+        self.dot(self).sqrt()
     }
     pub fn unit(&self) -> Normal {
         let Normal(x, y, z) = self / self.norm();

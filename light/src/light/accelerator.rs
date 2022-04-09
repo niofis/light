@@ -1,5 +1,5 @@
 use super::{
-    bounding_volume_hierarchy::{BVHStats, BVH},
+    bounding_volume_hierarchy::{BVHStats, Bvh},
     brute_force::BruteForce,
     primitive::Primitive,
     ray::Ray,
@@ -14,7 +14,7 @@ pub enum Accelerator {
 pub enum AcceleratorInstance {
     None,
     BruteForce(BruteForce),
-    BoundingVolumeHierarchy(BVH),
+    BoundingVolumeHierarchy(Bvh),
 }
 
 #[derive(Debug)]
@@ -24,12 +24,12 @@ pub enum AcceleratorStats {
 }
 
 impl AcceleratorInstance {
-    pub fn new_brute_force(primitives: &Vec<Primitive>) -> AcceleratorInstance {
+    pub fn new_brute_force(primitives: &[Primitive]) -> AcceleratorInstance {
         let tracer = BruteForce::new(primitives);
         AcceleratorInstance::BruteForce(tracer)
     }
-    pub fn new_bounding_volume_hierarchy(primitives: &Vec<Primitive>) -> AcceleratorInstance {
-        let tracer = BVH::new(primitives);
+    pub fn new_bounding_volume_hierarchy(primitives: &[Primitive]) -> AcceleratorInstance {
+        let tracer = Bvh::new(primitives);
         AcceleratorInstance::BoundingVolumeHierarchy(tracer)
     }
     pub fn stats(&self) -> AcceleratorStats {

@@ -43,7 +43,7 @@ impl ops::Div<f32> for &Point {
     type Output = Point;
 
     fn div(self, rhs: f32) -> Self::Output {
-        Point::from(GVector4::from(self) * rhs)
+        Point::from(GVector4::from(self) / rhs)
     }
 }
 

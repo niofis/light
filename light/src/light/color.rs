@@ -4,6 +4,7 @@ use std::ops;
 pub struct Color(pub f32, pub f32, pub f32); //r,g,b
 
 pub const BLACK: Color = Color(0., 0., 0.);
+pub const WHITE: Color = Color(1., 1., 1.);
 
 impl ops::Mul<f32> for Color {
     type Output = Color;

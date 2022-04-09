@@ -43,6 +43,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             Point(-20.0 / 2.0, 0.0, -50.0),
             Point(20.0 / 2.0, 15.0, -50.0),
         ))
+        .algorithm(light::Algorithm::PathTracing)
         .render_method(light::RenderMethod::Tiles)
         .world(light::demos::cornell())
         .accelerator(Accelerator::BoundingVolumeHierarchy)
