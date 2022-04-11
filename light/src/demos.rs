@@ -25,7 +25,7 @@ pub fn cornell() -> World {
     let cornell = Solid::CornellBox(Transform::combine(&cornell_trs));
 
     //this is a donut
-    let donut_trs = vec![Transform::rotate(PI / -4.0, 0.0, 0.0)];
+    let donut_trs = vec![Transform::rotate(PI / -4.0, -4.0, 0.0)];
     let donut = Solid::Torus(2.5, 7.0, 60, 100, Transform::combine(&donut_trs));
 
     // bunny!
