@@ -218,13 +218,13 @@ fn light_plane(transform: &Transform) -> Vec<Primitive> {
             pt4(),
             pt3(),
             pt2(),
-            Material::Emissive(crate::light::color::WHITE * 4.),
+            Material::Emissive(crate::light::color::WHITE * 2.),
         ),
         Primitive::new_triangle(
             pt3(),
             pt1(),
             pt2(),
-            Material::Emissive(crate::light::color::WHITE * 4.),
+            Material::Emissive(crate::light::color::WHITE * 2.),
         ),
     ]
 }
