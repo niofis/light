@@ -145,7 +145,7 @@ impl Renderer {
         it.into_par_iter()
             .map_init(rand::thread_rng, |rng, pixel| {
                 let ray = camera.get_ray(pixel.x, pixel.y);
-                trace(self, rng, &ray, 0)
+                trace(self, rng, &ray, 1)
             })
             .collect_into_vec(&mut pixels);
         pixels
@@ -170,7 +170,7 @@ impl Renderer {
                 for yy in 0..size {
                     for xx in 0..size {
                         let ray = camera.get_ray((x + xx) as f32, (y + yy) as f32);
-                        pixels.push(trace(self, rnd, &ray, 0));
+                        pixels.push(trace(self, rnd, &ray, 1));
                     }
                 }
                 pixels
@@ -210,7 +210,7 @@ impl Renderer {
                 (0..width)
                     .into_iter()
                     .map(|col| camera.get_ray((left + col) as f32, y as f32))
-                    .map(|ray| trace(self, rng, &ray, 0))
+                    .map(|ray| trace(self, rng, &ray, 1))
                     .collect::<Vec<Color>>()
             })
             .flatten()

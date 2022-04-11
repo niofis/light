@@ -5,13 +5,14 @@ use super::{color, primitive::Primitive, ray::Ray};
 
 pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8) -> Color {
     let accelerator = &renderer.accelerator;
-    if depth > 5 {
+    let max_depth = 5;
+    if depth > max_depth {
         return color::BLACK;
     }
     let mut final_color = color::BLACK;
-    let samples = 5.0;
+    let samples: f32 = 100.0;
     for _ in 0..(samples as i32) {
-        match accelerator.trace(ray) {
+        let sample_color = match accelerator.trace(ray) {
             Some(prm_idxs) => {
                 let closest = find_closest_primitive(renderer, ray, &prm_idxs);
                 match closest {
@@ -27,8 +28,7 @@ pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8)
                                 let normal = primitive.normal(&point);
                                 let new_dir = random_dome(rng, &normal);
                                 let path_ray = Ray::new(point, new_dir.unit(), f32::INFINITY);
-                                final_color = final_color
-                                    + color.clone() * trace_ray(renderer, rng, &path_ray, depth + 1)
+                                color.clone() * trace_ray(renderer, rng, &path_ray, depth + 1)
                             }
                             Material::Reflective(_, idx) => {
                                 let normal = primitive.normal(&point);
@@ -36,23 +36,19 @@ pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8)
                                 let dot = ri.dot(&normal) * 2.0;
                                 let new_dir = ri - (normal * dot);
                                 let reflected_ray = Ray::new(point, new_dir.unit(), f32::INFINITY);
-                                final_color = final_color
-                                    + trace_ray(renderer, rng, &reflected_ray, depth + 1) * *idx
+                                trace_ray(renderer, rng, &reflected_ray, depth + 1) * *idx
                             }
-                            Material::Emissive(color) => final_color = final_color + color.clone(),
+                            Material::Emissive(color) => color.clone(),
                         }
                     }
-                    None => final_color = final_color + color::BLACK,
+                    None => color::BLACK,
                 }
             }
-            None => final_color = final_color + color::BLACK,
-        }
+            None => color::BLACK,
+        };
+        final_color = final_color + (sample_color * 1.5) / depth as f32;
     }
-    Color(
-        final_color.0 / samples,
-        final_color.1 / samples,
-        final_color.2 / samples,
-    )
+    final_color / samples
 }
 
 fn find_closest_primitive<'a>(

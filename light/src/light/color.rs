@@ -32,6 +32,14 @@ impl ops::Mul<f32> for &Color {
     }
 }
 
+impl ops::Div<f32> for Color {
+    type Output = Color;
+    fn div(self, rhs: f32) -> Color {
+        let Color(ar, ag, ab) = self;
+        Color(ar / rhs, ag / rhs, ab / rhs)
+    }
+}
+
 impl ops::Add<Color> for Color {
     type Output = Color;
     fn add(self, rhs: Color) -> Color {
