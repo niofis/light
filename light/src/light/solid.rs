@@ -12,6 +12,7 @@ pub enum Solid {
     Torus(f32, f32, usize, usize, Transform),
     Mesh(Vec<Primitive>),
     File(String, Transform),
+    LightPlane(Transform),
 }
 
 impl Solid {
@@ -31,6 +32,7 @@ impl Solid {
             Solid::Torus(rd1, rd2, sc1, sc2, transform) => torus(*rd1, *rd2, *sc1, *sc2, transform),
             Solid::Mesh(primitives) => primitives.clone(),
             Solid::File(filename, transform) => load_file(filename, transform),
+            Solid::LightPlane(transform) => light_plane(transform),
         }
     }
 }
@@ -86,18 +88,8 @@ fn cornell_box(transform: &Transform) -> Vec<Primitive> {
         Primitive::new_triangle(pt1(), pt5(), pt8(), Material::red()),
         Primitive::new_triangle(pt1(), pt8(), pt4(), Material::red()),
         //top
-        Primitive::new_triangle(
-            pt6(),
-            pt5(),
-            pt2(),
-            Material::Emissive(crate::light::color::WHITE),
-        ),
-        Primitive::new_triangle(
-            pt5(),
-            pt1(),
-            pt2(),
-            Material::Emissive(crate::light::color::WHITE),
-        ),
+        Primitive::new_triangle(pt6(), pt5(), pt2(), Material::white()),
+        Primitive::new_triangle(pt5(), pt1(), pt2(), Material::white()),
         //bottom
         Primitive::new_triangle(pt3(), pt4(), pt8(), Material::white()),
         Primitive::new_triangle(pt7(), pt3(), pt8(), Material::white()),
@@ -214,4 +206,25 @@ fn load_file(filename: &str, transform: &Transform) -> Vec<Primitive> {
         }
     }
     triangles
+}
+
+fn light_plane(transform: &Transform) -> Vec<Primitive> {
+    let pt1 = || transform.apply(&Point(-0.5, 0.0, -0.5));
+    let pt2 = || transform.apply(&Point(0.5, 0.0, -0.5));
+    let pt3 = || transform.apply(&Point(-0.5, 0.0, 0.5));
+    let pt4 = || transform.apply(&Point(0.5, 0.0, 0.5));
+    vec![
+        Primitive::new_triangle(
+            pt4(),
+            pt3(),
+            pt2(),
+            Material::Emissive(crate::light::color::WHITE * 4.),
+        ),
+        Primitive::new_triangle(
+            pt3(),
+            pt1(),
+            pt2(),
+            Material::Emissive(crate::light::color::WHITE * 4.),
+        ),
+    ]
 }

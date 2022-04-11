@@ -4,7 +4,7 @@ use rand::{prelude::ThreadRng, Rng};
 use super::{color, primitive::Primitive, ray::Ray};
 
 fn trace_ray_internal(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8) -> Color {
-    let max_depth = 5;
+    let max_depth = 10;
     if depth > max_depth {
         return color::BLACK;
     }

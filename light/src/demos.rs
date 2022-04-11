@@ -45,6 +45,13 @@ pub fn cornell() -> World {
         Light::Point(Point(0.0, 10.0, -50.0), 100.0),
     ];
 
+    let light_plane_trs = Transform::combine(&vec![
+        Transform::scale(30.0, 10.0, 10.0),
+        Transform::rotate(0.0, 0.0, 0.0),
+        Transform::translate(0.0, 22.4, -30.0),
+    ]);
+    let light_plane = Solid::LightPlane(light_plane_trs);
+
     World::build()
         .lights(lights)
         .objects(vec![
@@ -55,6 +62,7 @@ pub fn cornell() -> World {
             donut,
             bunny,
             geo,
+            light_plane,
         ])
         .finish()
 }
