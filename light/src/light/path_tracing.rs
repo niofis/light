@@ -3,9 +3,10 @@ use rand::{prelude::ThreadRng, Rng};
 
 use super::{color, primitive::Primitive, ray::Ray};
 
+const MAX_DEPTH: u8 = 10;
+
 fn trace_ray_internal(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8) -> Color {
-    let max_depth = 10;
-    if depth > max_depth {
+    if depth > MAX_DEPTH {
         return color::BLACK;
     }
     let accelerator = &renderer.accelerator;
@@ -48,6 +49,7 @@ fn trace_ray_internal(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth
 pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8) -> Color {
     let mut final_color = color::BLACK;
     let samples: f32 = 1000.0;
+    let depth_fallout = depth as f32 / MAX_DEPTH as f32;
     for _ in 0..(samples as i32) {
         let (nx, ny, nz) = rng.gen::<(f32, f32, f32)>();
         let origin = Point(
@@ -57,7 +59,7 @@ pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8)
         );
         let rray = Ray::new(origin, ray.direction, ray.max_distance);
         let sample_color = trace_ray_internal(renderer, rng, &rray, depth);
-        final_color = final_color + (sample_color * 1.5) / depth as f32;
+        final_color = final_color + (sample_color * 1.5) * depth_fallout;
     }
     final_color / samples
 }
