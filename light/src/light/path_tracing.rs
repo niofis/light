@@ -48,7 +48,7 @@ fn trace_ray_internal(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth
 
 pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8) -> Color {
     let mut final_color = color::BLACK;
-    let samples: f32 = 1000.0;
+    let samples: f32 = 500.0;
     let depth_fallout = depth as f32 / MAX_DEPTH as f32;
     for _ in 0..(samples as i32) {
         let (nx, ny, nz) = rng.gen::<(f32, f32, f32)>();

@@ -45,12 +45,32 @@ pub fn cornell() -> World {
         Light::Point(Point(0.0, 10.0, -50.0), 100.0),
     ];
 
-    let light_plane_trs = Transform::combine(&vec![
+    let top_light_trs = Transform::combine(&vec![
         Transform::scale(30.0, 10.0, 10.0),
         Transform::rotate(0.0, 0.0, 0.0),
         Transform::translate(0.0, 22.4, -15.0),
     ]);
-    let light_plane = Solid::LightPlane(light_plane_trs);
+    let top_light = Solid::LightPlane(top_light_trs);
+
+    // let light_sphere_trs = Transform::combine(&vec![Transform::translate(0., 10., 0.)]);
+    let light_sphere = Solid::Sphere(
+        Point(0.0, -5.5, -8.0),
+        2.,
+        Material::Emissive(crate::light::color::WHITE * 10.),
+    );
+
+    let light_sphere_2 = Solid::Sphere(
+        Point(-16.0, -5.5, -27.0),
+        2.0,
+        Material::Emissive(crate::light::color::WHITE * 10.),
+    );
+
+    let cornell_trs = vec![
+        Transform::rotate(0., 0., PI),
+        Transform::scale(4.0, 4.0, 4.0),
+        Transform::translate(0.0, -5., -10.0),
+    ];
+    let cornell_2 = Solid::CornellBox(Transform::combine(&cornell_trs));
 
     World::build()
         .lights(lights)
@@ -62,7 +82,10 @@ pub fn cornell() -> World {
             donut,
             bunny,
             geo,
-            light_plane,
+            top_light,
+            light_sphere,
+            cornell_2,
+            light_sphere_2,
         ])
         .finish()
 }
