@@ -31,7 +31,7 @@ pub fn cornell() -> World {
     // bunny!
     let bunny_trs = Transform::combine(&vec![
         Transform::scale(80.0, 80.0, 80.0),
-        Transform::translate(9.0, -11.0, 20.0),
+        Transform::translate(7.0, -11.0, 20.0),
         Transform::rotate(0.0, PI, 0.0),
     ]);
     let bunny = Solid::File(String::from("../models/bunny_res2.obj"), bunny_trs);
@@ -53,24 +53,25 @@ pub fn cornell() -> World {
     let top_light = Solid::LightPlane(top_light_trs);
 
     // let light_sphere_trs = Transform::combine(&vec![Transform::translate(0., 10., 0.)]);
-    let light_sphere = Solid::Sphere(
-        Point(0.0, -5.5, -8.0),
-        2.,
-        Material::Emissive(crate::light::color::WHITE * 10.),
-    );
+    // let light_sphere = Solid::Sphere(
+    //     Point(0.0, -5.5, -8.0),
+    //     2.,
+    //     Material::Emissive(crate::light::color::WHITE * 10.),
+    // );
 
     let light_sphere_2 = Solid::Sphere(
-        Point(-16.0, -5.5, -27.0),
+        // Point(-16.0, -5.5, -27.0),
+        Point(-8., -4., -21.0),
         2.0,
         Material::Emissive(crate::light::color::WHITE * 10.),
     );
 
-    let cornell_trs = vec![
-        Transform::rotate(0., 0., PI),
-        Transform::scale(4.0, 4.0, 4.0),
-        Transform::translate(0.0, -5., -10.0),
-    ];
-    let cornell_2 = Solid::CornellBox(Transform::combine(&cornell_trs));
+    // let cornell_trs = vec![
+    //     Transform::rotate(0., 0., PI),
+    //     Transform::scale(4.0, 4.0, 4.0),
+    //     Transform::translate(0.0, -5., -10.0),
+    // ];
+    // let cornell_2 = Solid::CornellBox(Transform::combine(&cornell_trs));
 
     World::build()
         .lights(lights)
@@ -83,8 +84,8 @@ pub fn cornell() -> World {
             bunny,
             geo,
             top_light,
-            light_sphere,
-            cornell_2,
+            // light_sphere,
+            // cornell_2,
             light_sphere_2,
         ])
         .finish()

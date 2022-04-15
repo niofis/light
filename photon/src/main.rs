@@ -1,10 +1,19 @@
 use clap::{App, AppSettings, Arg};
 use light::{Accelerator, Camera, Color, Point, Renderer};
 
+fn gamma_correct(x: u8) -> u8 {
+    (255.0 * (x as f32 / 255.0).powf(1.0 / 2.2)).min(255.0) as u8
+}
+
 fn print_ppm(data: &[u8], width: usize, height: usize) {
     println!("P3\n{} {}\n255", width, height);
     for pixel in (0..(width * height * 4)).step_by(4) {
-        print!("{} {} {} ", data[pixel], data[pixel + 1], data[pixel + 2]);
+        print!(
+            "{} {} {} ",
+            gamma_correct(data[pixel]),
+            gamma_correct(data[pixel + 1]),
+            gamma_correct(data[pixel + 2])
+        );
         print!("\n");
     }
 }

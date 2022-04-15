@@ -199,8 +199,8 @@ fn load_file(filename: &str, transform: &Transform) -> Vec<Primitive> {
             );
             triangles.push(Primitive::new_triangle(
                 transform.apply(&pt1),
-                transform.apply(&pt3),
                 transform.apply(&pt2),
+                transform.apply(&pt3),
                 Material::white(),
             ));
         }
