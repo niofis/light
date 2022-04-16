@@ -25,13 +25,16 @@ pub fn cornell() -> World {
     let cornell = Solid::CornellBox(Transform::combine(&cornell_trs));
 
     //this is a donut
-    let donut_trs = vec![Transform::rotate(PI / -4.0, -4.0, 0.0)];
-    let donut = Solid::Torus(2.5, 7.0, 60, 100, Transform::combine(&donut_trs));
+    let donut_trs = vec![
+        Transform::rotate(PI / -4.0, PI / -4.0, 0.0),
+        Transform::translate(-17.0, -3.5, 2.),
+    ];
+    let donut = Solid::Torus(1.25, 3.5, 60, 100, Transform::combine(&donut_trs));
 
     // bunny!
     let bunny_trs = Transform::combine(&vec![
         Transform::scale(80.0, 80.0, 80.0),
-        Transform::translate(7.0, -11.0, 20.0),
+        Transform::translate(0.0, -11.0, 0.0),
         Transform::rotate(0.0, PI, 0.0),
     ]);
     let bunny = Solid::File(String::from("../models/bunny_res2.obj"), bunny_trs);
@@ -61,7 +64,7 @@ pub fn cornell() -> World {
 
     let light_sphere_2 = Solid::Sphere(
         // Point(-16.0, -5.5, -27.0),
-        Point(-8., -4., -21.0),
+        Point(0., -4., -1.0),
         2.0,
         Material::Emissive(crate::light::color::WHITE * 10.),
     );
@@ -83,7 +86,7 @@ pub fn cornell() -> World {
             donut,
             bunny,
             geo,
-            top_light,
+            // top_light,
             // light_sphere,
             // cornell_2,
             light_sphere_2,
