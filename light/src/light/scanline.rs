@@ -13,17 +13,6 @@ pub struct ScanlineIterator {
     pub height: usize,
 }
 
-impl ScanlineIterator {
-    pub fn new(left: usize, top: usize, width: usize, height: usize) -> Self {
-        ScanlineIterator {
-            left,
-            top,
-            width,
-            height,
-        }
-    }
-}
-
 impl ParallelIterator for ScanlineIterator {
     type Item = Scanline;
 

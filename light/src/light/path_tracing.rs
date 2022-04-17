@@ -1,7 +1,7 @@
-use crate::{Color, Material, Point, Renderer, Vector};
+use crate::{Color, Material, Renderer, Vector};
 use rand::{prelude::ThreadRng, Rng};
 
-use super::{color, primitive::Primitive, ray::Ray};
+use super::{color, pixel::Pixel, primitive::Primitive, ray::Ray};
 
 const MAX_DEPTH: u8 = 10;
 
@@ -46,20 +46,15 @@ fn trace_ray_internal(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth
     }
 }
 
-pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8) -> Color {
+pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, pixel: Pixel) -> Color {
     let mut final_color = color::BLACK;
     let samples: f32 = 500.0;
-    let depth_fallout = depth as f32 / MAX_DEPTH as f32;
+    let Pixel { x, y } = pixel;
     for _ in 0..(samples as i32) {
-        let (nx, ny, nz) = rng.gen::<(f32, f32, f32)>();
-        let origin = Point(
-            ray.origin.0 + (nx * 0.1),
-            ray.origin.1 + (ny * 0.1),
-            ray.origin.2 + (nz * 0.1),
-        );
-        let rray = Ray::new(origin, ray.direction, ray.max_distance);
-        let sample_color = trace_ray_internal(renderer, rng, &rray, depth);
-        final_color = final_color + (sample_color * 1.5) * depth_fallout;
+        let (nx, ny) = rng.gen::<(f32, f32)>();
+        let ray = renderer.camera.get_ray(x + nx, y + ny);
+        let sample_color = trace_ray_internal(renderer, rng, &ray, 1);
+        final_color = final_color + sample_color
     }
     final_color / samples
 }

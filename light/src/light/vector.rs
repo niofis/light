@@ -120,7 +120,7 @@ impl Vector {
         self.dot(rhs).abs()
     }
     pub fn norm(&self) -> f32 {
-        self.dot(&self).sqrt()
+        self.dot(self).sqrt()
     }
     pub fn unit(&self) -> Vector {
         let Vector(x, y, z) = self / self.norm();

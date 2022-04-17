@@ -32,15 +32,15 @@ pub fn cornell() -> World {
     let donut = Solid::Torus(1.25, 3.5, 60, 100, Transform::combine(&donut_trs));
 
     // bunny!
-    let bunny_trs = Transform::combine(&vec![
+    let bunny_trs = Transform::combine(&[
         Transform::scale(80.0, 80.0, 80.0),
         Transform::translate(0.0, -11.0, 0.0),
         Transform::rotate(0.0, PI, 0.0),
     ]);
-    let bunny = Solid::File(String::from("../models/bunny_res2.obj"), bunny_trs);
+    let bunny = Solid::InvertedFile(String::from("../models/bunny_res2.obj"), bunny_trs);
 
     // bunny!
-    let geo_trs = Transform::combine(&vec![Transform::translate(10.0, 10.0, -10.0)]);
+    let geo_trs = Transform::combine(&[Transform::translate(10.0, 10.0, -10.0)]);
     let geo = Solid::GeodesicSphere(3.0, 20, geo_trs);
 
     let lights = vec![
@@ -48,12 +48,15 @@ pub fn cornell() -> World {
         Light::Point(Point(0.0, 10.0, -50.0), 100.0),
     ];
 
-    let top_light_trs = Transform::combine(&vec![
+    let top_light_trs = Transform::combine(&[
         Transform::scale(30.0, 10.0, 10.0),
         Transform::rotate(0.0, 0.0, 0.0),
         Transform::translate(0.0, 22.4, -15.0),
     ]);
-    let top_light = Solid::LightPlane(top_light_trs);
+    let top_light = Solid::Plane(
+        top_light_trs,
+        Material::Emissive(crate::light::color::WHITE * 1.),
+    );
 
     // let light_sphere_trs = Transform::combine(&vec![Transform::translate(0., 10., 0.)]);
     // let light_sphere = Solid::Sphere(
@@ -66,7 +69,7 @@ pub fn cornell() -> World {
         // Point(-16.0, -5.5, -27.0),
         Point(0., -4., -1.0),
         2.0,
-        Material::Emissive(crate::light::color::WHITE * 10.),
+        Material::Emissive(crate::light::color::WHITE * 1.),
     );
 
     // let cornell_trs = vec![
@@ -76,6 +79,19 @@ pub fn cornell() -> World {
     // ];
     // let cornell_2 = Solid::CornellBox(Transform::combine(&cornell_trs));
 
+    // Transform::scale(42.0, 30.0, 50.0),
+    // Transform::translate(0.0, 7.5, 0.0),
+    let tmp = 5.0;
+    let cube_trs = vec![
+        Transform::scale(tmp, tmp, tmp),
+        Transform::translate(-21. + tmp / 2., 22.5 - tmp / 2., 25. - tmp / 2.),
+    ];
+    let corner_cube = Solid::InvertedCube(Transform::combine(&cube_trs));
+    let corner_cube_light = Solid::Sphere(
+        Point(-21. + tmp / 2., 22.5 - tmp / 2., 25. - tmp / 2.),
+        tmp / 2.1,
+        Material::Emissive(crate::light::color::WHITE * 5.),
+    );
     World::build()
         .lights(lights)
         .objects(vec![
@@ -86,10 +102,12 @@ pub fn cornell() -> World {
             donut,
             bunny,
             geo,
-            // top_light,
+            top_light,
             // light_sphere,
             // cornell_2,
             light_sphere_2,
+            corner_cube,
+            corner_cube_light,
         ])
         .finish()
 }
@@ -161,7 +179,7 @@ pub fn obj(file: &str) -> World {
         panic!("obj model is not valid!");
     }
     let (models, _) = bunny_obj.unwrap();
-    let mesh_trs = Transform::combine(&vec![
+    let mesh_trs = Transform::combine(&[
         Transform::scale(120.0, 120.0, 120.0),
         Transform::translate(0.0, -11.0, 0.0),
     ]);

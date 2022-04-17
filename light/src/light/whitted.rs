@@ -1,13 +1,13 @@
 use rand::prelude::ThreadRng;
 
-use super::{color, primitive::Primitive, ray::Ray};
+use super::{color, pixel::Pixel, primitive::Primitive, ray::Ray};
 use crate::{Color, Material, Point, Renderer, Vector};
 
-pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8) -> Color {
-    let accelerator = &renderer.accelerator;
+fn inner_trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8) -> Color {
     if depth > 10 {
         return color::BLACK;
     }
+    let accelerator = &renderer.accelerator;
 
     match accelerator.trace(ray) {
         Some(prm_idxs) => {
@@ -21,15 +21,15 @@ pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8)
                     };
 
                     match prm_material {
-                        Material::Simple(_) => calculate_shading(renderer, &primitive, &point),
+                        Material::Simple(_) => calculate_shading(renderer, primitive, &point),
                         Material::Reflective(_, idx) => {
                             let normal = primitive.normal(&point);
                             let ri = ray.direction.unit();
                             let dot = ri.dot(&normal) * 2.0;
                             let new_dir = ri - (normal * dot);
                             let reflected_ray = Ray::new(point, new_dir.unit(), f32::INFINITY);
-                            (calculate_shading(&renderer, primitive, &point) * (1.0 - idx))
-                                + trace_ray(renderer, rng, &reflected_ray, depth + 1) * *idx
+                            (calculate_shading(renderer, primitive, &point) * (1.0 - idx))
+                                + inner_trace_ray(renderer, rng, &reflected_ray, depth + 1) * *idx
                         }
                         Material::Emissive(color) => color.clone(),
                     }
@@ -39,6 +39,13 @@ pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8)
         }
         None => color::BLACK,
     }
+}
+
+pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, pixel: Pixel) -> Color {
+    let Pixel { x, y } = pixel;
+    let ray = renderer.camera.get_ray(x, y);
+
+    inner_trace_ray(renderer, rng, &ray, 1)
 }
 
 fn calculate_shading(renderer: &Renderer, prm: &Primitive, point: &Point) -> Color {

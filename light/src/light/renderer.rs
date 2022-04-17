@@ -132,7 +132,6 @@ impl Renderer {
         let width = section.width;
         let left = section.x;
         let top = section.y;
-        let camera = &self.camera;
         let it = SectionIterator::new(left, top, width, height);
 
         let trace = match self.algorithm {
@@ -141,19 +140,14 @@ impl Renderer {
         };
 
         let mut pixels = vec![Color::default(); height * width];
-        //(0..height * width)
         it.into_par_iter()
-            .map_init(rand::thread_rng, |rng, pixel| {
-                let ray = camera.get_ray(pixel.x, pixel.y);
-                trace(self, rng, &ray, 1)
-            })
+            .map_init(rand::thread_rng, |rng, pixel| trace(self, rng, pixel))
             .collect_into_vec(&mut pixels);
         pixels
     }
     fn render_tiles(&mut self, section: &Section) -> Vec<Color> {
         let height = section.height;
         let width = section.width;
-        let camera = &self.camera;
         let tile_size = 16;
         let sections_h = width / tile_size;
         let it = TileIterator::new(section.x, section.y, section.width, section.height);
@@ -167,11 +161,8 @@ impl Renderer {
             .into_par_iter()
             .map_init(rand::thread_rng, |rnd, Tile { x, y, size }| {
                 let mut pixels = vec![];
-                for yy in 0..size {
-                    for xx in 0..size {
-                        let ray = camera.get_ray((x + xx) as f32, (y + yy) as f32);
-                        pixels.push(trace(self, rnd, &ray, 1));
-                    }
+                for pixel in SectionIterator::new(x, y, size, size) {
+                    pixels.push(trace(self, rnd, pixel));
                 }
                 pixels
             })
@@ -192,26 +183,22 @@ impl Renderer {
     fn render_scanlines(&mut self, section: &Section) -> Vec<Color> {
         let height = section.height;
         let width = section.width;
-        let left = section.x;
         let top = section.y;
-        let camera = &self.camera;
 
         let trace = match self.algorithm {
             Algorithm::Whitted => whitted::trace_ray,
             Algorithm::PathTracing => path_tracing::trace_ray,
         };
 
-        //let mut pixels = vec![Color::default(); height * width];
         (0..height)
             .into_par_iter()
             .map_init(rand::thread_rng, |rng, row| {
                 let y = top + row;
 
-                (0..width)
-                    .into_iter()
-                    .map(|col| camera.get_ray((left + col) as f32, y as f32))
-                    .map(|ray| trace(self, rng, &ray, 1))
-                    .collect::<Vec<Color>>()
+                Iterator::map(SectionIterator::new(0, y, width, height), |pixel| {
+                    trace(self, rng, pixel)
+                })
+                .collect::<Vec<Color>>()
             })
             .flatten()
             .collect::<Vec<Color>>()

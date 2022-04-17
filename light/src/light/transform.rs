@@ -40,7 +40,7 @@ fn combine(mts: &Vec<Matrix>) -> Matrix {
 }
 
 impl Transform {
-    pub fn combine(trs: &Vec<Transform>) -> Transform {
+    pub fn combine(trs: &[Transform]) -> Transform {
         let mts = trs.iter().map(|t| t.0).collect();
         Transform(combine(&mts))
     }

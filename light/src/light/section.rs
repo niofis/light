@@ -25,6 +25,10 @@ pub struct SectionIterator {
     top: usize,
     width: usize,
     height: usize,
+    x: usize,
+    y: usize,
+    right: usize,
+    bottom: usize,
 }
 
 impl SectionIterator {
@@ -34,7 +38,39 @@ impl SectionIterator {
             top,
             width,
             height,
+            x: left,
+            y: top,
+            right: left + width,
+            bottom: top + height,
         }
+    }
+}
+
+impl Iterator for SectionIterator {
+    type Item = Pixel;
+    fn next(&mut self) -> Option<Self::Item> {
+        let SectionIterator {
+            left,
+            x,
+            y,
+            right,
+            bottom,
+            ..
+        } = self;
+        let new_next = Pixel {
+            x: *x as f32,
+            y: *y as f32,
+        };
+
+        if y == bottom {
+            return None;
+        }
+        self.x += 1;
+        if self.x == *right {
+            self.x = *left;
+            self.y += 1;
+        }
+        Some(new_next)
     }
 }
 
@@ -50,6 +86,7 @@ impl ParallelIterator for SectionIterator {
             top,
             width,
             height,
+            ..
         } = self;
         (0..width * height)
             .into_par_iter()
@@ -76,6 +113,7 @@ impl IndexedParallelIterator for SectionIterator {
             top,
             width,
             height,
+            ..
         } = self;
         (0..width * height)
             .into_par_iter()
@@ -96,6 +134,7 @@ impl IndexedParallelIterator for SectionIterator {
             top,
             width,
             height,
+            ..
         } = self;
         (0..width * height)
             .into_par_iter()
