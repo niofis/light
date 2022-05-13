@@ -5,7 +5,7 @@ mod brute_force;
 pub(crate) mod camera;
 pub(crate) mod color;
 mod generic_vector;
-pub(crate) mod light;
+pub(crate) mod light_source;
 pub(crate) mod material;
 mod normal;
 mod path_tracing;

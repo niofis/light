@@ -3,7 +3,7 @@ mod light;
 pub use light::accelerator::Accelerator;
 pub use light::camera::Camera;
 pub use light::color::Color;
-pub use light::light::Light;
+pub use light::light_source::LightSource;
 pub use light::material::Material;
 pub use light::point::Point;
 pub use light::renderer::Algorithm;

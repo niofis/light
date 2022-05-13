@@ -26,10 +26,10 @@ pub enum Algorithm {
 pub struct Stats {
     primitives: usize,
     accelerator: Option<AcceleratorStats>,
-    bvh_nodes: usize,
-    bvh_height: usize,
-    bvh_leaves: usize,
-    bvh_ppn: usize,
+    // bvh_nodes: usize,
+    // bvh_height: usize,
+    // bvh_leaves: usize,
+    // bvh_ppn: usize,
 }
 
 pub struct Renderer {

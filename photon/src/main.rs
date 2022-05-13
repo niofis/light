@@ -64,25 +64,54 @@ fn main() {
             .multiple(false)
             .conflicts_with("threads")
             .help("captures stats and prints them when done rendering. cannot be used with threads"))
+        .arg(
+                Arg::with_name("algorithm")
+                .short("alg")
+                .long("algorithm")
+                .takes_value(true)
+                .multiple(false)
+                .help("choose the rendering algorithm, options: pathtracing, whitted. Not setting this option defaults to pathtracing"))
+        .arg(
+            Arg::with_name("render method")
+            .short("rm")
+            .long("rendermethod")
+            .takes_value(true)
+            .multiple(false)
+            .help("select the rendering method: pixels, tiles, scanlines. Not setting this option defaults to tiles.")
+        )
         .setting(AppSettings::ArgRequiredElseHelp)
         .get_matches();
     let width = 1280;
     let height = 960;
 
     let mut renderer = Renderer::build();
-    renderer
-        .width(width)
-        .height(height)
-        .camera(Camera::new(
-            Point(0.0, 15.0 / 2.0, -75.0),
-            Point(-20.0 / 2.0, 15.0, -50.0),
-            Point(-20.0 / 2.0, 0.0, -50.0),
-            Point(20.0 / 2.0, 15.0, -50.0),
-        ))
-        .algorithm(light::Algorithm::PathTracing)
-        //.render_method(light::RenderMethod::Pixels);
-        .render_method(light::RenderMethod::Tiles);
-    //.render_method(light::RenderMethod::Scanlines);
+    renderer.width(width).height(height).camera(Camera::new(
+        Point(0.0, 15.0 / 2.0, -75.0),
+        Point(-20.0 / 2.0, 15.0, -50.0),
+        Point(-20.0 / 2.0, 0.0, -50.0),
+        Point(20.0 / 2.0, 15.0, -50.0),
+    ));
+
+    match matches.value_of("algorithm") {
+        Some("whitted") => {
+            renderer.algorithm(light::Algorithm::Whitted);
+        }
+        _ => {
+            renderer.algorithm(light::Algorithm::PathTracing);
+        }
+    }
+
+    match matches.value_of("render method") {
+        Some("pixel") => {
+            renderer.render_method(light::RenderMethod::Pixels);
+        }
+        Some("scanlines") => {
+            renderer.render_method(light::RenderMethod::Scanlines);
+        }
+        _ => {
+            renderer.render_method(light::RenderMethod::Tiles);
+        }
+    }
 
     if matches.is_present("stats") {
         renderer.use_stats();

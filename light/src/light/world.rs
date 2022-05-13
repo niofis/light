@@ -1,7 +1,7 @@
-use super::{light::Light, primitive::Primitive, solid::Solid};
+use super::{light_source::LightSource, primitive::Primitive, solid::Solid};
 
 pub struct World {
-    pub lights: Vec<Light>,
+    pub lights: Vec<LightSource>,
     pub objects: Vec<Solid>,
 }
 
@@ -15,7 +15,7 @@ impl World {
             objects: Vec::new(),
         }
     }
-    pub fn lights(mut self, lights: Vec<Light>) -> World {
+    pub fn lights(mut self, lights: Vec<LightSource>) -> World {
         self.lights = lights;
         self
     }

@@ -4,7 +4,7 @@ type Matrix = [f32; 16];
 
 pub struct Transform(pub Matrix);
 
-fn combine(mts: &Vec<Matrix>) -> Matrix {
+fn combine(mts: &[Matrix]) -> Matrix {
     let roxcol = |a: &Matrix, b: &Matrix, r: usize, c: usize| {
         a[r * 4] * b[c]
             + a[1 + r * 4] * b[4 + c]
@@ -41,7 +41,7 @@ fn combine(mts: &Vec<Matrix>) -> Matrix {
 
 impl Transform {
     pub fn combine(trs: &[Transform]) -> Transform {
-        let mts = trs.iter().map(|t| t.0).collect();
+        let mts: Vec<Matrix> = trs.iter().map(|t| t.0).collect();
         Transform(combine(&mts))
     }
 
@@ -51,7 +51,7 @@ impl Transform {
         let (sz, cz) = z.sin_cos();
 
         let matrix = combine(
-            &(vec![
+            &([
                 [
                     cz, -sz, 0.0, 0.0, sz, cz, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
                 ],

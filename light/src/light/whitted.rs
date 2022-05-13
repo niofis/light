@@ -104,7 +104,7 @@ fn find_shadow_primitive(
 
 fn calculate_direct_lighting(renderer: &Renderer, point: &Point, normal: &Vector) -> Color {
     let incident_lights = renderer.world.lights.iter().filter_map(|ll| {
-        let super::light::Light::Point(light, intensity) = ll;
+        let super::light_source::LightSource::Point(light, intensity) = ll;
         let direction = light - point;
         let unit_dir = direction.unit();
         let dot = normal.dot(&unit_dir);

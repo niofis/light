@@ -1,5 +1,5 @@
 use crate::light::point::Point;
 
-pub enum Light {
+pub enum LightSource {
     Point(Point, f32),
 }

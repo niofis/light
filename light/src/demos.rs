@@ -1,6 +1,6 @@
 use std::{f32::consts::PI, path::Path};
 
-use crate::{Color, Light, Material, Point, Solid, Transform, World};
+use crate::{Color, LightSource, Material, Point, Solid, Transform, World};
 
 pub fn cornell() -> World {
     let simple_sphere = Solid::Sphere(
@@ -44,8 +44,8 @@ pub fn cornell() -> World {
     let geo = Solid::GeodesicSphere(3.0, 20, geo_trs);
 
     let lights = vec![
-        Light::Point(Point(0.0, 15.0, 0.0), 100.0),
-        Light::Point(Point(0.0, 10.0, -50.0), 100.0),
+        LightSource::Point(Point(0.0, 15.0, 0.0), 100.0),
+        LightSource::Point(Point(0.0, 10.0, -50.0), 100.0),
     ];
 
     let top_light_trs = Transform::combine(&[
@@ -138,7 +138,7 @@ pub fn simple() -> World {
     let donut = Solid::Torus(1.5, 4.0, 30, 50, Transform::combine(&donut_trs));
     let sphere_trs = vec![Transform::translate(-16.0, -2.0, 10.0)];
     let geo_sphere = Solid::GeodesicSphere(2.0, 20, Transform::combine(&sphere_trs));
-    let lights = vec![Light::Point(Point(-10.0, 10.0, -10.0), 100.0)];
+    let lights = vec![LightSource::Point(Point(-10.0, 10.0, -10.0), 100.0)];
 
     World::build()
         .lights(lights)
@@ -153,7 +153,7 @@ pub fn simple() -> World {
 }
 
 pub fn shader_bench() -> World {
-    let lights = vec![Light::Point(Point(0.0, 0.0, -10.0), 100.0)];
+    let lights = vec![LightSource::Point(Point(0.0, 0.0, -10.0), 100.0)];
 
     World::build()
         .lights(lights)
@@ -214,7 +214,7 @@ pub fn obj(file: &str) -> World {
             ));
         }
     }
-    let lights = vec![Light::Point(Point(0.0, 20.0, -50.0), 100.0)];
+    let lights = vec![LightSource::Point(Point(0.0, 20.0, -50.0), 100.0)];
 
     World::build().lights(lights).objects(solids).finish()
 }
