@@ -14,7 +14,7 @@ fn print_ppm(data: &[u8], width: usize, height: usize) {
             gamma_correct(data[pixel + 1]),
             gamma_correct(data[pixel + 2])
         );
-        print!("\n");
+        println!();
     }
 }
 

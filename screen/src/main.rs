@@ -1,11 +1,10 @@
-use light::{Accelerator, Camera, Color, Point, Renderer, World};
+use light::{Accelerator, Camera, Color, Point, Renderer};
 use sdl2::event::Event;
 use sdl2::gfx::primitives::DrawRenderer;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::Rect;
 use std::error::Error;
-use std::f32::consts::PI;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let width: u32 = 640;
