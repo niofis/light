@@ -50,7 +50,7 @@ pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, pixel: Pixel) -> Colo
     let mut final_color = color::BLACK;
     let samples: f32 = 5.0;
     let Pixel { x, y } = pixel;
-    for _ in 0..(samples as i32) {
+    for _ in 0..(samples as u32) {
         let (nx, ny) = rng.gen::<(f32, f32)>();
         let ray = renderer.camera.get_ray(x + nx, y + ny);
         let sample_color = trace_ray_internal(renderer, rng, &ray, 1);

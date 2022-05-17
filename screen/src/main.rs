@@ -34,8 +34,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     //let mut world = World::shader_bench(width, height);
     let mut renderer = Renderer::build();
     renderer
-        .width(width as usize)
-        .height(height as usize)
+        .width(width)
+        .height(height)
         .camera(Camera::new(
             Point(0.0, 15.0 / 2.0, -75.0),
             Point(-20.0 / 2.0, 15.0, -50.0),
@@ -49,7 +49,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .finish();
 
     let mut buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
-    let section = light::Section::new(0, 0, width as usize, height as usize);
+    let section = light::Section::new(0, 0, width, height);
 
     'event_loop: loop {
         for event in event_pump.poll_iter() {
@@ -67,17 +67,17 @@ fn main() -> Result<(), Box<dyn Error>> {
 
         let pixels = renderer.render(&section);
         for (idx, pixel) in pixels.into_iter().enumerate() {
-            let x = section.x + (idx % section.width);
-            let y = section.y + (idx / section.width);
-            let offset = (y * (width as usize) + x) * 4;
+            let x = section.x + (idx as u32 % section.width);
+            let y = section.y + (idx as u32 / section.width);
+            let offset = (y * (width) + x) * 4;
             let Color(red, green, blue) = pixel;
-            buffer[offset + 2] = if red > 1.0 { 255 } else { (red * 255.99) as u8 };
-            buffer[offset + 1] = if green > 1.0 {
+            buffer[(offset + 2) as usize] = if red > 1.0 { 255 } else { (red * 255.99) as u8 };
+            buffer[(offset + 1) as usize] = if green > 1.0 {
                 255
             } else {
                 (green * 255.99) as u8
             };
-            buffer[offset] = if blue > 1.0 {
+            buffer[offset as usize] = if blue > 1.0 {
                 255
             } else {
                 (blue * 255.99) as u8

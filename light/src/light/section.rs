@@ -3,14 +3,14 @@ use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterato
 
 #[derive(Copy, Clone)]
 pub struct Section {
-    pub x: usize,
-    pub y: usize,
-    pub width: usize,
-    pub height: usize,
+    pub x: u32,
+    pub y: u32,
+    pub width: u32,
+    pub height: u32,
 }
 
 impl Section {
-    pub fn new(x: usize, y: usize, width: usize, height: usize) -> Section {
+    pub fn new(x: u32, y: u32, width: u32, height: u32) -> Section {
         Section {
             x,
             y,
@@ -21,18 +21,18 @@ impl Section {
 }
 
 pub struct SectionIterator {
-    left: usize,
-    top: usize,
-    width: usize,
-    height: usize,
-    x: usize,
-    y: usize,
-    right: usize,
-    bottom: usize,
+    left: u32,
+    top: u32,
+    width: u32,
+    height: u32,
+    x: u32,
+    y: u32,
+    right: u32,
+    bottom: u32,
 }
 
 impl SectionIterator {
-    pub fn new(left: usize, top: usize, width: usize, height: usize) -> Self {
+    pub fn new(left: u32, top: u32, width: u32, height: u32) -> Self {
         Self {
             left,
             top,
@@ -101,7 +101,7 @@ impl ParallelIterator for SectionIterator {
 
 impl IndexedParallelIterator for SectionIterator {
     fn len(&self) -> usize {
-        self.width * self.height
+        (self.width * self.height) as usize
     }
 
     fn drive<C>(self, consumer: C) -> C::Result

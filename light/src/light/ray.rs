@@ -4,7 +4,7 @@ use crate::light::vector::Vector;
 pub struct Ray {
     pub origin: Point,
     pub direction: Vector,
-    pub direction_reciprocal: Vector,
+    pub direction_reciprocal: [f32; 3],
     pub max_distance: f32,
 }
 
@@ -13,7 +13,7 @@ impl Ray {
         Ray {
             origin,
             direction,
-            direction_reciprocal: Vector(1.0 / direction.0, 1.0 / direction.1, 1.0 / direction.2),
+            direction_reciprocal: [1.0 / direction.0, 1.0 / direction.1, 1.0 / direction.2],
             max_distance,
         }
     }

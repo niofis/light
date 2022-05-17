@@ -5,14 +5,14 @@ fn gamma_correct(x: u8) -> u8 {
     (255.0 * (x as f32 / 255.0).powf(1.0 / 2.2)).min(255.0) as u8
 }
 
-fn print_ppm(data: &[u8], width: usize, height: usize) {
+fn print_ppm(data: &[u8], width: u32, height: u32) {
     println!("P3\n{} {}\n255", width, height);
     for pixel in (0..(width * height * 4)).step_by(4) {
         print!(
             "{} {} {} ",
-            gamma_correct(data[pixel]),
-            gamma_correct(data[pixel + 1]),
-            gamma_correct(data[pixel + 2])
+            gamma_correct(data[pixel as usize]),
+            gamma_correct(data[(pixel + 1) as usize]),
+            gamma_correct(data[(pixel + 2) as usize])
         );
         println!();
     }
@@ -81,8 +81,8 @@ fn main() {
         )
         .setting(AppSettings::ArgRequiredElseHelp)
         .get_matches();
-    let width = 1280;
-    let height = 960;
+    let width: u32 = 1280;
+    let height: u32 = 960;
 
     let mut renderer = Renderer::build();
     renderer.width(width).height(height).camera(Camera::new(
@@ -117,35 +117,31 @@ fn main() {
         renderer.use_stats();
     }
 
-    if let Some(scene) = matches.value_of("demo") {
-        match scene {
-            "simple" => {
-                renderer.world(light::demos::simple());
-            }
-            "cornell" => {
-                renderer.world(light::demos::cornell());
-            }
-            "shader_bench" => {
-                renderer.world(light::demos::shader_bench());
-            }
-            _ => return println!("scene not found!"),
+    match matches.value_of("demo") {
+        Some("simple") => {
+            renderer.world(light::demos::simple());
         }
+        Some("cornell") => {
+            renderer.world(light::demos::cornell());
+        }
+        Some("shader_bench") => {
+            renderer.world(light::demos::shader_bench());
+        }
+        _ => return println!("scene not found!"),
     }
 
     if let Some(val) = matches.value_of("obj") {
         renderer.world(light::demos::obj(val));
     }
 
-    if let Some(val) = matches.value_of("accelerator") {
-        match val {
-            "brute_force" => {
-                renderer.accelerator(Accelerator::BruteForce);
-            }
-            "bvh" => {
-                renderer.accelerator(Accelerator::BoundingVolumeHierarchy);
-            }
-            _ => {}
+    match matches.value_of("accelerator") {
+        Some("brute_force") => {
+            renderer.accelerator(Accelerator::BruteForce);
         }
+        Some("bvh") => {
+            renderer.accelerator(Accelerator::BoundingVolumeHierarchy);
+        }
+        _ => {}
     }
 
     if let Some(val) = matches.value_of("threads") {
@@ -163,17 +159,17 @@ fn main() {
     let start = time::precise_time_s();
     let pixels = renderer.render(&section);
     for (idx, pixel) in pixels.into_iter().enumerate() {
-        let x = section.x + (idx % section.width);
-        let y = section.y + (idx / section.width);
+        let x = section.x + (idx as u32 % section.width);
+        let y = section.y + (idx as u32 / section.width);
         let offset = (y * width + x) * 4;
         let Color(red, green, blue) = pixel;
-        buffer[offset] = if red > 1.0 { 255 } else { (red * 255.99) as u8 };
-        buffer[offset + 1] = if green > 1.0 {
+        buffer[offset as usize] = if red > 1.0 { 255 } else { (red * 255.99) as u8 };
+        buffer[(offset + 1) as usize] = if green > 1.0 {
             255
         } else {
             (green * 255.99) as u8
         };
-        buffer[offset + 2] = if blue > 1.0 {
+        buffer[(offset + 2) as usize] = if blue > 1.0 {
             255
         } else {
             (blue * 255.99) as u8

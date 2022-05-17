@@ -33,8 +33,8 @@ pub struct Stats {
 }
 
 pub struct Renderer {
-    pub width: usize,
-    pub height: usize,
+    pub width: u32,
+    pub height: u32,
     pub accelerator: AcceleratorInstance,
     pub world: World,
     pub primitives: Vec<Primitive>,
@@ -62,11 +62,11 @@ impl Renderer {
         self.algorithm = algorithm;
         self
     }
-    pub fn width(&mut self, width: usize) -> &mut Renderer {
+    pub fn width(&mut self, width: u32) -> &mut Renderer {
         self.width = width;
         self
     }
-    pub fn height(&mut self, height: usize) -> &mut Renderer {
+    pub fn height(&mut self, height: u32) -> &mut Renderer {
         self.height = height;
         self
     }
@@ -139,43 +139,56 @@ impl Renderer {
             Algorithm::PathTracing => path_tracing::trace_ray,
         };
 
-        let mut pixels = vec![Color::default(); height * width];
+        let mut pixels = vec![Color::default(); (height * width) as usize];
         it.into_par_iter()
             .map_init(rand::thread_rng, |rng, pixel| trace(self, rng, pixel))
             .collect_into_vec(&mut pixels);
         pixels
     }
     fn render_tiles(&mut self, section: &Section) -> Vec<Color> {
-        let height = section.height;
-        let width = section.width;
-        let tile_size = 16;
-        let sections_h = width / tile_size;
-        let it = TileIterator::new(section.x, section.y, section.width, section.height);
+        let Section {
+            x: left,
+            y: top,
+            height,
+            width,
+        } = section;
 
         let trace = match self.algorithm {
             Algorithm::Whitted => whitted::trace_ray,
             Algorithm::PathTracing => path_tracing::trace_ray,
         };
 
-        let tiles = it
+        let tile_size = 16;
+        let sections_v = height / tile_size;
+        let sections_h = width / tile_size;
+
+        let tiles: Vec<(u32, u32)> = (0..sections_v * sections_h)
+            .map(|idx| {
+                let x = left + (idx % sections_h) * tile_size;
+                let y = top + (idx / sections_h) * tile_size;
+                (x, y)
+            })
+            .collect();
+
+        let tiles = tiles
             .into_par_iter()
-            .map_init(rand::thread_rng, |rnd, Tile { x, y, size }| {
+            .map_init(rand::thread_rng, |rnd, (x, y)| {
                 let mut pixels = vec![];
-                for pixel in SectionIterator::new(x, y, size, size) {
+                for pixel in SectionIterator::new(x, y, tile_size, tile_size) {
                     pixels.push(trace(self, rnd, pixel));
                 }
                 pixels
             })
             .collect::<Vec<Vec<Color>>>();
 
-        let mut pixels: Vec<Color> = vec![Color::default(); width * height];
+        let mut pixels: Vec<Color> = vec![Color::default(); (width * height) as usize];
         for (section, colors) in tiles.into_iter().enumerate() {
-            let start_x = (section % sections_h) * tile_size;
-            let start_y = (section / sections_h) * tile_size;
+            let start_x = (section as u32 % sections_h) * tile_size;
+            let start_y = (section as u32 / sections_h) * tile_size;
             for (idx, color) in colors.into_iter().enumerate() {
-                let x = idx % tile_size;
-                let y = idx / tile_size;
-                pixels[(start_y + y) * width + start_x + x] = color;
+                let x = idx as u32 % tile_size;
+                let y = idx as u32 / tile_size;
+                pixels[((start_y + y) * width + start_x + x) as usize] = color;
             }
         }
         pixels

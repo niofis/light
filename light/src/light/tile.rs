@@ -1,20 +1,20 @@
 use rayon::iter::{plumbing::UnindexedConsumer, IntoParallelIterator, ParallelIterator};
 
 pub struct Tile {
-    pub x: usize,
-    pub y: usize,
-    pub size: usize,
+    pub x: u32,
+    pub y: u32,
+    pub size: u32,
 }
 
 pub struct TileIterator {
-    pub left: usize,
-    pub top: usize,
-    pub width: usize,
-    pub height: usize,
+    pub left: u32,
+    pub top: u32,
+    pub width: u32,
+    pub height: u32,
 }
 
 impl TileIterator {
-    pub fn new(left: usize, top: usize, width: usize, height: usize) -> Self {
+    pub fn new(left: u32, top: u32, width: u32, height: u32) -> Self {
         TileIterator {
             left,
             top,
