@@ -4,12 +4,11 @@ use super::{
     color::Color,
     path_tracing,
     primitive::Primitive,
-    section::{Section, SectionIterator},
-    tile::{Tile, TileIterator},
+    section::Section,
     whitted,
     world::World,
 };
-use rayon::iter::{IndexedParallelIterator, IntoParallelIterator, ParallelIterator};
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 pub enum RenderMethod {
     Pixels,
@@ -42,6 +41,7 @@ pub struct Renderer {
     pub render_method: RenderMethod,
     pub algorithm: Algorithm,
     pub stats: Option<Stats>,
+    pub threads: Option<u32>,
 }
 
 impl Renderer {
@@ -56,6 +56,7 @@ impl Renderer {
             render_method: RenderMethod::Pixels,
             algorithm: Algorithm::Whitted,
             stats: None,
+            threads: None,
         }
     }
     pub fn algorithm(&mut self, algorithm: Algorithm) -> &mut Renderer {
@@ -104,12 +105,13 @@ impl Renderer {
         };
         self
     }
-    pub fn threads(&mut self, count: usize) -> &mut Renderer {
+    pub fn threads(&mut self, count: u32) -> &mut Renderer {
         if count > 0 {
             rayon::ThreadPoolBuilder::new()
-                .num_threads(count)
+                .num_threads(count as usize)
                 .build_global()
                 .unwrap();
+            self.threads = Some(count);
         }
         self
     }
@@ -121,6 +123,9 @@ impl Renderer {
         self
     }
     pub fn render(&mut self, section: &Section) -> Vec<Color> {
+        if let Some(1) = self.threads {
+            return self.render_pixels_single_thread(section);
+        }
         match self.render_method {
             RenderMethod::Pixels => self.render_pixels(section),
             RenderMethod::Tiles => self.render_tiles(section),
@@ -132,18 +137,16 @@ impl Renderer {
         let width = section.width;
         let left = section.x;
         let top = section.y;
-        let it = SectionIterator::new(left, top, width, height);
-
         let trace = match self.algorithm {
             Algorithm::Whitted => whitted::trace_ray,
             Algorithm::PathTracing => path_tracing::trace_ray,
         };
 
-        let mut pixels = vec![Color::default(); (height * width) as usize];
-        it.into_par_iter()
+        (0..width * height)
+            .into_par_iter()
+            .map(|idx| (left + (idx % width), top + (idx / width)))
             .map_init(rand::thread_rng, |rng, pixel| trace(self, rng, pixel))
-            .collect_into_vec(&mut pixels);
-        pixels
+            .collect()
     }
     fn render_tiles(&mut self, section: &Section) -> Vec<Color> {
         let Section {
@@ -173,11 +176,10 @@ impl Renderer {
         let tiles = tiles
             .into_par_iter()
             .map_init(rand::thread_rng, |rnd, (x, y)| {
-                let mut pixels = vec![];
-                for pixel in SectionIterator::new(x, y, tile_size, tile_size) {
-                    pixels.push(trace(self, rnd, pixel));
-                }
-                pixels
+                (0..tile_size * tile_size)
+                    .map(|idx| (x + (idx % tile_size), y + (idx / tile_size)))
+                    .map(|pixel| trace(self, rnd, pixel))
+                    .collect()
             })
             .collect::<Vec<Vec<Color>>>();
 
@@ -191,6 +193,7 @@ impl Renderer {
                 pixels[((start_y + y) * width + start_x + x) as usize] = color;
             }
         }
+
         pixels
     }
     fn render_scanlines(&mut self, section: &Section) -> Vec<Color> {
@@ -208,12 +211,29 @@ impl Renderer {
             .map_init(rand::thread_rng, |rng, row| {
                 let y = top + row;
 
-                Iterator::map(SectionIterator::new(0, y, width, height), |pixel| {
-                    trace(self, rng, pixel)
-                })
-                .collect::<Vec<Color>>()
+                (0..width)
+                    .map(|idx| (idx, y))
+                    .map(|pixel| trace(self, rng, pixel))
+                    .collect::<Vec<Color>>()
             })
             .flatten()
             .collect::<Vec<Color>>()
+    }
+
+    fn render_pixels_single_thread(&mut self, section: &Section) -> Vec<Color> {
+        let height = section.height;
+        let width = section.width;
+        let left = section.x;
+        let top = section.y;
+        let trace = match self.algorithm {
+            Algorithm::Whitted => whitted::trace_ray,
+            Algorithm::PathTracing => path_tracing::trace_ray,
+        };
+        let mut rng = rand::thread_rng();
+
+        (0..width * height)
+            .map(|idx| (left + (idx % width), top + (idx / width)))
+            .map(|pixel| trace(self, &mut rng, pixel))
+            .collect()
     }
 }

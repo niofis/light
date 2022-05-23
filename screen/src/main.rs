@@ -1,10 +1,37 @@
 use light::{Accelerator, Camera, Color, Point, Renderer};
 use sdl2::event::Event;
-use sdl2::gfx::primitives::DrawRenderer;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::Rect;
 use std::error::Error;
+use time::Instant;
+
+struct FrameTimmings {
+    pub count: u32,
+    pub min: f32,
+    pub max: f32,
+    pub avg: f32,
+    pub acc: f32,
+}
+
+impl FrameTimmings {
+    pub fn new() -> FrameTimmings {
+        FrameTimmings {
+            count: 0,
+            min: f32::MAX,
+            max: f32::MIN,
+            avg: 0.0,
+            acc: 0.0,
+        }
+    }
+    pub fn add(&mut self, elapsed: f32) {
+        self.count += 1;
+        self.acc += elapsed;
+        self.min = self.min.min(elapsed);
+        self.max = self.max.max(elapsed);
+        self.avg = self.acc / self.count as f32;
+    }
+}
 
 fn main() -> Result<(), Box<dyn Error>> {
     let width: u32 = 640;
@@ -26,12 +53,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let rect = Rect::new(0, 0, width, height);
     let step = (bpp * width) as usize;
 
-    let mut prev_time = time::precise_time_s();
-    let mut curr_time: f64;
     let mut fps: String;
 
-    // let mut world = World::bunny(width, height);
-    //let mut world = World::shader_bench(width, height);
     let mut renderer = Renderer::build();
     renderer
         .width(width)
@@ -48,10 +71,16 @@ fn main() -> Result<(), Box<dyn Error>> {
         .accelerator(Accelerator::BoundingVolumeHierarchy)
         .finish();
 
+    let mut frames: Vec<Color> = vec![Color(0., 0., 0.); (4 * width * height) as usize];
     let mut buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
     let section = light::Section::new(0, 0, width, height);
+    let mut frames_count: f32 = 0.0;
+
+    let mut frame_timmings = FrameTimmings::new();
 
     'event_loop: loop {
+        let timer = Instant::now();
+
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit { .. }
@@ -66,33 +95,39 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
 
         let pixels = renderer.render(&section);
+        frames_count += 1.0;
         for (idx, pixel) in pixels.into_iter().enumerate() {
+            let point = frames[idx] + pixel;
             let x = section.x + (idx as u32 % section.width);
             let y = section.y + (idx as u32 / section.width);
             let offset = (y * (width) + x) * 4;
-            let Color(red, green, blue) = pixel;
-            buffer[(offset + 2) as usize] = if red > 1.0 { 255 } else { (red * 255.99) as u8 };
-            buffer[(offset + 1) as usize] = if green > 1.0 {
-                255
-            } else {
-                (green * 255.99) as u8
-            };
-            buffer[offset as usize] = if blue > 1.0 {
-                255
-            } else {
-                (blue * 255.99) as u8
-            };
+            let (red, green, blue) = (point / frames_count).as_gamma_corrected_rgb_u8();
+            buffer[offset as usize] = blue;
+            buffer[(offset + 1) as usize] = green;
+            buffer[(offset + 2) as usize] = red;
+            frames[idx] = point;
         }
 
         texture.update(rect, &buffer, step)?;
 
         canvas.copy(&texture, None, Some(rect))?;
 
-        curr_time = time::precise_time_s();
-        fps = format!("{:.*}", 2, 1.0 / (curr_time - prev_time));
-        prev_time = curr_time;
-        canvas.string(0, 0, &fps, sdl2::pixels::Color::RGB(127, 127, 127))?;
+        let elapsed = timer.elapsed().as_seconds_f32();
+        frame_timmings.add(elapsed);
+        fps = format!(
+            "fps: {:.*} | min: {:.*}s | max: {:.*}s | avg: {:.*}s",
+            2,
+            1.0 / elapsed,
+            4,
+            frame_timmings.min,
+            4,
+            frame_timmings.max,
+            4,
+            frame_timmings.avg
+        );
+        // canvas.string(0, 0, &fps, sdl2::pixels::Color::RGB(127, 127, 127))?;
         canvas.present();
+        canvas.window_mut().set_title(&fps).unwrap();
     }
     Ok(())
 }

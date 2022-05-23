@@ -1,6 +1,6 @@
 use rand::prelude::ThreadRng;
 
-use super::{color, pixel::Pixel, primitive::Primitive, ray::Ray};
+use super::{color, primitive::Primitive, ray::Ray};
 use crate::{Color, Material, Point, Renderer, Vector};
 
 fn inner_trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8) -> Color {
@@ -41,9 +41,9 @@ fn inner_trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u
     }
 }
 
-pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, pixel: Pixel) -> Color {
-    let Pixel { x, y } = pixel;
-    let ray = renderer.camera.get_ray(x, y);
+pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, pixel: (u32, u32)) -> Color {
+    let (x, y) = pixel;
+    let ray = renderer.camera.get_ray(x as f32, y as f32);
 
     inner_trace_ray(renderer, rng, &ray, 1)
 }

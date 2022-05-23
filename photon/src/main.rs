@@ -102,7 +102,7 @@ fn main() {
     }
 
     match matches.value_of("render method") {
-        Some("pixel") => {
+        Some("pixels") => {
             renderer.render_method(light::RenderMethod::Pixels);
         }
         Some("scanlines") => {

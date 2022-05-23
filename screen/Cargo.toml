@@ -9,7 +9,7 @@ split-debuginfo = "unpacked"
 
 [dependencies]
 clap = "2"
-time = "0.1.42"
+time = "0.3"
 light = { path = "../light" }
 
 [dependencies.sdl2]
