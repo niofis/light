@@ -126,6 +126,9 @@ impl Renderer {
         if let Some(1) = self.threads {
             return self.render_pixels_single_thread(section);
         }
+        if self.stats.is_some() {
+            return self.render_pixels_single_thread(section);
+        }
         match self.render_method {
             RenderMethod::Pixels => self.render_pixels(section),
             RenderMethod::Tiles => self.render_tiles(section),

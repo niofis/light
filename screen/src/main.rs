@@ -1,4 +1,4 @@
-use light::{Accelerator, Camera, Color, Point, Renderer};
+use light::{Accelerator, Camera, Color, Point, Renderer, Transform, Vector};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::PixelFormatEnum;
@@ -60,10 +60,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         .width(width)
         .height(height)
         .camera(Camera::new(
-            Point(0.0, 15.0 / 2.0, -75.0),
-            Point(-20.0 / 2.0, 15.0, -50.0),
-            Point(-20.0 / 2.0, 0.0, -50.0),
-            Point(20.0 / 2.0, 15.0, -50.0),
+            Point(0.0, 0.75, -36.0),
+            Point(-1.0, 1.5, -35.0),
+            Point(-1.0, 0.0, -35.0),
+            Point(1.0, 1.5, -35.0),
         ))
         .algorithm(light::Algorithm::PathTracing)
         .render_method(light::RenderMethod::Tiles)
@@ -89,6 +89,28 @@ fn main() -> Result<(), Box<dyn Error>> {
                     ..
                 } => {
                     break 'event_loop;
+                }
+                Event::KeyDown {
+                    keycode: Some(keycode),
+                    ..
+                } => {
+                    let Vector(x, y, z) = renderer.camera.normal;
+                    if keycode == Keycode::Left {
+                        renderer.camera.apply_transform(&Transform::rotate(
+                            0.0,
+                            std::f32::consts::PI / 100.0,
+                            0.0,
+                        ));
+                    } else if keycode == Keycode::W {
+                        renderer
+                            .camera
+                            .apply_transform(&Transform::translate(x, y, z + 5.0));
+                    }
+
+                    frames = vec![Color(0., 0., 0.); (4 * width * height) as usize];
+                    buffer = vec![0; (4 * width * height) as usize];
+                    frames_count = 0.0;
+                    frame_timmings = FrameTimmings::new();
                 }
                 _ => {}
             }
