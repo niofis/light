@@ -1,7 +1,8 @@
 use crate::light::generic_vector::GVector4;
 use crate::light::normal::Normal;
+use crate::Point;
 use std::ops;
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Default)]
 pub struct Vector(pub f32, pub f32, pub f32); //x,y,z
 
 impl From<GVector4> for Vector {
@@ -19,6 +20,12 @@ impl From<Vector> for GVector4 {
 impl From<&Vector> for GVector4 {
     fn from(vc: &Vector) -> Self {
         GVector4(vc.0, vc.1, vc.2, 0.0)
+    }
+}
+
+impl From<&Point> for Vector {
+    fn from(pt: &Point) -> Self {
+        Vector(pt.0, pt.1, pt.2)
     }
 }
 

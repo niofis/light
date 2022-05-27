@@ -23,6 +23,12 @@ impl From<&Point> for GVector4 {
     }
 }
 
+impl From<Vector> for Point {
+    fn from(pt: Vector) -> Self {
+        Point(pt.0, pt.1, pt.2)
+    }
+}
+
 impl ops::Add<&Vector> for &Point {
     type Output = Point;
 

@@ -94,17 +94,26 @@ fn main() -> Result<(), Box<dyn Error>> {
                     keycode: Some(keycode),
                     ..
                 } => {
-                    let Vector(x, y, z) = renderer.camera.normal;
                     if keycode == Keycode::Left {
-                        renderer.camera.apply_transform(&Transform::rotate(
-                            0.0,
-                            std::f32::consts::PI / 100.0,
-                            0.0,
-                        ));
-                    } else if keycode == Keycode::W {
                         renderer
                             .camera
-                            .apply_transform(&Transform::translate(x, y, z + 5.0));
+                            .rotate(0.0, -std::f32::consts::PI / 100.0, 0.0);
+                    } else if keycode == Keycode::Right {
+                        renderer
+                            .camera
+                            .rotate(0.0, std::f32::consts::PI / 100.0, 0.0);
+                    } else if keycode == Keycode::Up {
+                        renderer
+                            .camera
+                            .rotate(-std::f32::consts::PI / 100.0, 0.0, 0.0);
+                    } else if keycode == Keycode::Down {
+                        renderer
+                            .camera
+                            .rotate(std::f32::consts::PI / 100.0, 0.0, 0.0);
+                    } else if keycode == Keycode::W {
+                        // renderer
+                        //     .camera
+                        //     .apply_transform(&Transform::translate(x, y, z + 5.0));
                     }
 
                     frames = vec![Color(0., 0., 0.); (4 * width * height) as usize];

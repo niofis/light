@@ -3,6 +3,23 @@ use crate::light::ray::Ray;
 use crate::light::vector::Vector;
 use crate::Transform;
 
+#[derive(Default)]
+pub struct CoordinateSystem {
+    pub u: Vector,
+    pub v: Vector,
+    pub w: Vector,
+}
+
+impl CoordinateSystem {
+    pub fn new(u: &Vector, v: &Vector) -> CoordinateSystem {
+        let mut cs = CoordinateSystem::default();
+        cs.u = u.unit();
+        cs.v = v.unit();
+        cs.w = cs.u.cross(&cs.v);
+        cs
+    }
+}
+
 pub struct Camera {
     pub eye: Point,
     pub left_top: Point,
@@ -12,7 +29,7 @@ pub struct Camera {
     delta_down: Vector,
     width: f32,
     height: f32,
-    pub normal: Vector,
+    coordinate_system: CoordinateSystem,
 }
 
 impl Camera {
@@ -26,7 +43,7 @@ impl Camera {
             delta_down: Vector::default(),
             width: 0.0,
             height: 0.0,
-            normal: Vector::default(),
+            coordinate_system: CoordinateSystem::default(),
         }
     }
 
@@ -40,7 +57,7 @@ impl Camera {
             delta_down: Vector::default(),
             width: 0.0,
             height: 0.0,
-            normal: Vector::default(),
+            coordinate_system: CoordinateSystem::default(),
         }
     }
 
@@ -53,7 +70,7 @@ impl Camera {
         self.height = height;
         let edge1 = &self.right_top - &self.left_top;
         let edge2 = &self.left_bottom - &self.left_top;
-        self.normal = edge1.cross(&edge2).unit();
+        self.coordinate_system = CoordinateSystem::new(&edge1, &edge2);
     }
 
     pub fn get_ray(&self, x: f32, y: f32) -> Ray {
@@ -70,6 +87,16 @@ impl Camera {
 
         Ray::new(origin, direction.unit(), f32::INFINITY)
     }
+
+    pub fn rotate(&mut self, x: f32, y: f32, z: f32) {
+        let transform = Transform::rotate(x, y, z);
+        self.left_top = &transform.apply(&(&self.left_top - &self.eye).into()) + &self.eye;
+        self.left_bottom = &transform.apply(&(&self.left_bottom - &self.eye).into()) + &self.eye;
+        self.right_top = &transform.apply(&(&self.right_top - &self.eye).into()) + &self.eye;
+        self.init(self.width, self.height);
+    }
+
+    pub fn translate(&mut self, x: f32, y: f32, z: f32) {}
 
     pub fn apply_transform(&mut self, transform: &Transform) {
         self.eye = transform.apply(&self.eye);
