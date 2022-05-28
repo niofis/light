@@ -96,7 +96,23 @@ impl Camera {
         self.init(self.width, self.height);
     }
 
-    pub fn translate(&mut self, x: f32, y: f32, z: f32) {}
+    pub fn translate(&mut self, x: f32, y: f32, z: f32) {
+        let CoordinateSystem { u, v, w } = self.coordinate_system;
+        let dw = w * -z;
+        let du = u * -x;
+        let dv = v * y;
+        let transform = Transform::combine(&[
+            Transform::translate(dw.0, dw.1, dw.2),
+            Transform::translate(du.0, du.1, du.2),
+            Transform::translate(dv.0, dv.1, dv.2),
+        ]);
+
+        self.eye = transform.apply(&self.eye);
+        self.left_top = transform.apply(&self.left_top);
+        self.left_bottom = transform.apply(&self.left_bottom);
+        self.right_top = transform.apply(&self.right_top);
+        self.init(self.width, self.height);
+    }
 
     pub fn apply_transform(&mut self, transform: &Transform) {
         self.eye = transform.apply(&self.eye);

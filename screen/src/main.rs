@@ -111,9 +111,17 @@ fn main() -> Result<(), Box<dyn Error>> {
                             .camera
                             .rotate(std::f32::consts::PI / 100.0, 0.0, 0.0);
                     } else if keycode == Keycode::W {
-                        // renderer
-                        //     .camera
-                        //     .apply_transform(&Transform::translate(x, y, z + 5.0));
+                        renderer.camera.translate(0.0, 0.0, 5.0);
+                    } else if keycode == Keycode::S {
+                        renderer.camera.translate(0.0, 0.0, -5.0);
+                    } else if keycode == Keycode::A {
+                        renderer.camera.translate(5.0, 0.0, 0.0);
+                    } else if keycode == Keycode::D {
+                        renderer.camera.translate(-5.0, 0.0, 0.0);
+                    } else if keycode == Keycode::Q {
+                        renderer.camera.translate(0.0, 5.0, 0.0);
+                    } else if keycode == Keycode::E {
+                        renderer.camera.translate(0.0, -5.0, 0.0);
                     }
 
                     frames = vec![Color(0., 0., 0.); (4 * width * height) as usize];
