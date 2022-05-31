@@ -79,14 +79,28 @@ fn find_closest_primitive<'a>(
         })
 }
 
+fn rotate_vector(vector: &Vector, axis: &Vector, angle: f32) -> Vector {
+    // vr = v * cos(angle) + (cross(axis, v))*sin(angle) + axis * dot(axis,v) * (1 - cos(angle))
+    let (sin, cos) = angle.sin_cos();
+    (vector * cos) + (axis.cross(vector) * sin) + (axis * axis.dot(vector) * (1.0 - cos))
+}
+
 fn random_dome(rng: &mut ThreadRng, normal: &Vector) -> Vector {
-    loop {
-        let triple = rng.gen::<(f32, f32, f32)>();
-        let new_vec = Vector(triple.0 * 2. - 1., triple.1 * 2. - 1., triple.2 * 2. - 1.).unit();
-        if new_vec.dot(normal) >= 0. {
-            return new_vec;
-        }
-    }
+    let (v, _) = normal.coordinate_system();
+    let (r1, r2) = rng.gen::<(f32, f32)>();
+    let first_rotation = 0.75 * r1 * std::f32::consts::PI / 2.0;
+    let second_rotation = r2 * std::f32::consts::PI * 2.0;
+    let nr = rotate_vector(normal, &v, first_rotation);
+    rotate_vector(&nr, normal, second_rotation)
+
+    // return normal.clone();
+    // loop {
+    //     let triple = rng.gen::<(f32, f32, f32)>();
+    //     let new_vec = Vector(triple.0 * 2. - 1., triple.1 * 2. - 1., triple.2 * 2. - 1.).unit();
+    //     if new_vec.dot(normal) >= 0. {
+    //         return new_vec;
+    //     }
+    // }
     // rng.sample_iter::<(f32, f32, f32)>(rand::distributions::Standard)
     //     .map(|(x, y, z)| {
     //         (Vector {

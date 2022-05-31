@@ -78,6 +78,18 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut frame_timmings = FrameTimmings::new();
 
+    // let cs1 = Vector::new(0.0, 1.0, 0.0).coordinate_system();
+    // let u = Vector::new(1.0, 2.0, 3.0).unit();
+    // let (v, w) = u.coordinate_system();
+
+    // println!(
+    //     "Coordinate system: {:?} dot:{}\n{:?} dot:{:?}",
+    //     cs1,
+    //     cs1.0.dot(&cs1.1),
+    //     (u, v, w),
+    //     (u.dot(&v), u.dot(&w), v.dot(&w))
+    // );
+
     'event_loop: loop {
         let timer = Instant::now();
 
