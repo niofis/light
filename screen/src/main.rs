@@ -1,4 +1,4 @@
-use light::{Accelerator, Camera, Color, Point, Renderer, Transform, Vector};
+use light::{Accelerator, Camera, Color, Point, Renderer};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::PixelFormatEnum;

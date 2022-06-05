@@ -1,9 +1,14 @@
-use rand::prelude::ThreadRng;
+use rand_xoshiro::Xoshiro256PlusPlus;
 
 use super::{color, primitive::Primitive, ray::Ray};
 use crate::{Color, Material, Point, Renderer, Vector};
 
-fn inner_trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8) -> Color {
+fn inner_trace_ray(
+    renderer: &Renderer,
+    rng: &mut Xoshiro256PlusPlus,
+    ray: &Ray,
+    depth: u8,
+) -> Color {
     if depth > 10 {
         return color::BLACK;
     }
@@ -41,7 +46,7 @@ fn inner_trace_ray(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u
     }
 }
 
-pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, pixel: (u32, u32)) -> Color {
+pub fn trace_ray(renderer: &Renderer, rng: &mut Xoshiro256PlusPlus, pixel: (u32, u32)) -> Color {
     let (x, y) = pixel;
     let ray = renderer.camera.get_ray(x as f32, y as f32);
 

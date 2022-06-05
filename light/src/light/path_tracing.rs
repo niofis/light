@@ -1,11 +1,17 @@
 use crate::{Color, Material, Renderer, Vector};
-use rand::{prelude::ThreadRng, Rng};
+use rand::Rng;
+use rand_xoshiro::Xoshiro256PlusPlus;
 
 use super::{color, primitive::Primitive, ray::Ray};
 
-const MAX_DEPTH: u8 = 10;
+const MAX_DEPTH: u8 = 5;
 
-fn trace_ray_internal(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth: u8) -> Color {
+fn trace_ray_internal(
+    renderer: &Renderer,
+    rng: &mut Xoshiro256PlusPlus,
+    ray: &Ray,
+    depth: u8,
+) -> Color {
     if depth > MAX_DEPTH {
         return color::BLACK;
     }
@@ -46,7 +52,7 @@ fn trace_ray_internal(renderer: &Renderer, rng: &mut ThreadRng, ray: &Ray, depth
     }
 }
 
-pub fn trace_ray(renderer: &Renderer, rng: &mut ThreadRng, pixel: (u32, u32)) -> Color {
+pub fn trace_ray(renderer: &Renderer, rng: &mut Xoshiro256PlusPlus, pixel: (u32, u32)) -> Color {
     let mut final_color = color::BLACK;
     let samples: f32 = 1.0;
     let (x, y) = pixel;
@@ -85,7 +91,7 @@ fn rotate_vector(vector: &Vector, axis: &Vector, angle: f32) -> Vector {
     (vector * cos) + (axis.cross(vector) * sin) + (axis * axis.dot(vector) * (1.0 - cos))
 }
 
-fn random_dome(rng: &mut ThreadRng, normal: &Vector) -> Vector {
+fn random_dome(rng: &mut Xoshiro256PlusPlus, normal: &Vector) -> Vector {
     let (v, _) = normal.coordinate_system();
     let (r1, r2) = rng.gen::<(f32, f32)>();
     let first_rotation = 0.75 * r1 * std::f32::consts::PI / 2.0;
@@ -93,7 +99,6 @@ fn random_dome(rng: &mut ThreadRng, normal: &Vector) -> Vector {
     let nr = rotate_vector(normal, &v, first_rotation);
     rotate_vector(&nr, normal, second_rotation)
 
-    // return normal.clone();
     // loop {
     //     let triple = rng.gen::<(f32, f32, f32)>();
     //     let new_vec = Vector(triple.0 * 2. - 1., triple.1 * 2. - 1., triple.2 * 2. - 1.).unit();
@@ -101,16 +106,4 @@ fn random_dome(rng: &mut ThreadRng, normal: &Vector) -> Vector {
     //         return new_vec;
     //     }
     // }
-    // rng.sample_iter::<(f32, f32, f32)>(rand::distributions::Standard)
-    //     .map(|(x, y, z)| {
-    //         (Vector {
-    //             x: x * 2. - 1.,
-    //             y: y * 2. - 1.,
-    //             z: z * 2. - 1.,
-    //         })
-    //         .unit()
-    //     })
-    //     .filter(|v| v.dot(&normal) >= 0.)
-    //     .next()
-    //     .unwrap()
 }

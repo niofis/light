@@ -8,6 +8,8 @@ use super::{
     whitted,
     world::World,
 };
+use rand_xoshiro::rand_core::SeedableRng;
+use rand_xoshiro::Xoshiro256PlusPlus;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 pub enum RenderMethod {
@@ -148,7 +150,9 @@ impl Renderer {
         (0..width * height)
             .into_par_iter()
             .map(|idx| (left + (idx % width), top + (idx / width)))
-            .map_init(rand::thread_rng, |rng, pixel| trace(self, rng, pixel))
+            .map_init(Xoshiro256PlusPlus::from_entropy, |rng, pixel| {
+                trace(self, rng, pixel)
+            })
             .collect()
     }
     fn render_tiles(&mut self, section: &Section) -> Vec<Color> {
@@ -178,7 +182,7 @@ impl Renderer {
 
         let tiles = tiles
             .into_par_iter()
-            .map_init(rand::thread_rng, |rnd, (x, y)| {
+            .map_init(Xoshiro256PlusPlus::from_entropy, |rnd, (x, y)| {
                 (0..tile_size * tile_size)
                     .map(|idx| (x + (idx % tile_size), y + (idx / tile_size)))
                     .map(|pixel| trace(self, rnd, pixel))
@@ -211,7 +215,7 @@ impl Renderer {
 
         (0..height)
             .into_par_iter()
-            .map_init(rand::thread_rng, |rng, row| {
+            .map_init(Xoshiro256PlusPlus::from_entropy, |rng, row| {
                 let y = top + row;
 
                 (0..width)
@@ -232,7 +236,9 @@ impl Renderer {
             Algorithm::Whitted => whitted::trace_ray,
             Algorithm::PathTracing => path_tracing::trace_ray,
         };
-        let mut rng = rand::thread_rng();
+        // let mut rng = rand::thread_rng();
+
+        let mut rng = Xoshiro256PlusPlus::from_entropy();
 
         (0..width * height)
             .map(|idx| (left + (idx % width), top + (idx / width)))
