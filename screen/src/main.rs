@@ -166,7 +166,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let elapsed = timer.elapsed().as_seconds_f32();
         frame_timmings.add(elapsed);
         fps = format!(
-            "fps: {:.*} | min: {:.*}s | max: {:.*}s | avg: {:.*}s",
+            "fps: {:.*} | min: {:.*}s | max: {:.*}s | avg: {:.*}s | n: {}",
             2,
             1.0 / elapsed,
             4,
@@ -174,9 +174,10 @@ fn main() -> Result<(), Box<dyn Error>> {
             4,
             frame_timmings.max,
             4,
-            frame_timmings.avg
+            frame_timmings.avg,
+            frame_timmings.count
         );
-        // canvas.string(0, 0, &fps, sdl2::pixels::Color::RGB(127, 127, 127))?;
+
         canvas.present();
         canvas.window_mut().set_title(&fps).unwrap();
     }
