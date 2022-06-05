@@ -288,7 +288,7 @@ impl Bvh {
         }
 
         let indexes = 0..len;
-        let centroid = primitives.iter().map(|x| x.centroid());
+        let centroid = primitives.iter().map(|x| x.bounding_box().centroid);
         let items: Vec<(Point, usize)> = centroid.zip(indexes).collect();
         let root = octree_grouping(&items);
         rebuild(primitives, root)

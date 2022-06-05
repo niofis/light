@@ -1,17 +1,19 @@
-use crate::light::ray::*;
-use crate::light::vector::*;
 use std::f32::{MAX, MIN};
-use std::ops;
+use std::ops::{self};
+
+use crate::Point;
+
+use super::ray::Ray;
 
 #[derive(Debug, Clone, Copy)]
 pub struct BoundingBox {
-    pub min: Vector,
-    pub max: Vector,
-    pub centroid: Vector,
+    pub min: Point,
+    pub max: Point,
+    pub centroid: Point,
 }
 
 impl ops::Index<usize> for BoundingBox {
-    type Output = Vector;
+    type Output = Point;
 
     fn index(&self, rhs: usize) -> &Self::Output {
         match rhs {
@@ -22,18 +24,19 @@ impl ops::Index<usize> for BoundingBox {
 }
 
 impl BoundingBox {
-    pub fn new(min: Vector, max: Vector) -> BoundingBox {
-        BoundingBox {
-            min,
-            max,
-            centroid: (min + max) / 2.0,
-        }
+    pub fn new(min: Point, max: Point) -> BoundingBox {
+        let centroid = Point(
+            (min.0 + max.0) / 2.0,
+            (min.1 + max.1) / 2.0,
+            (min.2 + max.2) / 2.0,
+        );
+        BoundingBox { min, max, centroid }
     }
     pub fn default() -> BoundingBox {
         BoundingBox {
-            min: Vector(MAX, MAX, MAX),
-            max: Vector(MIN, MIN, MIN),
-            centroid: Vector::default(),
+            min: Point(MAX, MAX, MAX),
+            max: Point(MIN, MIN, MIN),
+            centroid: Point::default(),
         }
     }
 
@@ -68,17 +71,16 @@ impl BoundingBox {
     }
 
     pub fn combine(&self, rhs: &BoundingBox) -> BoundingBox {
-        let min = Vector(
+        let min = Point(
             self.min.0.min(rhs.min.0),
             self.min.1.min(rhs.min.1),
             self.min.2.min(rhs.min.2),
         );
-        let max = Vector(
+        let max = Point(
             self.max.0.max(rhs.max.0),
             self.max.1.max(rhs.max.1),
             self.max.2.max(rhs.max.2),
         );
-        let centroid = (self.min + self.max) / 2.0;
-        BoundingBox { min, max, centroid }
+        BoundingBox::new(min, max)
     }
 }

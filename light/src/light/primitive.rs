@@ -64,18 +64,18 @@ impl Primitive {
     pub fn bounding_box(&self) -> BoundingBox {
         match self {
             Primitive::Sphere { center, radius, .. } => BoundingBox::new(
-                Vector(center.0 - radius, center.1 - radius, center.2 - radius),
-                Vector(center.0 + radius, center.1 + radius, center.2 + radius),
+                Point(center.0 - radius, center.1 - radius, center.2 - radius),
+                Point(center.0 + radius, center.1 + radius, center.2 + radius),
             ),
             Primitive::Triangle {
                 origin, pt2, pt3, ..
             } => BoundingBox::new(
-                Vector(
+                Point(
                     origin.0.min(pt2.0).min(pt3.0),
                     origin.1.min(pt2.1).min(pt3.1),
                     origin.2.min(pt2.2).min(pt3.2),
                 ),
-                Vector(
+                Point(
                     origin.0.max(pt2.0).max(pt3.0),
                     origin.1.max(pt2.1).max(pt3.1),
                     origin.2.max(pt2.2).max(pt3.2),
