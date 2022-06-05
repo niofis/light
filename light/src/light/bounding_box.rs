@@ -3,10 +3,11 @@ use crate::light::vector::*;
 use std::f32::{MAX, MIN};
 use std::ops;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct BoundingBox {
     pub min: Vector,
     pub max: Vector,
+    pub centroid: Vector,
 }
 
 impl ops::Index<usize> for BoundingBox {
@@ -21,10 +22,18 @@ impl ops::Index<usize> for BoundingBox {
 }
 
 impl BoundingBox {
-    pub fn empty() -> BoundingBox {
+    pub fn new(min: Vector, max: Vector) -> BoundingBox {
+        BoundingBox {
+            min,
+            max,
+            centroid: (min + max) / 2.0,
+        }
+    }
+    pub fn default() -> BoundingBox {
         BoundingBox {
             min: Vector(MAX, MAX, MAX),
             max: Vector(MIN, MIN, MIN),
+            centroid: Vector::default(),
         }
     }
 
@@ -69,6 +78,7 @@ impl BoundingBox {
             self.max.1.max(rhs.max.1),
             self.max.2.max(rhs.max.2),
         );
-        BoundingBox { min, max }
+        let centroid = (self.min + self.max) / 2.0;
+        BoundingBox { min, max, centroid }
     }
 }
