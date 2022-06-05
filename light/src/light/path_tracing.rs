@@ -32,7 +32,7 @@ fn trace_ray_internal(
                             let normal = primitive.normal(&point);
                             let new_dir = random_dome(rng, &normal);
                             let path_ray = Ray::new(point, new_dir.unit(), f32::INFINITY);
-                            color.clone() * trace_ray_internal(renderer, rng, &path_ray, depth + 1)
+                            *color * trace_ray_internal(renderer, rng, &path_ray, depth + 1)
                         }
                         Material::Reflective(_, idx) => {
                             let normal = primitive.normal(&point);
@@ -42,7 +42,7 @@ fn trace_ray_internal(
                             let reflected_ray = Ray::new(point, new_dir.unit(), f32::INFINITY);
                             trace_ray_internal(renderer, rng, &reflected_ray, depth + 1) * *idx
                         }
-                        Material::Emissive(color) => color.clone(),
+                        Material::Emissive(color) => *color,
                     }
                 }
                 None => color::BLACK,
@@ -54,15 +54,15 @@ fn trace_ray_internal(
 
 pub fn trace_ray(renderer: &Renderer, rng: &mut Xoshiro256PlusPlus, pixel: (u32, u32)) -> Color {
     let mut final_color = color::BLACK;
-    let samples: f32 = 1.0;
+    let samples = renderer.samples;
     let (x, y) = pixel;
-    for _ in 0..(samples as u32) {
+    for _ in 0..samples {
         let (nx, ny) = rng.gen::<(f32, f32)>();
         let ray = renderer.camera.get_ray(x as f32 + nx, y as f32 + ny);
         let sample_color = trace_ray_internal(renderer, rng, &ray, 1);
         final_color = final_color + sample_color
     }
-    final_color / samples
+    final_color / (samples as f32)
 }
 
 fn find_closest_primitive<'a>(
@@ -94,7 +94,7 @@ fn rotate_vector(vector: &Vector, axis: &Vector, angle: f32) -> Vector {
 fn random_dome(rng: &mut Xoshiro256PlusPlus, normal: &Vector) -> Vector {
     let (v, _) = normal.coordinate_system();
     let (r1, r2) = rng.gen::<(f32, f32)>();
-    let first_rotation = 0.75 * r1 * std::f32::consts::PI / 2.0;
+    let first_rotation = 0.8 * r1 * std::f32::consts::PI / 2.0;
     let second_rotation = r2 * std::f32::consts::PI * 2.0;
     let nr = rotate_vector(normal, &v, first_rotation);
     rotate_vector(&nr, normal, second_rotation)

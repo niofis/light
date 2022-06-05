@@ -50,22 +50,22 @@ fn main() {
                 .help("renders one of the demo scenes"))
         .arg(
             Arg::with_name("obj")
-            .short("o")
-            .long("obj")
-            .takes_value(true)
-            .multiple(false)
-            .conflicts_with("demo")
-            .help("renders the specified obj file"))
+                .short("o")
+                .long("obj")
+                .takes_value(true)
+                .multiple(false)
+                .conflicts_with("demo")
+                .help("renders the specified obj file"))
         .arg(
             Arg::with_name("stats")
-            .short("s")
-            .long("stats")
-            .takes_value(false)
-            .multiple(false)
-            .conflicts_with("threads")
-            .help("captures stats and prints them when done rendering. cannot be used with threads"))
+                .short("s")
+                .long("stats")
+                .takes_value(false)
+                .multiple(false)
+                .conflicts_with("threads")
+                .help("captures stats and prints them when done rendering. cannot be used with threads"))
         .arg(
-                Arg::with_name("algorithm")
+            Arg::with_name("algorithm")
                 .short("alg")
                 .long("algorithm")
                 .takes_value(true)
@@ -73,11 +73,19 @@ fn main() {
                 .help("choose the rendering algorithm, options: pathtracing, whitted. Not setting this option defaults to pathtracing"))
         .arg(
             Arg::with_name("render method")
-            .short("rm")
-            .long("rendermethod")
-            .takes_value(true)
-            .multiple(false)
-            .help("select the rendering method: pixels, tiles, scanlines. Not setting this option defaults to tiles.")
+                .short("rm")
+                .long("rendermethod")
+                .takes_value(true)
+                .multiple(false)
+                .help("select the rendering method: pixels, tiles, scanlines. Not setting this option defaults to tiles.")
+        )
+        .arg(
+            Arg::with_name("samples count")
+                .short("sc")
+                .long("samples")
+                .takes_value(true)
+                .multiple(false)
+                .help("specify the number of samples per pixel to collect")
         )
         .setting(AppSettings::ArgRequiredElseHelp)
         .get_matches();
@@ -150,6 +158,16 @@ fn main() {
         } else {
             eprintln!("invalid threads value!");
         }
+    }
+
+    if let Some(val) = matches.value_of("samples count") {
+        if let Ok(samples) = val.parse() {
+            renderer.samples(samples);
+        } else {
+            eprintln!("invalid samples value!");
+        }
+    } else {
+        renderer.samples(10);
     }
 
     let section = light::Section::new(0, 0, width, height);

@@ -44,6 +44,7 @@ pub struct Renderer {
     pub algorithm: Algorithm,
     pub stats: Option<Stats>,
     pub threads: Option<u32>,
+    pub samples: u32,
 }
 
 impl Renderer {
@@ -59,6 +60,7 @@ impl Renderer {
             algorithm: Algorithm::Whitted,
             stats: None,
             threads: None,
+            samples: 1,
         }
     }
     pub fn algorithm(&mut self, algorithm: Algorithm) -> &mut Renderer {
@@ -115,6 +117,10 @@ impl Renderer {
                 .unwrap();
             self.threads = Some(count);
         }
+        self
+    }
+    pub fn samples(&mut self, samples: u32) -> &mut Renderer {
+        self.samples = samples;
         self
     }
     pub fn use_stats(&mut self) -> &mut Renderer {

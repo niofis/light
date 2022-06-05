@@ -36,7 +36,7 @@ fn inner_trace_ray(
                             (calculate_shading(renderer, primitive, &point) * (1.0 - idx))
                                 + inner_trace_ray(renderer, rng, &reflected_ray, depth + 1) * *idx
                         }
-                        Material::Emissive(color) => color.clone(),
+                        Material::Emissive(color) => *color,
                     }
                 }
                 None => color::BLACK,
