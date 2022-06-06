@@ -9,5 +9,6 @@ split-debuginfo = "unpacked"
 
 [dependencies]
 clap = "2"
+chrono = "0.4.19"
 time = "0.1.42"
 light = { path = "../light" }

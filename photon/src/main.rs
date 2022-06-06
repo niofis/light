@@ -1,21 +1,23 @@
 use clap::{App, AppSettings, Arg};
 use light::{Accelerator, Camera, Color, Point, Renderer};
+use std::fs;
 
 fn gamma_correct(x: u8) -> u8 {
     (255.0 * (x as f32 / 255.0).powf(1.0 / 2.2)).min(255.0) as u8
 }
 
-fn print_ppm(data: &[u8], width: u32, height: u32) {
-    println!("P3\n{} {}\n255", width, height);
+fn print_ppm(data: &[u8], width: u32, height: u32) -> String {
+    let mut output = String::new();
+    output.push_str(&format!("P3\n{} {}\n255\n", width, height));
     for pixel in (0..(width * height * 4)).step_by(4) {
-        print!(
+        output.push_str(&format!(
             "{} {} {} ",
             gamma_correct(data[pixel as usize]),
             gamma_correct(data[(pixel + 1) as usize]),
             gamma_correct(data[(pixel + 2) as usize])
-        );
-        println!();
+        ));
     }
+    output
 }
 
 fn main() {
@@ -86,6 +88,14 @@ fn main() {
                 .takes_value(true)
                 .multiple(false)
                 .help("specify the number of samples per pixel to collect")
+        )
+        .arg(
+            Arg::with_name("savefile")
+                .short("sv")
+                .long("save")
+                .takes_value(false)
+                .multiple(false)
+                .help("saves the ppm to disk using the default name structure: YYYYMMDD-HHMM-SAMPLES-TIME.ppm")
         )
         .setting(AppSettings::ArgRequiredElseHelp)
         .get_matches();
@@ -199,5 +209,14 @@ fn main() {
     if let Some(stats) = renderer.stats {
         eprintln!("{:#?}", stats);
     }
-    print_ppm(&buffer, width, height);
+    let ppm = print_ppm(&buffer, width, height);
+    if matches.is_present("savefile") {
+        let now = chrono::offset::Local::now();
+        let date = now.format("%Y%m%d-%H%M%S");
+        let filename = format!("{}-{}-{}.ppm", date, renderer.samples, elapsed.ceil());
+        fs::write(&filename, ppm).unwrap();
+        eprintln!("saved file {}", filename);
+    } else {
+        print!("{}", ppm);
+    }
 }
