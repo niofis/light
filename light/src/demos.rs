@@ -92,6 +92,9 @@ pub fn cornell() -> World {
         tmp / 2.1,
         Material::Emissive(crate::light::color::WHITE * 5.),
     );
+
+    let glass_sphere = Solid::Sphere(Point(-16.0, -5.0, -10.0), 2.0, Material::Refractive);
+
     World::build()
         .lights(lights)
         .objects(vec![
@@ -108,6 +111,7 @@ pub fn cornell() -> World {
             light_sphere_2,
             corner_cube,
             corner_cube_light,
+            glass_sphere,
         ])
         .finish()
 }

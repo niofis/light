@@ -85,7 +85,7 @@ impl Camera {
         let origin = left_top + &(delta_right * x + delta_down * y);
         let direction = &origin - eye;
 
-        Ray::new(origin, direction.unit(), f32::INFINITY)
+        Ray::new(origin, direction.unit(), f32::INFINITY, 1.0)
     }
 
     pub fn rotate(&mut self, x: f32, y: f32, z: f32) {

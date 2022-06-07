@@ -46,6 +46,7 @@ impl BoundingBox {
             direction: _,
             direction_reciprocal,
             max_distance: _,
+            refraction_index: _,
         } = ray;
         let [dxi, dyi, dzi] = *direction_reciprocal;
         let (sx, rsx) = if dxi < 0.0 { (1, 0) } else { (0, 1) };

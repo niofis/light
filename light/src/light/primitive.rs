@@ -99,6 +99,7 @@ fn sphere_intersect(sphere: (&Point, &f32), ray: &Ray) -> Option<f32> {
         direction,
         direction_reciprocal: _,
         max_distance: _,
+        refraction_index: _,
     } = ray;
     let oc = origin - center;
     let a = direction.dot(direction);
@@ -130,6 +131,7 @@ fn triangle_intersect(triangle: (&Point, &Vector, &Vector), ray: &Ray) -> Option
         direction,
         direction_reciprocal: _,
         max_distance: _,
+        refraction_index: _,
     } = ray;
     let pvec = direction.cross(edge2);
     let epsilon = 0.007;

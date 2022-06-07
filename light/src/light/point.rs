@@ -37,6 +37,22 @@ impl ops::Add<&Vector> for &Point {
     }
 }
 
+impl ops::Add<Vector> for &Point {
+    type Output = Point;
+
+    fn add(self, rhs: Vector) -> Self::Output {
+        Point::from(GVector4::from(self) + GVector4::from(rhs))
+    }
+}
+
+impl ops::Add<Vector> for Point {
+    type Output = Point;
+
+    fn add(self, rhs: Vector) -> Self::Output {
+        Point::from(GVector4::from(self) + GVector4::from(rhs))
+    }
+}
+
 impl ops::Add<&Point> for &Point {
     type Output = Point;
 

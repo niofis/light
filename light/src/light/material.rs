@@ -5,6 +5,7 @@ pub enum Material {
     Simple(Color),
     Reflective(Color, f32),
     Emissive(Color),
+    Refractive,
 }
 
 impl Material {

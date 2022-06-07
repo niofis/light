@@ -1,6 +1,10 @@
 use rand_xoshiro::Xoshiro256PlusPlus;
 
-use super::{color, primitive::Primitive, ray::Ray};
+use super::{
+    color::{self, BLACK},
+    primitive::Primitive,
+    ray::Ray,
+};
 use crate::{Color, Material, Point, Renderer, Vector};
 
 fn inner_trace_ray(
@@ -32,11 +36,22 @@ fn inner_trace_ray(
                             let ri = ray.direction.unit();
                             let dot = ri.dot(&normal) * 2.0;
                             let new_dir = ri - (normal * dot);
-                            let reflected_ray = Ray::new(point, new_dir.unit(), f32::INFINITY);
+                            let reflected_ray = Ray::new(point, new_dir.unit(), f32::INFINITY, 1.0);
                             (calculate_shading(renderer, primitive, &point) * (1.0 - idx))
                                 + inner_trace_ray(renderer, rng, &reflected_ray, depth + 1) * *idx
                         }
                         Material::Emissive(color) => *color,
+                        Material::Refractive => {
+                            let current_index = 1.52; //assume it is glass
+                            let previous_index = 1.0;
+                            let normal = primitive.normal(&point);
+                            let n = current_index / previous_index;
+                            let dot = normal.dot(&ray.direction);
+                            let ta = n * n * (1.0 - (dot * dot));
+                            let new_dir = ((ray.direction * n) - normal * (1.0 - ta).sqrt()).unit();
+                            let refracted_ray = Ray::new(point, new_dir.unit(), f32::INFINITY, 1.0);
+                            inner_trace_ray(renderer, rng, &refracted_ray, depth + 1)
+                        }
                     }
                 }
                 None => color::BLACK,
@@ -66,6 +81,7 @@ fn calculate_shading(renderer: &Renderer, prm: &Primitive, point: &Point) -> Col
         Material::Simple(color) => color,
         Material::Reflective(color, _) => color,
         Material::Emissive(color) => color,
+        Material::Refractive => &BLACK,
     };
 
     Color(
@@ -117,7 +133,7 @@ fn calculate_direct_lighting(renderer: &Renderer, point: &Point, normal: &Vector
             return None;
         }
 
-        let ray = Ray::new(*point, unit_dir, f32::INFINITY);
+        let ray = Ray::new(*point, unit_dir, f32::INFINITY, 1.0);
         match renderer.accelerator.trace(&ray) {
             Some(prm_idxs) => {
                 let light_distance = direction.norm();
