@@ -67,7 +67,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         ))
         .algorithm(light::Algorithm::PathTracing)
         .render_method(light::RenderMethod::Tiles)
-        .world(light::demos::cornell())
+        .world(light::demos::simple())
         .accelerator(Accelerator::BoundingVolumeHierarchy)
         .finish();
 

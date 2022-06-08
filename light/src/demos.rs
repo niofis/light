@@ -144,6 +144,18 @@ pub fn simple() -> World {
     let geo_sphere = Solid::GeodesicSphere(2.0, 20, Transform::combine(&sphere_trs));
     let lights = vec![LightSource::Point(Point(-10.0, 10.0, -10.0), 100.0)];
 
+    let top_light_trs = Transform::combine(&[
+        Transform::scale(30.0, 10.0, 10.0),
+        Transform::rotate(0.0, 0.0, 0.0),
+        Transform::translate(0.0, 22.4, -15.0),
+    ]);
+    let top_light = Solid::Plane(
+        top_light_trs,
+        Material::Emissive(crate::light::color::WHITE * 1.),
+    );
+
+    let glass_sphere = Solid::Sphere(Point(0.0, -5.0, -7.0), 2.0, Material::Refractive);
+
     World::build()
         .lights(lights)
         .objects(vec![
@@ -152,6 +164,8 @@ pub fn simple() -> World {
             cube,
             donut,
             geo_sphere,
+            top_light,
+            glass_sphere,
         ])
         .finish()
 }
