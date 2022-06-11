@@ -1,5 +1,6 @@
+use crate::light::float::Float;
 use crate::light::point::Point;
 
 pub enum LightSource {
-    Point(Point, f32),
+    Point(Point, Float),
 }

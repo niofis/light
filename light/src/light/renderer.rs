@@ -2,6 +2,7 @@ use super::{
     accelerator::{Accelerator, AcceleratorInstance, AcceleratorStats},
     camera::Camera,
     color::Color,
+    float::Float,
     path_tracing,
     primitive::Primitive,
     section::Section,
@@ -77,7 +78,7 @@ impl Renderer {
     }
     pub fn camera(&mut self, camera: Camera) -> &mut Renderer {
         self.camera = camera;
-        self.camera.init(self.width as f32, self.height as f32);
+        self.camera.init(self.width as Float, self.height as Float);
         self
     }
     pub fn world(&mut self, world: World) -> &mut Renderer {

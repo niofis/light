@@ -1,16 +1,22 @@
+use super::float::Float;
 use crate::light::point::Point;
 use crate::light::vector::Vector;
 
 pub struct Ray {
     pub origin: Point,
     pub direction: Vector,
-    pub direction_reciprocal: [f32; 3],
-    pub max_distance: f32,
-    pub refraction_index: f32,
+    pub direction_reciprocal: [Float; 3],
+    pub max_distance: Float,
+    pub refraction_index: Float,
 }
 
 impl Ray {
-    pub fn new(origin: Point, direction: Vector, max_distance: f32, refraction_index: f32) -> Ray {
+    pub fn new(
+        origin: Point,
+        direction: Vector,
+        max_distance: Float,
+        refraction_index: Float,
+    ) -> Ray {
         Ray {
             origin,
             direction,
@@ -20,7 +26,7 @@ impl Ray {
         }
     }
 
-    pub fn point(&self, rhs: f32) -> Point {
+    pub fn point(&self, rhs: Float) -> Point {
         let Ray {
             origin,
             direction,

@@ -1,9 +1,10 @@
-use crate::light::color::*;
+use crate::light::float::Float;
+use crate::Color;
 
 #[derive(Debug, Clone)]
 pub enum Material {
     Simple(Color),
-    Reflective(Color, f32),
+    Reflective(Color, Float),
     Emissive(Color),
     Refractive,
 }

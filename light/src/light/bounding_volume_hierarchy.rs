@@ -5,6 +5,8 @@ use crate::light::ray::Ray;
 use crate::light::trace::Trace;
 use crate::light::vector::Vector;
 
+use super::float::{MAX, MIN};
+
 #[derive(Debug)]
 pub enum Bvh {
     Empty,
@@ -94,12 +96,12 @@ fn octree_grouping(items: &[(Point, usize)]) -> Bvh {
         };
     }
 
-    let mut minx = std::f32::MAX;
-    let mut miny = std::f32::MAX;
-    let mut minz = std::f32::MAX;
-    let mut maxx = std::f32::MIN;
-    let mut maxy = std::f32::MIN;
-    let mut maxz = std::f32::MIN;
+    let mut minx = MAX;
+    let mut miny = MAX;
+    let mut minz = MAX;
+    let mut maxx = MIN;
+    let mut maxy = MIN;
+    let mut maxz = MIN;
 
     for item in items {
         let (Point(x, y, z), _) = item;

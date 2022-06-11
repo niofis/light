@@ -1,9 +1,11 @@
+use super::float::Float;
 use crate::light::generic_vector::GVector4;
 use crate::light::normal::Normal;
 use crate::Point;
 use std::ops;
+
 #[derive(Copy, Clone, Debug, Default)]
-pub struct Vector(pub f32, pub f32, pub f32); //x,y,z
+pub struct Vector(pub Float, pub Float, pub Float); //x,y,z
 
 impl From<GVector4> for Vector {
     fn from(gv: GVector4) -> Self {
@@ -61,40 +63,40 @@ impl ops::Sub<&Vector> for &Vector {
     }
 }
 
-impl ops::Mul<f32> for Vector {
+impl ops::Mul<Float> for Vector {
     type Output = Vector;
 
-    fn mul(self, rhs: f32) -> Self::Output {
+    fn mul(self, rhs: Float) -> Self::Output {
         Vector::from(GVector4::from(self) * rhs)
     }
 }
 
-impl ops::Mul<f32> for &Vector {
+impl ops::Mul<Float> for &Vector {
     type Output = Vector;
 
-    fn mul(self, rhs: f32) -> Self::Output {
+    fn mul(self, rhs: Float) -> Self::Output {
         Vector::from(GVector4::from(self) * rhs)
     }
 }
 
-impl ops::Div<f32> for Vector {
+impl ops::Div<Float> for Vector {
     type Output = Vector;
 
-    fn div(self, rhs: f32) -> Self::Output {
+    fn div(self, rhs: Float) -> Self::Output {
         Vector::from(GVector4::from(self) / rhs)
     }
 }
 
-impl ops::Div<f32> for &Vector {
+impl ops::Div<Float> for &Vector {
     type Output = Vector;
 
-    fn div(self, rhs: f32) -> Self::Output {
+    fn div(self, rhs: Float) -> Self::Output {
         Vector::from(GVector4::from(self) / rhs)
     }
 }
 
 impl ops::Index<usize> for Vector {
-    type Output = f32;
+    type Output = Float;
 
     fn index(&self, rhs: usize) -> &Self::Output {
         match rhs {
@@ -114,19 +116,19 @@ impl ops::Neg for Vector {
 }
 
 impl Vector {
-    pub fn new(x: f32, y: f32, z: f32) -> Vector {
+    pub fn new(x: Float, y: Float, z: Float) -> Vector {
         Vector(x, y, z)
     }
     pub fn default() -> Vector {
         Vector(0.0, 0.0, 0.0)
     }
-    pub fn dot(&self, rhs: &Vector) -> f32 {
+    pub fn dot(&self, rhs: &Vector) -> Float {
         self.0 * rhs.0 + self.1 * rhs.1 + self.2 * rhs.2
     }
-    pub fn abs_dot(&self, rhs: &Vector) -> f32 {
+    pub fn abs_dot(&self, rhs: &Vector) -> Float {
         self.dot(rhs).abs()
     }
-    pub fn norm(&self) -> f32 {
+    pub fn norm(&self) -> Float {
         self.dot(self).sqrt()
     }
     pub fn unit(&self) -> Vector {
@@ -143,12 +145,12 @@ impl Vector {
         let x = y1 * z2 - z1 * y2;
         let y = z1 * x2 - x1 * z2;
         let z = x1 * y2 - y1 * x2;
-        Vector(x as f32, y as f32, z as f32)
+        Vector(x as Float, y as Float, z as Float)
     }
-    pub fn min_component(&self) -> f32 {
+    pub fn min_component(&self) -> Float {
         self.0.min(self.1.min(self.2))
     }
-    pub fn max_component(&self) -> f32 {
+    pub fn max_component(&self) -> Float {
         self.0.max(self.1.max(self.2))
     }
     pub fn max_dimension(&self) -> usize {

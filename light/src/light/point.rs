@@ -1,9 +1,10 @@
+use super::float::Float;
 use crate::light::generic_vector::GVector4;
 use crate::light::vector::Vector;
 use std::ops;
 
 #[derive(Copy, Clone, Debug)]
-pub struct Point(pub f32, pub f32, pub f32); //x,y,z
+pub struct Point(pub Float, pub Float, pub Float); //x,y,z
 
 impl From<GVector4> for Point {
     fn from(gv: GVector4) -> Self {
@@ -61,10 +62,10 @@ impl ops::Add<&Point> for &Point {
     }
 }
 
-impl ops::Div<f32> for &Point {
+impl ops::Div<Float> for &Point {
     type Output = Point;
 
-    fn div(self, rhs: f32) -> Self::Output {
+    fn div(self, rhs: Float) -> Self::Output {
         Point::from(GVector4::from(self) / rhs)
     }
 }
@@ -86,7 +87,7 @@ impl ops::Sub<&Vector> for &Point {
 }
 
 impl ops::Index<usize> for Point {
-    type Output = f32;
+    type Output = Float;
 
     fn index(&self, rhs: usize) -> &Self::Output {
         match rhs {
@@ -101,10 +102,10 @@ impl Point {
     pub fn default() -> Point {
         Point(0.0, 0.0, 0.0)
     }
-    pub fn distance(&self, rhs: &Point) -> f32 {
+    pub fn distance(&self, rhs: &Point) -> Float {
         (rhs - self).norm()
     }
-    pub fn distance_saquared(&self, rhs: &Point) -> f32 {
+    pub fn distance_saquared(&self, rhs: &Point) -> Float {
         let dist = self.distance(rhs);
         dist * dist
     }

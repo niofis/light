@@ -1,8 +1,8 @@
-use super::generic_vector::GVector4;
+use super::{float::Float, generic_vector::GVector4};
 use crate::light::vector::Vector;
 use std::ops;
 #[derive(Copy, Clone, Debug)]
-pub struct Normal(pub f32, pub f32, pub f32); //x,y,z
+pub struct Normal(pub Float, pub Float, pub Float); //x,y,z
 
 impl From<GVector4> for Normal {
     fn from(gv: GVector4) -> Self {
@@ -54,19 +54,19 @@ impl ops::Sub<&Normal> for &Normal {
     }
 }
 
-impl ops::Mul<f32> for &Normal {
+impl ops::Mul<Float> for &Normal {
     type Output = Normal;
 
-    fn mul(self, rhs: f32) -> Self::Output {
+    fn mul(self, rhs: Float) -> Self::Output {
         let Normal(x, y, z) = self;
         Normal(x * rhs, y * rhs, z * rhs)
     }
 }
 
-impl ops::Div<f32> for &Normal {
+impl ops::Div<Float> for &Normal {
     type Output = Normal;
 
-    fn div(self, rhs: f32) -> Self::Output {
+    fn div(self, rhs: Float) -> Self::Output {
         Normal::from(GVector4::from(self) / rhs)
     }
 }
@@ -79,16 +79,16 @@ impl ops::Neg for &Normal {
 }
 
 impl Normal {
-    pub fn new(x: f32, y: f32, z: f32) -> Normal {
+    pub fn new(x: Float, y: Float, z: Float) -> Normal {
         Normal(x, y, z)
     }
     pub fn default() -> Normal {
         Normal(0.0, 0.0, 0.0)
     }
-    pub fn dot(&self, rhs: &Normal) -> f32 {
+    pub fn dot(&self, rhs: &Normal) -> Float {
         self.0 * rhs.0 + self.1 * rhs.1 + self.2 * rhs.2
     }
-    pub fn norm(&self) -> f32 {
+    pub fn norm(&self) -> Float {
         self.dot(self).sqrt()
     }
     pub fn unit(&self) -> Normal {

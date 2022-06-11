@@ -1,6 +1,6 @@
-use std::{f32::consts::PI, path::Path};
+use std::path::Path;
 
-use crate::{Color, LightSource, Material, Point, Solid, Transform, World};
+use crate::{light::float::PI, Color, LightSource, Material, Point, Solid, Transform, World};
 
 pub fn cornell() -> World {
     let simple_sphere = Solid::Sphere(
@@ -208,21 +208,21 @@ pub fn obj(file: &str) -> World {
             let i = 3 * f;
             let x = 3 * mesh.indices[i] as usize;
             let pt1 = Point(
-                -mesh.positions[x],
-                mesh.positions[x + 1],
-                mesh.positions[x + 2],
+                (-mesh.positions[x]).into(),
+                mesh.positions[x + 1].into(),
+                mesh.positions[x + 2].into(),
             );
             let x = 3 * mesh.indices[i + 1] as usize;
             let pt2 = Point(
-                -mesh.positions[x],
-                mesh.positions[x + 1],
-                mesh.positions[x + 2],
+                (-mesh.positions[x]).into(),
+                mesh.positions[x + 1].into(),
+                mesh.positions[x + 2].into(),
             );
             let x = 3 * mesh.indices[i + 2] as usize;
             let pt3 = Point(
-                -mesh.positions[x],
-                mesh.positions[x + 1],
-                mesh.positions[x + 2],
+                (-mesh.positions[x]).into(),
+                mesh.positions[x + 1].into(),
+                mesh.positions[x + 2].into(),
             );
             solids.push(Solid::Triangle(
                 mesh_trs.apply(&pt1),

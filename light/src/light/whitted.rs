@@ -2,6 +2,7 @@ use rand_xoshiro::Xoshiro256PlusPlus;
 
 use super::{
     color::{self, BLACK},
+    float::Float,
     primitive::Primitive,
     ray::Ray,
 };
@@ -36,7 +37,8 @@ fn inner_trace_ray(
                             let ri = ray.direction.unit();
                             let dot = ri.dot(&normal) * 2.0;
                             let new_dir = ri - (normal * dot);
-                            let reflected_ray = Ray::new(point, new_dir.unit(), f32::INFINITY, 1.0);
+                            let reflected_ray =
+                                Ray::new(point, new_dir.unit(), Float::INFINITY, 1.0);
                             (calculate_shading(renderer, primitive, &point) * (1.0 - idx))
                                 + inner_trace_ray(renderer, rng, &reflected_ray, depth + 1) * *idx
                         }
@@ -49,7 +51,8 @@ fn inner_trace_ray(
                             let dot = normal.dot(&ray.direction);
                             let ta = n * n * (1.0 - (dot * dot));
                             let new_dir = ((ray.direction * n) - normal * (1.0 - ta).sqrt()).unit();
-                            let refracted_ray = Ray::new(point, new_dir.unit(), f32::INFINITY, 1.0);
+                            let refracted_ray =
+                                Ray::new(point, new_dir.unit(), Float::INFINITY, 1.0);
                             inner_trace_ray(renderer, rng, &refracted_ray, depth + 1)
                         }
                     }
@@ -63,7 +66,7 @@ fn inner_trace_ray(
 
 pub fn trace_ray(renderer: &Renderer, rng: &mut Xoshiro256PlusPlus, pixel: (u32, u32)) -> Color {
     let (x, y) = pixel;
-    let ray = renderer.camera.get_ray(x as f32, y as f32);
+    let ray = renderer.camera.get_ray(x as Float, y as Float);
 
     inner_trace_ray(renderer, rng, &ray, 1)
 }
@@ -95,7 +98,7 @@ fn find_closest_primitive<'a>(
     renderer: &'a Renderer,
     ray: &Ray,
     prm_indexes: &[usize],
-) -> Option<(&'a Primitive, f32)> {
+) -> Option<(&'a Primitive, Float)> {
     let primitives = &renderer.primitives;
     prm_indexes
         .iter()
@@ -115,7 +118,7 @@ fn find_shadow_primitive(
     primitives: &[Primitive],
     ray: &Ray,
     prm_indexes: &[usize],
-    max_dist: f32,
+    max_dist: Float,
 ) -> bool {
     prm_indexes
         .iter()
@@ -133,12 +136,12 @@ fn calculate_direct_lighting(renderer: &Renderer, point: &Point, normal: &Vector
             return None;
         }
 
-        let ray = Ray::new(*point, unit_dir, f32::INFINITY, 1.0);
+        let ray = Ray::new(*point, unit_dir, Float::INFINITY, 1.0);
         match renderer.accelerator.trace(&ray) {
             Some(prm_idxs) => {
                 let light_distance = direction.norm();
                 if !find_shadow_primitive(&renderer.primitives, &ray, &prm_idxs, light_distance) {
-                    let it = f32::max(0.0, (intensity - light_distance) / intensity);
+                    let it = Float::max(0.0, (intensity - light_distance) / intensity);
                     Some(Color(1.0, 1.0, 1.0) * dot * it)
                 } else {
                     None

@@ -1,9 +1,11 @@
-use std::f32::{MAX, MIN};
 use std::ops::{self};
 
 use crate::Point;
 
-use super::ray::Ray;
+use super::{
+    float::{MAX, MIN},
+    ray::Ray,
+};
 
 #[derive(Debug, Clone, Copy)]
 pub struct BoundingBox {

@@ -1,3 +1,4 @@
+use super::float::Float;
 use crate::light::bounding_box::BoundingBox;
 use crate::light::material::Material;
 use crate::light::point::Point;
@@ -8,7 +9,7 @@ use crate::light::vector::Vector;
 pub enum Primitive {
     Sphere {
         center: Point,
-        radius: f32,
+        radius: Float,
         material: Material,
     },
     Triangle {
@@ -49,7 +50,7 @@ impl Primitive {
         }
     }
 
-    pub fn intersect(&self, ray: &Ray) -> Option<f32> {
+    pub fn intersect(&self, ray: &Ray) -> Option<Float> {
         match self {
             Primitive::Sphere { center, radius, .. } => sphere_intersect((center, radius), ray),
             Primitive::Triangle {
@@ -92,7 +93,7 @@ impl Primitive {
     }
 }
 
-fn sphere_intersect(sphere: (&Point, &f32), ray: &Ray) -> Option<f32> {
+fn sphere_intersect(sphere: (&Point, &Float), ray: &Ray) -> Option<Float> {
     let (center, radius) = sphere;
     let Ray {
         origin,
@@ -124,7 +125,7 @@ fn sphere_intersect(sphere: (&Point, &f32), ray: &Ray) -> Option<f32> {
     None
 }
 
-fn triangle_intersect(triangle: (&Point, &Vector, &Vector), ray: &Ray) -> Option<f32> {
+fn triangle_intersect(triangle: (&Point, &Vector, &Vector), ray: &Ray) -> Option<Float> {
     let (v0, edge1, edge2) = triangle;
     let Ray {
         origin,

@@ -1,16 +1,17 @@
+use super::{
+    float::{Float, PI},
+    primitive::Primitive,
+};
 use crate::{Material, Point, Transform};
-use std::f32::consts::PI;
-
-use super::primitive::Primitive;
 
 pub enum Solid {
     Triangle(Point, Point, Point, Material),
-    Sphere(Point, f32, Material),
+    Sphere(Point, Float, Material),
     Cube(Transform),
     InvertedCube(Transform),
     CornellBox(Transform),
-    GeodesicSphere(f32, usize, Transform),
-    Torus(f32, f32, usize, usize, Transform),
+    GeodesicSphere(Float, usize, Transform),
+    Torus(Float, Float, usize, usize, Transform),
     Mesh(Vec<Primitive>),
     File(String, Transform),
     InvertedFile(String, Transform),
@@ -123,13 +124,13 @@ fn cornell_box(transform: &Transform) -> Vec<Primitive> {
     ]
 }
 
-fn torus(rd1: f32, rd2: f32, sc1: usize, sc2: usize, transform: &Transform) -> Vec<Primitive> {
+fn torus(rd1: Float, rd2: Float, sc1: usize, sc2: usize, transform: &Transform) -> Vec<Primitive> {
     let pt = Point(0.0, rd1, 0.0);
-    let rt1 = 2.0 * PI / (sc1 as f32);
-    let rt2 = 2.0 * PI / (sc2 as f32);
+    let rt1 = 2.0 * PI / (sc1 as Float);
+    let rt2 = 2.0 * PI / (sc2 as Float);
     let mut triangles: Vec<Primitive> = Vec::new();
     let mut cur = (0..=sc1)
-        .map(|x| Transform::rotate((x as f32) * rt1, 0.0, 0.0).apply(&pt))
+        .map(|x| Transform::rotate((x as Float) * rt1, 0.0, 0.0).apply(&pt))
         .map(|p| Transform::translate(0.0, 0.0, -rd2).apply(&p))
         .collect::<Vec<Point>>();
 
@@ -159,14 +160,14 @@ fn torus(rd1: f32, rd2: f32, sc1: usize, sc2: usize, transform: &Transform) -> V
     triangles
 }
 
-fn sphere(radius: f32, sc1: usize, transform: &Transform) -> Vec<Primitive> {
+fn sphere(radius: Float, sc1: usize, transform: &Transform) -> Vec<Primitive> {
     let pt = Point(0.0, radius, 0.0);
     let sc2 = sc1 * 2;
-    let rt1 = PI / (sc1 as f32);
-    let rt2 = 2.0 * PI / (sc2 as f32);
+    let rt1 = PI / (sc1 as Float);
+    let rt2 = 2.0 * PI / (sc2 as Float);
     let mut triangles: Vec<Primitive> = Vec::new();
     let mut cur = (0..=sc1)
-        .map(|x| Transform::rotate((x as f32) * rt1, 0.0, 0.0).apply(&pt))
+        .map(|x| Transform::rotate((x as Float) * rt1, 0.0, 0.0).apply(&pt))
         .collect::<Vec<Point>>();
 
     for _ in 0..sc2 {
@@ -208,21 +209,21 @@ fn load_file(filename: &str, transform: &Transform, invert_normals: bool) -> Vec
             let i = 3 * f;
             let x = 3 * mesh.indices[i] as usize;
             let pt1 = Point(
-                -mesh.positions[x],
-                mesh.positions[x + 1],
-                mesh.positions[x + 2],
+                (-mesh.positions[x]).into(),
+                mesh.positions[x + 1].into(),
+                mesh.positions[x + 2].into(),
             );
             let x = 3 * mesh.indices[i + 1] as usize;
             let pt2 = Point(
-                -mesh.positions[x],
-                mesh.positions[x + 1],
-                mesh.positions[x + 2],
+                (-mesh.positions[x]).into(),
+                mesh.positions[x + 1].into(),
+                mesh.positions[x + 2].into(),
             );
             let x = 3 * mesh.indices[i + 2] as usize;
             let pt3 = Point(
-                -mesh.positions[x],
-                mesh.positions[x + 1],
-                mesh.positions[x + 2],
+                (-mesh.positions[x]).into(),
+                mesh.positions[x + 1].into(),
+                mesh.positions[x + 2].into(),
             );
             if invert_normals {
                 triangles.push(Primitive::new_triangle(

@@ -1,7 +1,8 @@
+use crate::light::float::Float;
 use std::ops;
 
 #[derive(Debug, Clone, Copy)]
-pub struct GVector4(pub f32, pub f32, pub f32, pub f32);
+pub struct GVector4(pub Float, pub Float, pub Float, pub Float);
 
 impl ops::Add<GVector4> for GVector4 {
     type Output = GVector4;
@@ -55,42 +56,42 @@ impl ops::Sub<&GVector4> for &GVector4 {
     }
 }
 
-impl ops::Mul<f32> for GVector4 {
+impl ops::Mul<Float> for GVector4 {
     type Output = GVector4;
 
-    fn mul(self, rhs: f32) -> Self::Output {
+    fn mul(self, rhs: Float) -> Self::Output {
         GVector4(self.0 * rhs, self.1 * rhs, self.2 * rhs, self.3 * rhs)
     }
 }
 
-impl ops::Mul<f32> for &GVector4 {
+impl ops::Mul<Float> for &GVector4 {
     type Output = GVector4;
 
-    fn mul(self, rhs: f32) -> Self::Output {
+    fn mul(self, rhs: Float) -> Self::Output {
         GVector4(self.0 * rhs, self.1 * rhs, self.2 * rhs, self.3 * rhs)
     }
 }
 
-impl ops::Div<f32> for GVector4 {
+impl ops::Div<Float> for GVector4 {
     type Output = GVector4;
 
-    fn div(self, rhs: f32) -> Self::Output {
-        let inv: f32 = 1.0 / rhs;
+    fn div(self, rhs: Float) -> Self::Output {
+        let inv: Float = 1.0 / rhs;
         GVector4(self.0 * inv, self.1 * inv, self.2 * inv, self.3 * inv)
     }
 }
 
-impl ops::Div<f32> for &GVector4 {
+impl ops::Div<Float> for &GVector4 {
     type Output = GVector4;
 
-    fn div(self, rhs: f32) -> Self::Output {
-        let inv: f32 = 1.0 / rhs;
+    fn div(self, rhs: Float) -> Self::Output {
+        let inv: Float = 1.0 / rhs;
         GVector4(self.0 * inv, self.1 * inv, self.2 * inv, self.3 * inv)
     }
 }
 
 impl ops::Index<usize> for GVector4 {
-    type Output = f32;
+    type Output = Float;
 
     fn index(&self, rhs: usize) -> &Self::Output {
         match rhs {

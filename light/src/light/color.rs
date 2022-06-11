@@ -1,15 +1,16 @@
+use crate::light::float::Float;
 use std::ops;
 
 #[derive(Debug, Copy, Clone, Default)]
-pub struct Color(pub f32, pub f32, pub f32); //r,g,b
+pub struct Color(pub Float, pub Float, pub Float); //r,g,b
 
 pub const BLACK: Color = Color(0., 0., 0.);
 pub const WHITE: Color = Color(1., 1., 1.);
 
-impl ops::Mul<f32> for Color {
+impl ops::Mul<Float> for Color {
     type Output = Color;
 
-    fn mul(self, rhs: f32) -> Color {
+    fn mul(self, rhs: Float) -> Color {
         let Color(r, g, b) = self;
         Color(r * rhs, g * rhs, b * rhs)
     }
@@ -24,17 +25,17 @@ impl ops::Mul<Color> for Color {
     }
 }
 
-impl ops::Mul<f32> for &Color {
+impl ops::Mul<Float> for &Color {
     type Output = Color;
-    fn mul(self, rhs: f32) -> Color {
+    fn mul(self, rhs: Float) -> Color {
         let Color(ar, ag, ab) = self;
         Color(ar * rhs, ag * rhs, ab * rhs)
     }
 }
 
-impl ops::Div<f32> for Color {
+impl ops::Div<Float> for Color {
     type Output = Color;
-    fn div(self, rhs: f32) -> Color {
+    fn div(self, rhs: Float) -> Color {
         let Color(ar, ag, ab) = self;
         Color(ar / rhs, ag / rhs, ab / rhs)
     }

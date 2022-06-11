@@ -1,3 +1,4 @@
+use light::float::PI;
 use light::{Accelerator, Camera, Color, Point, Renderer};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -107,21 +108,13 @@ fn main() -> Result<(), Box<dyn Error>> {
                     ..
                 } => {
                     if keycode == Keycode::Left {
-                        renderer
-                            .camera
-                            .rotate(0.0, -std::f32::consts::PI / 100.0, 0.0);
+                        renderer.camera.rotate(0.0, -PI / 100.0, 0.0);
                     } else if keycode == Keycode::Right {
-                        renderer
-                            .camera
-                            .rotate(0.0, std::f32::consts::PI / 100.0, 0.0);
+                        renderer.camera.rotate(0.0, PI / 100.0, 0.0);
                     } else if keycode == Keycode::Up {
-                        renderer
-                            .camera
-                            .rotate(-std::f32::consts::PI / 100.0, 0.0, 0.0);
+                        renderer.camera.rotate(-PI / 100.0, 0.0, 0.0);
                     } else if keycode == Keycode::Down {
-                        renderer
-                            .camera
-                            .rotate(std::f32::consts::PI / 100.0, 0.0, 0.0);
+                        renderer.camera.rotate(PI / 100.0, 0.0, 0.0);
                     } else if keycode == Keycode::W {
                         renderer.camera.translate(0.0, 0.0, 5.0);
                     } else if keycode == Keycode::S {
@@ -152,7 +145,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             let x = section.x + (idx as u32 % section.width);
             let y = section.y + (idx as u32 / section.width);
             let offset = (y * (width) + x) * 4;
-            let (red, green, blue) = (point / frames_count).as_gamma_corrected_rgb_u8();
+            let (red, green, blue) = (point / frames_count.into()).as_gamma_corrected_rgb_u8();
             buffer[offset as usize] = blue;
             buffer[(offset + 1) as usize] = green;
             buffer[(offset + 2) as usize] = red;

@@ -3,6 +3,8 @@ use crate::light::ray::Ray;
 use crate::light::vector::Vector;
 use crate::Transform;
 
+use super::float::Float;
+
 #[derive(Default)]
 pub struct CoordinateSystem {
     pub u: Vector,
@@ -27,8 +29,8 @@ pub struct Camera {
     pub right_top: Point,
     delta_right: Vector,
     delta_down: Vector,
-    width: f32,
-    height: f32,
+    width: Float,
+    height: Float,
     coordinate_system: CoordinateSystem,
 }
 
@@ -61,7 +63,7 @@ impl Camera {
         }
     }
 
-    pub fn init(&mut self, width: f32, height: f32) {
+    pub fn init(&mut self, width: Float, height: Float) {
         let delta_right = (&self.right_top - &self.left_top) / width;
         let delta_down = (&self.left_bottom - &self.left_top) / height;
         self.delta_down = delta_down;
@@ -73,7 +75,7 @@ impl Camera {
         self.coordinate_system = CoordinateSystem::new(&edge1, &edge2);
     }
 
-    pub fn get_ray(&self, x: f32, y: f32) -> Ray {
+    pub fn get_ray(&self, x: Float, y: Float) -> Ray {
         let Camera {
             eye,
             left_top,
@@ -85,10 +87,10 @@ impl Camera {
         let origin = left_top + &(delta_right * x + delta_down * y);
         let direction = &origin - eye;
 
-        Ray::new(origin, direction.unit(), f32::INFINITY, 1.0)
+        Ray::new(origin, direction.unit(), Float::INFINITY, 1.0)
     }
 
-    pub fn rotate(&mut self, x: f32, y: f32, z: f32) {
+    pub fn rotate(&mut self, x: Float, y: Float, z: Float) {
         let transform = Transform::rotate(x, y, z);
         self.left_top = &transform.apply(&(&self.left_top - &self.eye).into()) + &self.eye;
         self.left_bottom = &transform.apply(&(&self.left_bottom - &self.eye).into()) + &self.eye;
@@ -96,7 +98,7 @@ impl Camera {
         self.init(self.width, self.height);
     }
 
-    pub fn translate(&mut self, x: f32, y: f32, z: f32) {
+    pub fn translate(&mut self, x: Float, y: Float, z: Float) {
         let CoordinateSystem { u, v, w } = self.coordinate_system;
         let dw = w * -z;
         let du = u * -x;

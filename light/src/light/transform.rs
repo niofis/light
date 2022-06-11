@@ -1,6 +1,7 @@
+use super::float::Float;
 use crate::light::point::Point;
 
-type Matrix = [f32; 16];
+type Matrix = [Float; 16];
 
 pub struct Transform(pub Matrix);
 
@@ -45,7 +46,7 @@ impl Transform {
         Transform(combine(&mts))
     }
 
-    pub fn rotate(x: f32, y: f32, z: f32) -> Transform {
+    pub fn rotate(x: Float, y: Float, z: Float) -> Transform {
         let (sx, cx) = x.sin_cos();
         let (sy, cy) = y.sin_cos();
         let (sz, cz) = z.sin_cos();
@@ -66,14 +67,14 @@ impl Transform {
         Transform(matrix)
     }
 
-    pub fn scale(x: f32, y: f32, z: f32) -> Transform {
+    pub fn scale(x: Float, y: Float, z: Float) -> Transform {
         let matrix: Matrix = [
             x, 0.0, 0.0, 0.0, 0.0, y, 0.0, 0.0, 0.0, 0.0, z, 0.0, 0.0, 0.0, 0.0, 1.0,
         ];
         Transform(matrix)
     }
 
-    pub fn translate(x: f32, y: f32, z: f32) -> Transform {
+    pub fn translate(x: Float, y: Float, z: Float) -> Transform {
         let matrix: Matrix = [
             1.0, 0.0, 0.0, x, 0.0, 1.0, 0.0, y, 0.0, 0.0, 1.0, z, 0.0, 0.0, 0.0, 1.0,
         ];

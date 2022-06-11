@@ -4,6 +4,7 @@ mod bounding_volume_hierarchy;
 mod brute_force;
 pub(crate) mod camera;
 pub(crate) mod color;
+pub mod float;
 mod generic_vector;
 pub(crate) mod light_source;
 pub(crate) mod material;
