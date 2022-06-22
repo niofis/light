@@ -3,7 +3,7 @@ use crate::light::generic_vector::GVector4;
 use crate::light::vector::Vector;
 use std::ops;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Point(pub Float, pub Float, pub Float); //x,y,z
 
 impl From<GVector4> for Point {

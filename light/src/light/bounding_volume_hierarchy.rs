@@ -87,7 +87,9 @@ fn octree_grouping(items: &[(Point, usize)]) -> Bvh {
         return Bvh::Empty;
     }
 
-    if items.len() <= 4 {
+    let first = &items[0];
+
+    if items.len() == 2 || items.iter().all(|pt| pt.0 == first.0) {
         return Bvh::Node {
             primitives: Some(items.iter().map(|x| x.1).collect::<Vec<usize>>()),
             bounding_box: BoundingBox::default(),
