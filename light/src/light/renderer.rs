@@ -145,15 +145,14 @@ impl Renderer {
             (_, _, RenderMethod::Tiles) => render_tiles,
             (_, _, RenderMethod::Scanlines) => render_scanlines,
         };
-
         render(self, section, trace)
     }
 }
 
 fn render_pixels(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
     let Section {
-        x: left,
-        y: top,
+        left,
+        top,
         height,
         width,
     } = section;
@@ -168,8 +167,8 @@ fn render_pixels(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> 
 }
 fn render_tiles(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
     let Section {
-        x: left,
-        y: top,
+        left,
+        top,
         height,
         width,
     } = section;
@@ -211,10 +210,7 @@ fn render_tiles(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> V
 
 fn render_scanlines(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
     let Section {
-        height,
-        width,
-        y: top,
-        ..
+        height, width, top, ..
     } = section;
 
     (0..*height)
@@ -239,14 +235,13 @@ fn render_pixels_single_thread(
     let Section {
         height,
         width,
-        x: left,
-        y: top,
-    } = section;
-
+        left,
+        top,
+    } = *section;
     let mut rng = Xoshiro256PlusPlus::from_entropy();
 
-    (0..width * height)
-        .map(|idx| (left + (idx % width), top + (idx / width)))
+    (top..height)
+        .flat_map(|y| (left..width).map(move |x| (x, y)))
         .map(|pixel| trace(renderer, &mut rng, pixel))
         .collect()
 }

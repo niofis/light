@@ -142,8 +142,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         frames_count += 1.0;
         for (idx, pixel) in pixels.into_iter().enumerate() {
             let point = frames[idx] + pixel;
-            let x = section.x + (idx as u32 % section.width);
-            let y = section.y + (idx as u32 / section.width);
+            let x = section.left + (idx as u32 % section.width);
+            let y = section.top + (idx as u32 / section.width);
             let offset = (y * (width) + x) * 4;
             let (red, green, blue) = (point / frames_count.into()).as_gamma_corrected_rgb_u8();
             buffer[offset as usize] = blue;

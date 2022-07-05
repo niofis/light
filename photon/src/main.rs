@@ -187,8 +187,8 @@ fn main() {
     let start = time::precise_time_s();
     let pixels = renderer.render(&section);
     for (idx, pixel) in pixels.into_iter().enumerate() {
-        let x = section.x + (idx as u32 % section.width);
-        let y = section.y + (idx as u32 / section.width);
+        let x = section.left + (idx as u32 % section.width);
+        let y = section.top + (idx as u32 / section.width);
         let offset = (y * width + x) * 4;
         let Color(red, green, blue) = pixel;
         buffer[offset as usize] = if red > 1.0 { 255 } else { (red * 255.99) as u8 };

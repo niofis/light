@@ -1,16 +1,16 @@
 #[derive(Copy, Clone)]
 pub struct Section {
-    pub x: u32,
-    pub y: u32,
+    pub left: u32,
+    pub top: u32,
     pub width: u32,
     pub height: u32,
 }
 
 impl Section {
-    pub fn new(x: u32, y: u32, width: u32, height: u32) -> Section {
+    pub fn new(left: u32, top: u32, width: u32, height: u32) -> Section {
         Section {
-            x,
-            y,
+            left,
+            top,
             width,
             height,
         }
