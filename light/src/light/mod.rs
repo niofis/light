@@ -3,6 +3,7 @@ mod bounding_box;
 mod bounding_volume_hierarchy;
 mod brute_force;
 pub(crate) mod camera;
+mod closest_primitive;
 pub(crate) mod color;
 pub mod float;
 mod generic_vector;

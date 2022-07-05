@@ -1,6 +1,7 @@
 use rand_xoshiro::Xoshiro256PlusPlus;
 
 use super::{
+    closest_primitive::ClosestPrimitive,
     color::{self, BLACK},
     float::Float,
     primitive::Primitive,
@@ -23,7 +24,10 @@ fn inner_trace_ray(
         Some(prm_idxs) => {
             let closest = find_closest_primitive(renderer, ray, &prm_idxs);
             match closest {
-                Some((primitive, distance)) => {
+                Some(ClosestPrimitive {
+                    primitive,
+                    distance,
+                }) => {
                     let point = ray.point(distance);
                     let prm_material = match primitive {
                         Primitive::Sphere { material, .. } => material,
@@ -98,18 +102,21 @@ fn find_closest_primitive<'a>(
     renderer: &'a Renderer,
     ray: &Ray,
     prm_indexes: &[usize],
-) -> Option<(&'a Primitive, Float)> {
+) -> Option<ClosestPrimitive<'a>> {
     let primitives = &renderer.primitives;
     prm_indexes
         .iter()
         .filter_map(|idx| {
             primitives[*idx]
                 .intersect(ray)
-                .map(|dist| (&primitives[*idx], dist))
+                .map(|distance| ClosestPrimitive {
+                    primitive: &primitives[*idx],
+                    distance,
+                })
         })
-        .fold(None, |closest, (pr, dist)| match closest {
-            None => Some((pr, dist)),
-            Some(res) if dist < res.1 => Some((pr, dist)),
+        .fold(None, |closest, next| match closest {
+            None => Some(next),
+            Some(current) if next.distance < current.distance => Some(next),
             _ => closest,
         })
 }
