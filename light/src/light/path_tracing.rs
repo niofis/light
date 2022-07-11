@@ -40,16 +40,17 @@ fn trace_ray_internal(
                         Material::Simple(color) => {
                             let normal = primitive.normal(&point);
                             let new_dir = random_dome(rng, &normal);
-                            let path_ray = Ray::new(point, new_dir.unit(), Float::INFINITY, 1.0);
+                            let path_ray =
+                                Ray::new(point, new_dir.unit().into(), Float::INFINITY, 1.0);
                             *color * trace_ray_internal(renderer, rng, &path_ray, depth + 1)
                         }
                         Material::Reflective(_, idx) => {
                             let normal = primitive.normal(&point);
-                            let ri = ray.direction.unit();
+                            let ri: Vector = ray.direction.unit().into();
                             let dot = ri.dot(&normal) * 2.0;
                             let new_dir = ri - (normal * dot);
                             let reflected_ray =
-                                Ray::new(point, new_dir.unit(), Float::INFINITY, 1.0);
+                                Ray::new(point, new_dir.unit().into(), Float::INFINITY, 1.0);
                             trace_ray_internal(renderer, rng, &reflected_ray, depth + 1) * *idx
                         }
                         Material::Emissive(color) => *color,
@@ -66,7 +67,7 @@ fn trace_ray_internal(
                             let new_dir = (ray.direction * n) - normal * (n + (1.0 - ta).sqrt());
 
                             let refracted_ray =
-                                Ray::new(point, new_dir.unit(), Float::INFINITY, 1.52);
+                                Ray::new(point, new_dir.unit().into(), Float::INFINITY, 1.52);
                             trace_ray_internal(renderer, rng, &refracted_ray, depth + 1)
                         }
                     }

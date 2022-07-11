@@ -38,11 +38,11 @@ fn inner_trace_ray(
                         Material::Simple(_) => calculate_shading(renderer, primitive, &point),
                         Material::Reflective(_, idx) => {
                             let normal = primitive.normal(&point);
-                            let ri = ray.direction.unit();
+                            let ri: Vector = ray.direction.unit().into();
                             let dot = ri.dot(&normal) * 2.0;
                             let new_dir = ri - (normal * dot);
                             let reflected_ray =
-                                Ray::new(point, new_dir.unit(), Float::INFINITY, 1.0);
+                                Ray::new(point, new_dir.unit().into(), Float::INFINITY, 1.0);
                             (calculate_shading(renderer, primitive, &point) * (1.0 - idx))
                                 + inner_trace_ray(renderer, rng, &reflected_ray, depth + 1) * *idx
                         }
@@ -56,7 +56,7 @@ fn inner_trace_ray(
                             let ta = n * n * (1.0 - (dot * dot));
                             let new_dir = ((ray.direction * n) - normal * (1.0 - ta).sqrt()).unit();
                             let refracted_ray =
-                                Ray::new(point, new_dir.unit(), Float::INFINITY, 1.0);
+                                Ray::new(point, new_dir.unit().into(), Float::INFINITY, 1.0);
                             inner_trace_ray(renderer, rng, &refracted_ray, depth + 1)
                         }
                     }
@@ -137,7 +137,7 @@ fn calculate_direct_lighting(renderer: &Renderer, point: &Point, normal: &Vector
     let incident_lights = renderer.world.lights.iter().filter_map(|ll| {
         let super::light_source::LightSource::Point(light, intensity) = ll;
         let direction = light - point;
-        let unit_dir = direction.unit();
+        let unit_dir = direction.unit().into();
         let dot = normal.dot(&unit_dir);
         if dot <= 0.0 {
             return None;

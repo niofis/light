@@ -115,6 +115,12 @@ impl ops::Neg for Vector {
     }
 }
 
+impl From<Normal> for Vector {
+    fn from(normal: Normal) -> Self {
+        Vector(normal.0, normal.1, normal.2)
+    }
+}
+
 impl Vector {
     pub fn new(x: Float, y: Float, z: Float) -> Vector {
         Vector(x, y, z)
@@ -131,9 +137,9 @@ impl Vector {
     pub fn norm(&self) -> Float {
         self.dot(self).sqrt()
     }
-    pub fn unit(&self) -> Vector {
+    pub fn unit(&self) -> Normal {
         let Vector(x, y, z) = self / self.norm();
-        Vector(x, y, z)
+        Normal(x, y, z)
     }
     pub fn cross(&self, rhs: &Vector) -> Vector {
         let x1 = self.0 as f64;

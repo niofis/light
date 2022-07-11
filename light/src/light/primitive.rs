@@ -28,7 +28,7 @@ impl Primitive {
     pub fn new_triangle(pt1: Point, pt2: Point, pt3: Point, material: Material) -> Primitive {
         let edge1 = &pt2 - &pt1;
         let edge2 = &pt3 - &pt1;
-        let normal = edge1.cross(&edge2).unit();
+        let normal = edge1.cross(&edge2).unit().into();
         let centroid = &(&(&pt1 + &pt2) + &pt3) / 3.0;
 
         Primitive::Triangle {
@@ -45,7 +45,7 @@ impl Primitive {
 
     pub fn normal(&self, point: &Point) -> Vector {
         match self {
-            Primitive::Sphere { center, .. } => ((point - center).unit()),
+            Primitive::Sphere { center, .. } => ((point - center).unit().into()),
             Primitive::Triangle { normal, .. } => Vector(normal.0, normal.1, normal.2),
         }
     }

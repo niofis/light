@@ -15,8 +15,8 @@ pub struct CoordinateSystem {
 impl CoordinateSystem {
     pub fn new(u: &Vector, v: &Vector) -> CoordinateSystem {
         let mut cs = CoordinateSystem::default();
-        cs.u = u.unit();
-        cs.v = v.unit();
+        cs.u = u.unit().into();
+        cs.v = v.unit().into();
         cs.w = cs.u.cross(&cs.v);
         cs
     }
@@ -87,7 +87,7 @@ impl Camera {
         let origin = left_top + &(delta_right * x + delta_down * y);
         let direction = &origin - eye;
 
-        Ray::new(origin, direction.unit(), Float::INFINITY, 1.0)
+        Ray::new(origin, direction.unit().into(), Float::INFINITY, 1.0)
     }
 
     pub fn rotate(&mut self, x: Float, y: Float, z: Float) {
