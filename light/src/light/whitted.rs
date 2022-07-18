@@ -42,7 +42,7 @@ fn inner_trace_ray(
                             let dot = ri.dot(&normal) * 2.0;
                             let new_dir = ri - (normal * dot);
                             let reflected_ray =
-                                Ray::new(point, new_dir.unit().into(), Float::INFINITY, 1.0);
+                                Ray::new(point, new_dir.unit(), Float::INFINITY, 1.0);
                             (calculate_shading(renderer, primitive, &point) * (1.0 - idx))
                                 + inner_trace_ray(renderer, rng, &reflected_ray, depth + 1) * *idx
                         }
@@ -55,8 +55,7 @@ fn inner_trace_ray(
                             let dot = normal.dot(&ray.direction.into());
                             let ta = n * n * (1.0 - (dot * dot));
                             let new_dir = ((ray.direction * n) - normal * (1.0 - ta).sqrt()).unit();
-                            let refracted_ray =
-                                Ray::new(point, new_dir.into(), Float::INFINITY, 1.0);
+                            let refracted_ray = Ray::new(point, new_dir, Float::INFINITY, 1.0);
                             inner_trace_ray(renderer, rng, &refracted_ray, depth + 1)
                         }
                     }
