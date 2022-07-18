@@ -84,7 +84,7 @@ impl Camera {
             ..
         } = self;
 
-        let origin = left_top + &(delta_right * x + delta_down * y);
+        let origin = left_top + (delta_right * x + delta_down * y);
         let direction = &origin - eye;
 
         Ray::new(origin, direction.unit().into(), Float::INFINITY, 1.0)

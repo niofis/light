@@ -103,8 +103,8 @@ fn sphere_intersect(sphere: (&Point, &Float), ray: &Ray) -> Option<Float> {
         refraction_index: _,
     } = ray;
     let oc = origin - center;
-    let a = direction.dot(direction);
-    let b = oc.dot(direction);
+    let a = direction.dot(&direction.into());
+    let b = oc.dot(&direction.into());
     let c = oc.dot(&oc) - radius * radius;
     let dis = b * b - a * c;
     let epsilon = 0.007;

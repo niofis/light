@@ -46,7 +46,7 @@ fn trace_ray_internal(
                         }
                         Material::Reflective(_, idx) => {
                             let normal = primitive.normal(&point);
-                            let ri: Vector = ray.direction.unit().into();
+                            let ri: Vector = ray.direction.into();
                             let dot = ri.dot(&normal) * 2.0;
                             let new_dir = ri - (normal * dot);
                             let reflected_ray =
@@ -59,7 +59,7 @@ fn trace_ray_internal(
                             let next_index = 1.52;
                             let mut normal = primitive.normal(&point);
                             let n = previous_index / next_index;
-                            let dot = normal.dot(&ray.direction);
+                            let dot = normal.dot(&ray.direction.into());
                             let ta = n * n * (1.0 - (dot * dot));
                             if previous_index == next_index {
                                 normal = normal * -1.0;

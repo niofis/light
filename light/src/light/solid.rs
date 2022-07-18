@@ -209,21 +209,21 @@ fn load_file(filename: &str, transform: &Transform, invert_normals: bool) -> Vec
             let i = 3 * f;
             let x = 3 * mesh.indices[i] as usize;
             let pt1 = Point(
-                (-mesh.positions[x]).into(),
-                mesh.positions[x + 1].into(),
-                mesh.positions[x + 2].into(),
+                -mesh.positions[x],
+                mesh.positions[x + 1],
+                mesh.positions[x + 2],
             );
             let x = 3 * mesh.indices[i + 1] as usize;
             let pt2 = Point(
-                (-mesh.positions[x]).into(),
-                mesh.positions[x + 1].into(),
-                mesh.positions[x + 2].into(),
+                -mesh.positions[x],
+                mesh.positions[x + 1],
+                mesh.positions[x + 2],
             );
             let x = 3 * mesh.indices[i + 2] as usize;
             let pt3 = Point(
-                (-mesh.positions[x]).into(),
-                mesh.positions[x + 1].into(),
-                mesh.positions[x + 2].into(),
+                -mesh.positions[x],
+                mesh.positions[x + 1],
+                mesh.positions[x + 2],
             );
             if invert_normals {
                 triangles.push(Primitive::new_triangle(

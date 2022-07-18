@@ -1,10 +1,10 @@
 use super::float::Float;
+use super::normal::Normal;
 use crate::light::point::Point;
-use crate::light::vector::Vector;
 
 pub struct Ray {
     pub origin: Point,
-    pub direction: Vector,
+    pub direction: Normal,
     pub direction_reciprocal: [Float; 3],
     pub max_distance: Float,
     pub refraction_index: Float,
@@ -13,7 +13,7 @@ pub struct Ray {
 impl Ray {
     pub fn new(
         origin: Point,
-        direction: Vector,
+        direction: Normal,
         max_distance: Float,
         refraction_index: Float,
     ) -> Ray {
@@ -34,6 +34,6 @@ impl Ray {
             max_distance: _,
             refraction_index: _,
         } = self;
-        origin + &(direction * rhs)
+        origin + (direction * rhs)
     }
 }
