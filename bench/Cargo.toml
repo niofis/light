@@ -9,10 +9,10 @@ edition = "2018"
 split-debuginfo = "unpacked"
 
 [dependencies]
-clap = "2"
-time = "0.1.42"
+clap = "3.2"
+time = "0.3"
 light = { path = "../light" }
-num_cpus = "1.0"
+num_cpus = "1"
 
 [profile.release]
 debug = true

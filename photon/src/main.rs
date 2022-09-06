@@ -27,7 +27,7 @@ fn main() {
         .about("Renders a scene using the light engine")
         .arg(
             Arg::with_name("threads")
-                .short("t")
+                .short('t')
                 .long("threads")
                 .takes_value(true)
                 .multiple(false)
@@ -35,7 +35,7 @@ fn main() {
         )
         .arg(
             Arg::with_name("accelerator")
-                .short("a")
+                .short('a')
                 .long("accelerator")
                 .takes_value(true)
                 .multiple(false)
@@ -44,7 +44,7 @@ fn main() {
                 .help("specify the accelerator structure to use, defaults to bvh"))
         .arg(
             Arg::with_name("demo")
-                .short("d")
+                .short('d')
                 .long("demo")
                 .takes_value(true)
                 .multiple(false)
@@ -52,7 +52,7 @@ fn main() {
                 .help("renders one of the demo scenes"))
         .arg(
             Arg::with_name("obj")
-                .short("o")
+                .short('o')
                 .long("obj")
                 .takes_value(true)
                 .multiple(false)
@@ -60,7 +60,7 @@ fn main() {
                 .help("renders the specified obj file"))
         .arg(
             Arg::with_name("stats")
-                .short("s")
+                .short('t')
                 .long("stats")
                 .takes_value(false)
                 .multiple(false)
@@ -68,14 +68,14 @@ fn main() {
                 .help("captures stats and prints them when done rendering. cannot be used with threads"))
         .arg(
             Arg::with_name("algorithm")
-                .short("alg")
+                .short('a')
                 .long("algorithm")
                 .takes_value(true)
                 .multiple(false)
                 .help("choose the rendering algorithm, options: pathtracing, whitted. Not setting this option defaults to pathtracing"))
         .arg(
             Arg::with_name("render method")
-                .short("rm")
+                .short('r')
                 .long("rendermethod")
                 .takes_value(true)
                 .multiple(false)
@@ -83,7 +83,7 @@ fn main() {
         )
         .arg(
             Arg::with_name("samples count")
-                .short("sc")
+                .short('c')
                 .long("samples")
                 .takes_value(true)
                 .multiple(false)
@@ -91,7 +91,7 @@ fn main() {
         )
         .arg(
             Arg::with_name("savefile")
-                .short("sv")
+                .short('s')
                 .long("save")
                 .takes_value(false)
                 .multiple(false)
@@ -184,7 +184,7 @@ fn main() {
     renderer.finish();
 
     let mut buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
-    let start = time::precise_time_s();
+    let start = time::Instant::now();
     let pixels = renderer.render(&section);
     for (idx, pixel) in pixels.into_iter().enumerate() {
         let x = section.left + (idx as u32 % section.width);
@@ -203,8 +203,7 @@ fn main() {
             (blue * 255.99) as u8
         };
     }
-
-    let elapsed = time::precise_time_s() - start;
+    let elapsed = start.elapsed().as_seconds_f32();
     eprintln!("Rendering time: {}s", elapsed);
     if let Some(stats) = renderer.stats {
         eprintln!("{:#?}", stats);

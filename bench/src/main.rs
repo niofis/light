@@ -9,7 +9,7 @@ fn main() {
         .about("Benchmarks the light engine")
         .arg(
             Arg::with_name("no save")
-                .short("ns")
+                .short('n')
                 .long("no-save")
                 .takes_value(false)
                 .multiple(false)
@@ -17,7 +17,7 @@ fn main() {
         )
         .arg(
             Arg::with_name("compare")
-                .short("c")
+                .short('c')
                 .long("compare")
                 .takes_value(false)
                 .multiple(false)
@@ -25,7 +25,7 @@ fn main() {
         )
         .arg(
             Arg::with_name("comment")
-                .short("C")
+                .short('C')
                 .long("comment")
                 .takes_value(true)
                 .multiple(false)
@@ -60,12 +60,12 @@ fn main() {
     let iterations = 10;
     let section = Section::new(0, 0, width, height);
     for _i in 0..iterations {
-        let start = time::precise_time_s();
+        let start = time::Instant::now();
         let _buffer = renderer.render(&section);
-        let elapsed = time::precise_time_s() - start;
+        let elapsed = start.elapsed().as_seconds_f64();
         min = min.min(elapsed);
         max = max.max(elapsed);
-        sum = sum + elapsed;
+        sum += elapsed;
     }
     let avg = sum / (iterations as f64);
     println!(

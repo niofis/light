@@ -8,12 +8,12 @@ edition = "2018"
 split-debuginfo = "unpacked"
 
 [dependencies]
-clap = "2"
+clap = "3"
 time = "0.3"
 light = { path = "../light" }
 
 [dependencies.sdl2]
-version = "0.34"
+version = "0.35"
 default-features = false
 features = ["gfx"]
 
