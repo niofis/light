@@ -45,7 +45,7 @@ impl Primitive {
 
     pub fn normal(&self, point: &Point) -> Vector {
         match self {
-            Primitive::Sphere { center, .. } => ((point - center).unit().into()),
+            Primitive::Sphere { center, .. } => (point - center).unit().into(),
             Primitive::Triangle { normal, .. } => Vector(normal.0, normal.1, normal.2),
         }
     }
