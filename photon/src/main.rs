@@ -1,23 +1,58 @@
-use clap::{App, AppSettings, Arg};
+use bincode::{config, Encode};
+use clap::{App, Arg};
 use light::{Accelerator, Camera, Color, Point, Renderer};
 use std::fs;
+
+#[derive(Encode)]
+struct BinaryRender {
+    width: u32,
+    height: u32,
+    pixels: Vec<(f32, f32, f32)>,
+}
 
 fn gamma_correct(x: u8) -> u8 {
     (255.0 * (x as f32 / 255.0).powf(1.0 / 2.2)).min(255.0) as u8
 }
 
-fn print_ppm(data: &[u8], width: u32, height: u32) -> String {
+fn format_as_ppm(pixels: &[Color], width: u32, height: u32) -> String {
     let mut output = String::new();
     output.push_str(&format!("P3\n{} {}\n255\n", width, height));
-    for pixel in (0..(width * height * 4)).step_by(4) {
+    for Color(red, green, blue) in pixels.iter() {
+        let r = if *red > 1.0 {
+            255
+        } else {
+            (red * 255.99) as u8
+        };
+        let g = if *green > 1.0 {
+            255
+        } else {
+            (green * 255.99) as u8
+        };
+        let b = if *blue > 1.0 {
+            255
+        } else {
+            (blue * 255.99) as u8
+        };
+
         output.push_str(&format!(
             "{} {} {} ",
-            gamma_correct(data[pixel as usize]),
-            gamma_correct(data[(pixel + 1) as usize]),
-            gamma_correct(data[(pixel + 2) as usize])
+            gamma_correct(r),
+            gamma_correct(g),
+            gamma_correct(b)
         ));
     }
     output
+}
+
+fn format_as_binary(pixels: &[Color], width: u32, height: u32) -> Vec<u8> {
+    let px = pixels.iter().map(|Color(r, g, b)| (*r, *g, *b)).collect();
+    let binary_render = BinaryRender {
+        width,
+        height,
+        pixels: px,
+    };
+    let config = config::standard();
+    bincode::encode_to_vec(&binary_render, config).unwrap()
 }
 
 fn main() {
@@ -90,6 +125,14 @@ fn main() {
                 .help("specify the number of samples per pixel to collect")
         )
         .arg(
+            Arg::with_name("ppm")
+                .short('p')
+                .long("ppm")
+                .takes_value(false)
+                .multiple(false)
+                .help("outputs ppm to the stdio")
+        )
+        .arg(
             Arg::with_name("savefile")
                 .short('s')
                 .long("save")
@@ -97,10 +140,24 @@ fn main() {
                 .multiple(false)
                 .help("saves the ppm to disk using the default name structure: YYYYMMDD-HHMM-SAMPLES-TIME.ppm")
         )
-        .setting(AppSettings::ArgRequiredElseHelp)
+        .arg(
+            Arg::with_name("save binary")
+                .short('b')
+                .long("binary")
+                .takes_value(false)
+                .multiple(false)
+                .help("saves the render result as a binary file using the default name structure: YYYMMDD-HHMM-SAMPLES-TIME.brf"))
+        .arg(
+            Arg::with_name("ml")
+            .short('m')
+            .long("machine-learning")
+            .takes_value(false)
+            .multiple(false)
+            .help("generates a 1000 samples image plus 1000 single sample images to use for ml; saves to /.ml folder")
+        )
         .get_matches();
-    let width: u32 = 1280;
-    let height: u32 = 960;
+    let width: u32 = 640;
+    let height: u32 = 480;
 
     let mut renderer = Renderer::build();
     renderer.width(width).height(height).camera(Camera::new(
@@ -183,39 +240,50 @@ fn main() {
     let section = light::Section::new(0, 0, width, height);
     renderer.finish();
 
-    let mut buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
+    if matches.is_present("ml") {
+        let demo = matches.value_of("demo").unwrap();
+        let start = time::Instant::now();
+        renderer.samples(1000);
+        let pixels = renderer.render(&section);
+        let data = format_as_binary(&pixels, width, height);
+        fs::write(format!("./ml/{}-target.brf", demo), data).unwrap();
+        let elapsed = start.elapsed().as_seconds_f32();
+        eprintln!("Target image rendering time: {}s", elapsed);
+
+        let start = time::Instant::now();
+        renderer.samples(1);
+        for i in 0..100 {
+            let pixels = renderer.render(&section);
+            let data = format_as_binary(&pixels, width, height);
+            fs::write(format!("./ml/{}-training-{}.brf", demo, i), data).unwrap();
+        }
+        let elapsed = start.elapsed().as_seconds_f32();
+        eprintln!("Training images rendering time: {}s", elapsed);
+
+        return;
+    }
+
     let start = time::Instant::now();
     let pixels = renderer.render(&section);
-    for (idx, pixel) in pixels.into_iter().enumerate() {
-        let x = section.left + (idx as u32 % section.width);
-        let y = section.top + (idx as u32 / section.width);
-        let offset = (y * width + x) * 4;
-        let Color(red, green, blue) = pixel;
-        buffer[offset as usize] = if red > 1.0 { 255 } else { (red * 255.99) as u8 };
-        buffer[(offset + 1) as usize] = if green > 1.0 {
-            255
-        } else {
-            (green * 255.99) as u8
-        };
-        buffer[(offset + 2) as usize] = if blue > 1.0 {
-            255
-        } else {
-            (blue * 255.99) as u8
-        };
-    }
     let elapsed = start.elapsed().as_seconds_f32();
     eprintln!("Rendering time: {}s", elapsed);
-    if let Some(stats) = renderer.stats {
-        eprintln!("{:#?}", stats);
-    }
-    let ppm = print_ppm(&buffer, width, height);
-    if matches.is_present("savefile") {
+
+    if matches.is_present("save binary") {
+        let now = chrono::offset::Local::now();
+        let date = now.format("%Y%m%d-%H%M%S");
+        let filename = format!("{}-{}-{}.brf", date, renderer.samples, elapsed.ceil());
+        let data = format_as_binary(&pixels, width, height);
+        fs::write(&filename, data).unwrap();
+        eprintln!("saved file {}", filename);
+    } else if matches.is_present("savefile") {
+        let ppm = format_as_ppm(&pixels, width, height);
         let now = chrono::offset::Local::now();
         let date = now.format("%Y%m%d-%H%M%S");
         let filename = format!("{}-{}-{}.ppm", date, renderer.samples, elapsed.ceil());
         fs::write(&filename, ppm).unwrap();
         eprintln!("saved file {}", filename);
-    } else {
-        print!("{}", ppm);
+    } else if matches.is_present("ppm") {
+        let ppm = format_as_ppm(&pixels, width, height);
+        println!("{}", ppm);
     }
 }

@@ -1,1 +1,1 @@
-cargo run --release -- --demo cornell | open -a Preview.app -f
+cargo run --release -- --demo cornell -p | open -a Preview.app -f
