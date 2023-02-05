@@ -1,6 +1,6 @@
 use clap::{App, Arg};
-use light::{Accelerator, Section};
-use light::{Camera, Point};
+use ilios::{demos, Accelerator, RenderMethod, Renderer, Section};
+use ilios::{Camera, Point};
 
 fn main() {
     let _matches = App::new("Bench")
@@ -37,7 +37,7 @@ fn main() {
     let height = 768; //2400;
     let threads = num_cpus::get();
 
-    let mut renderer = light::Renderer::build();
+    let mut renderer = Renderer::build();
     renderer
         .width(width)
         .height(height)
@@ -47,10 +47,10 @@ fn main() {
             Point(-20.0 / 2.0, 0.0, -50.0),
             Point(20.0 / 2.0, 15.0, -50.0),
         ))
-        .world(light::demos::cornell())
+        .world(demos::cornell())
         .accelerator(Accelerator::BoundingVolumeHierarchy)
-        .render_method(light::RenderMethod::Tiles)
-        // .render_method(light::RenderMethod::Pixels)
+        .render_method(RenderMethod::Tiles)
+        // .render_method(RenderMethod::Pixels)
         .threads(1)
         .finish();
 

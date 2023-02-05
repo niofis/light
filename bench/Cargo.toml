@@ -11,7 +11,7 @@ split-debuginfo = "unpacked"
 [dependencies]
 clap = "3.2"
 time = "0.3"
-light = { path = "../light" }
+ilios = { path = "../ilios" }
 num_cpus = "1"
 
 [profile.release]

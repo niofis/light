@@ -1,6 +1,6 @@
 use bincode::{config, Encode};
 use clap::{App, Arg};
-use light::{Accelerator, Camera, Color, Point, Renderer};
+use ilios::{demos, Accelerator, Algorithm, Camera, Color, Point, RenderMethod, Renderer, Section};
 use std::fs;
 
 #[derive(Encode)]
@@ -169,22 +169,22 @@ fn main() {
 
     match matches.value_of("algorithm") {
         Some("whitted") => {
-            renderer.algorithm(light::Algorithm::Whitted);
+            renderer.algorithm(Algorithm::Whitted);
         }
         _ => {
-            renderer.algorithm(light::Algorithm::PathTracing);
+            renderer.algorithm(Algorithm::PathTracing);
         }
     }
 
     match matches.value_of("render method") {
         Some("pixels") => {
-            renderer.render_method(light::RenderMethod::Pixels);
+            renderer.render_method(RenderMethod::Pixels);
         }
         Some("scanlines") => {
-            renderer.render_method(light::RenderMethod::Scanlines);
+            renderer.render_method(RenderMethod::Scanlines);
         }
         _ => {
-            renderer.render_method(light::RenderMethod::Tiles);
+            renderer.render_method(RenderMethod::Tiles);
         }
     }
 
@@ -194,19 +194,19 @@ fn main() {
 
     match matches.value_of("demo") {
         Some("simple") => {
-            renderer.world(light::demos::simple());
+            renderer.world(demos::simple());
         }
         Some("cornell") => {
-            renderer.world(light::demos::cornell());
+            renderer.world(demos::cornell());
         }
         Some("shader_bench") => {
-            renderer.world(light::demos::shader_bench());
+            renderer.world(demos::shader_bench());
         }
         _ => return println!("scene not found!"),
     }
 
     if let Some(val) = matches.value_of("obj") {
-        renderer.world(light::demos::obj(val));
+        renderer.world(demos::obj(val));
     }
 
     match matches.value_of("accelerator") {
@@ -237,7 +237,7 @@ fn main() {
         renderer.samples(10);
     }
 
-    let section = light::Section::new(0, 0, width, height);
+    let section = Section::new(0, 0, width, height);
     renderer.finish();
 
     if matches.is_present("ml") {

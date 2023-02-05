@@ -1,5 +1,5 @@
-use light::float::PI;
-use light::{Accelerator, Camera, Color, Point, Renderer};
+use ilios::float::PI;
+use ilios::{demos, Accelerator, Algorithm, Camera, Color, Point, RenderMethod, Renderer, Section};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::PixelFormatEnum;
@@ -66,15 +66,15 @@ fn main() -> Result<(), Box<dyn Error>> {
             Point(-1.0, 0.0, -35.0),
             Point(1.0, 1.5, -35.0),
         ))
-        .algorithm(light::Algorithm::PathTracing)
-        .render_method(light::RenderMethod::Tiles)
-        .world(light::demos::cornell())
+        .algorithm(Algorithm::PathTracing)
+        .render_method(RenderMethod::Tiles)
+        .world(demos::cornell())
         .accelerator(Accelerator::BoundingVolumeHierarchy)
         .finish();
 
     let mut frames: Vec<Color> = vec![Color(0., 0., 0.); (4 * width * height) as usize];
     let mut buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
-    let section = light::Section::new(0, 0, width, height);
+    let section = Section::new(0, 0, width, height);
     let mut frames_count: f32 = 0.0;
 
     let mut frame_timmings = FrameTimmings::new();

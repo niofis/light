@@ -1,0 +1,8 @@
+[workspace]
+
+members = [
+    "bench",
+    "ilios",
+    "photon",
+    "screen"
+]
