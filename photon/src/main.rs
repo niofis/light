@@ -155,16 +155,50 @@ fn main() {
             .multiple(false)
             .help("generates a 1000 samples image plus 1000 single sample images to use for ml; saves to /.ml folder")
         )
+        .arg(
+            Arg::with_name("width")
+            .short('w')
+            .long("width")
+            .takes_value(true)
+            .multiple(false)
+            .help("outupt image width")
+        )
+        .arg(
+            Arg::with_name("height")
+            .short('h')
+            .long("height")
+            .takes_value(true)
+            .multiple(false)
+            .help("outupt image height")
+        )
         .get_matches();
-    let width: u32 = 640;
-    let height: u32 = 480;
+    let mut width: u32 = 640;
+    let mut height: u32 = 360;
+
+    if let Some(val) = matches.value_of("width") {
+        if let Ok(parsed_width) = val.parse() {
+            width = parsed_width;
+        } else {
+            eprintln!("invalid width value!");
+        }
+    }
+
+    if let Some(val) = matches.value_of("height") {
+        if let Ok(parsed_height) = val.parse() {
+            height = parsed_height;
+        } else {
+            eprintln!("invalid height value!");
+        }
+    }
 
     let mut renderer = Renderer::build();
+    let v_offset = 3.0;
+    let z_offset = -10.0;
     renderer.width(width).height(height).camera(Camera::new(
-        Point(0.0, 15.0 / 2.0, -75.0),
-        Point(-20.0 / 2.0, 15.0, -50.0),
-        Point(-20.0 / 2.0, 0.0, -50.0),
-        Point(20.0 / 2.0, 15.0, -50.0),
+        Point(0.0, 9.0 / 2.0 + v_offset, -60.0 - z_offset),
+        Point(-8.0, 9.0 + v_offset, -50.0 - z_offset),
+        Point(-8.0, 0.0 + v_offset, -50.0 - z_offset),
+        Point(8.0, 9.0 + v_offset, -50.0 - z_offset),
     ));
 
     match matches.value_of("algorithm") {
