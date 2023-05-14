@@ -1,13 +1,11 @@
 use super::{
-    accelerator::{Accelerator, AcceleratorInstance, AcceleratorStats},
+    accelerators::{Accelerator, AcceleratorInstance, AcceleratorStats},
     camera::Camera,
     color::Color,
     float::Float,
-    path_tracing,
     primitive::Primitive,
     section::Section,
-    whitted,
-    world::World,
+    world::World, algorithms::{Algorithm, whitted, path_tracing},
 };
 use rand_xoshiro::rand_core::SeedableRng;
 use rand_xoshiro::Xoshiro256PlusPlus;
@@ -20,11 +18,6 @@ pub enum RenderMethod {
     Pixels,
     Tiles,
     Scanlines,
-}
-
-pub enum Algorithm {
-    Whitted,
-    PathTracing,
 }
 
 #[derive(Debug, Default)]
@@ -165,6 +158,7 @@ fn render_pixels(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> 
         })
         .collect()
 }
+
 fn render_tiles(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
     let Section {
         left,

@@ -5,7 +5,7 @@ use crate::light::ray::Ray;
 use crate::light::trace::Trace;
 use crate::light::vector::Vector;
 
-use super::float::{MAX, MIN};
+use super::super::float::{MAX, MIN};
 
 #[derive(Debug)]
 pub enum Bvh {

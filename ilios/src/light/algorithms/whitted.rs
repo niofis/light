@@ -1,13 +1,7 @@
 use rand_xoshiro::Xoshiro256PlusPlus;
 
-use super::{
-    closest_primitive::ClosestPrimitive,
-    color::{self, BLACK},
-    float::Float,
-    primitive::Primitive,
-    ray::Ray,
-};
-use crate::{Color, Material, Point, Renderer, Vector};
+
+use crate::{Color, Material, Point, Renderer, Vector, light::{ray::Ray, color::{self, BLACK}, closest_primitive::ClosestPrimitive, primitive::Primitive}, float::Float, LightSource};
 
 fn inner_trace_ray(
     renderer: &Renderer,
@@ -134,7 +128,7 @@ fn find_shadow_primitive(
 
 fn calculate_direct_lighting(renderer: &Renderer, point: &Point, normal: &Vector) -> Color {
     let incident_lights = renderer.world.lights.iter().filter_map(|ll| {
-        let super::light_source::LightSource::Point(light, intensity) = ll;
+        let LightSource::Point(light, intensity) = ll;
         let direction = light - point;
         let unit_dir = direction.unit();
         let dot = normal.dot(&unit_dir.into());

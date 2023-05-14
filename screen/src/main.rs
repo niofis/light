@@ -1,5 +1,5 @@
 use ilios::float::PI;
-use ilios::{demos, Accelerator, Algorithm, Camera, Color, Point, RenderMethod, Renderer, Section};
+use ilios::{demos, Accelerator, Camera, Color, Point, RenderMethod, Renderer, Section, Algorithm};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::PixelFormatEnum;

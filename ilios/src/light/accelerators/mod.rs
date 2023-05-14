@@ -1,10 +1,11 @@
+use self::{brute_force::BruteForce, bounding_volume_hierarchy::{Bvh, BVHStats}};
+
 use super::{
-    bounding_volume_hierarchy::{BVHStats, Bvh},
-    brute_force::BruteForce,
     primitive::Primitive,
-    ray::Ray,
-    trace::Trace,
+    ray::Ray, trace::Trace,
 };
+mod bounding_volume_hierarchy;
+mod brute_force;
 
 pub enum Accelerator {
     BruteForce,

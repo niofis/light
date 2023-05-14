@@ -1,14 +1,8 @@
-use crate::{Color, Material, Renderer, Vector};
+use crate::{Color, Material, Renderer, Vector, light::{ray::Ray, color, closest_primitive::ClosestPrimitive, primitive::Primitive}, float::{Float, PI}};
 use rand::Rng;
 use rand_xoshiro::Xoshiro256PlusPlus;
 
-use super::{
-    closest_primitive::ClosestPrimitive,
-    color,
-    float::{Float, PI},
-    primitive::Primitive,
-    ray::Ray,
-};
+
 
 const MAX_DEPTH: u8 = 5;
 

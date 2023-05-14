@@ -4,5 +4,6 @@ members = [
     "bench",
     "ilios",
     "photon",
-    "screen"
+    "screen",
+    "ilios-display"
 ]
