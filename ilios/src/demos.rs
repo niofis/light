@@ -1,6 +1,9 @@
 use std::path::Path;
 
-use crate::{light::float::PI, Color, LightSource, Material, Point, Solid, Transform, World};
+use crate::{
+    light::{float::PI, solids::Solid},
+    Color, LightSource, Material, Point, Transform, World,
+};
 
 pub fn cornell() -> World {
     let simple_sphere = Solid::Sphere(

@@ -1,4 +1,5 @@
 pub(crate) mod accelerators;
+pub(crate) mod algorithms;
 mod bounding_box;
 pub(crate) mod camera;
 mod closest_primitive;
@@ -11,10 +12,9 @@ mod normal;
 pub(crate) mod point;
 mod primitive;
 mod ray;
-pub(crate) mod algorithms;
 pub(crate) mod renderer;
 pub(crate) mod section;
-pub(crate) mod solid;
+pub(crate) mod solids;
 mod trace;
 pub(crate) mod transform;
 pub(crate) mod vector;

@@ -1,4 +1,4 @@
-use super::{light_source::LightSource, primitive::Primitive, solid::Solid};
+use super::{light_source::LightSource, primitive::Primitive, solids::Solid};
 
 pub struct World {
     pub lights: Vec<LightSource>,
