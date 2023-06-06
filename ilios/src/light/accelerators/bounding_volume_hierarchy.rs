@@ -1,6 +1,6 @@
 use crate::light::bounding_box::BoundingBox;
 use crate::light::point::Point;
-use crate::light::primitive::Primitive;
+use crate::light::primitives::Primitive;
 use crate::light::ray::Ray;
 use crate::light::trace::Trace;
 use crate::light::vector::Vector;

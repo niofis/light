@@ -1,5 +1,3 @@
-use std::path::Path;
-
 use crate::{
     light::{float::PI, solids::Solid},
     Color, LightSource, Material, Point, Transform, World,
@@ -195,46 +193,46 @@ pub fn obj(file: &str) -> World {
         Material::Simple(Color(1.0, 1.0, 1.0)),
     )];
 
-    let bunny_obj = tobj::load_obj(&Path::new(file));
-    if bunny_obj.is_err() {
-        panic!("obj model is not valid!");
-    }
-    let (models, _) = bunny_obj.unwrap();
-    let mesh_trs = Transform::combine(&[
-        Transform::scale(120.0, 120.0, 120.0),
-        Transform::translate(0.0, -11.0, 0.0),
-    ]);
+    // let bunny_obj = tobj::load_obj(&Path::new(file));
+    // if bunny_obj.is_err() {
+    //     panic!("obj model is not valid!");
+    // }
+    // let (models, _) = bunny_obj.unwrap();
+    // let mesh_trs = Transform::combine(&[
+    //     Transform::scale(120.0, 120.0, 120.0),
+    //     Transform::translate(0.0, -11.0, 0.0),
+    // ]);
 
-    for (_, m) in models.iter().enumerate() {
-        let mesh = &m.mesh;
-        for f in 0..mesh.indices.len() / 3 {
-            let i = 3 * f;
-            let x = 3 * mesh.indices[i] as usize;
-            let pt1 = Point(
-                -mesh.positions[x],
-                mesh.positions[x + 1],
-                mesh.positions[x + 2],
-            );
-            let x = 3 * mesh.indices[i + 1] as usize;
-            let pt2 = Point(
-                -mesh.positions[x],
-                mesh.positions[x + 1],
-                mesh.positions[x + 2],
-            );
-            let x = 3 * mesh.indices[i + 2] as usize;
-            let pt3 = Point(
-                -mesh.positions[x],
-                mesh.positions[x + 1],
-                mesh.positions[x + 2],
-            );
-            solids.push(Solid::Triangle(
-                mesh_trs.apply(&pt1),
-                mesh_trs.apply(&pt3),
-                mesh_trs.apply(&pt2),
-                Material::white(),
-            ));
-        }
-    }
+    // for (_, m) in models.iter().enumerate() {
+    //     let mesh = &m.mesh;
+    //     for f in 0..mesh.indices.len() / 3 {
+    //         let i = 3 * f;
+    //         let x = 3 * mesh.indices[i] as usize;
+    //         let pt1 = Point(
+    //             -mesh.positions[x],
+    //             mesh.positions[x + 1],
+    //             mesh.positions[x + 2],
+    //         );
+    //         let x = 3 * mesh.indices[i + 1] as usize;
+    //         let pt2 = Point(
+    //             -mesh.positions[x],
+    //             mesh.positions[x + 1],
+    //             mesh.positions[x + 2],
+    //         );
+    //         let x = 3 * mesh.indices[i + 2] as usize;
+    //         let pt3 = Point(
+    //             -mesh.positions[x],
+    //             mesh.positions[x + 1],
+    //             mesh.positions[x + 2],
+    //         );
+    //         solids.push(Solid::Triangle(
+    //             mesh_trs.apply(&pt1),
+    //             mesh_trs.apply(&pt3),
+    //             mesh_trs.apply(&pt2),
+    //             Material::white(),
+    //         ));
+    //     }
+    // }
     let lights = vec![LightSource::Point(Point(0.0, 20.0, -50.0), 100.0)];
 
     World::build().lights(lights).objects(solids).finish()

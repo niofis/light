@@ -1,9 +1,8 @@
-use self::{brute_force::BruteForce, bounding_volume_hierarchy::{Bvh, BVHStats}};
-
-use super::{
-    primitive::Primitive,
-    ray::Ray, trace::Trace,
+use self::{
+    bounding_volume_hierarchy::{BVHStats, Bvh},
+    brute_force::BruteForce,
 };
+use super::{primitives::Primitive, ray::Ray, trace::Trace};
 mod bounding_volume_hierarchy;
 mod brute_force;
 

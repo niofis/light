@@ -1,14 +1,16 @@
-use rand_xoshiro::Xoshiro256PlusPlus;
+use crate::{
+    float::Float,
+    light::{
+        closest_primitive::ClosestPrimitive,
+        color::{self, BLACK},
+        primitives::Primitive,
+        ray::Ray,
+        rng::Rng,
+    },
+    Color, LightSource, Material, Point, Renderer, Vector,
+};
 
-
-use crate::{Color, Material, Point, Renderer, Vector, light::{ray::Ray, color::{self, BLACK}, closest_primitive::ClosestPrimitive, primitive::Primitive}, float::Float, LightSource};
-
-fn inner_trace_ray(
-    renderer: &Renderer,
-    rng: &mut Xoshiro256PlusPlus,
-    ray: &Ray,
-    depth: u8,
-) -> Color {
+fn inner_trace_ray(renderer: &Renderer, rng: &mut dyn Rng, ray: &Ray, depth: u8) -> Color {
     if depth > 10 {
         return color::BLACK;
     }
@@ -61,7 +63,7 @@ fn inner_trace_ray(
     }
 }
 
-pub fn trace_ray(renderer: &Renderer, rng: &mut Xoshiro256PlusPlus, pixel: (u32, u32)) -> Color {
+pub fn trace_ray(renderer: &Renderer, rng: &mut dyn Rng, pixel: (u32, u32)) -> Color {
     let (x, y) = pixel;
     let ray = renderer.camera.get_ray(x as Float, y as Float);
 

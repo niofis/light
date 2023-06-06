@@ -1,6 +1,6 @@
 use super::{
     float::{Float, PI},
-    primitive::Primitive,
+    primitives::Primitive,
 };
 use crate::{Material, Point, Transform};
 
@@ -34,10 +34,10 @@ impl Solid {
             Solid::GeodesicSphere(radius, sc1, transform) => sphere(*radius, *sc1, transform),
             Solid::Torus(rd1, rd2, sc1, sc2, transform) => torus(*rd1, *rd2, *sc1, *sc2, transform),
             Solid::Mesh(primitives) => primitives.clone(),
-            Solid::File(filename, transform) => load_file(filename, transform, false),
+            Solid::File(filename, transform) => vec![], //load_file(filename, transform, false),
             Solid::Plane(transform, material) => plane(transform, material),
             Solid::InvertedCube(transform) => cube(transform, true),
-            Solid::InvertedFile(filename, transform) => load_file(filename, transform, true),
+            Solid::InvertedFile(filename, transform) => vec![], //load_file(filename, transform, true),
         }
     }
 }
@@ -195,55 +195,55 @@ fn sphere(radius: Float, sc1: usize, transform: &Transform) -> Vec<Primitive> {
     triangles
 }
 
-fn load_file(filename: &str, transform: &Transform, invert_normals: bool) -> Vec<Primitive> {
-    let mut triangles: Vec<Primitive> = vec![];
-    let bunny_obj = tobj::load_obj(&std::path::Path::new(filename));
-    if bunny_obj.is_err() {
-        panic!("obj model is not valid!");
-    }
-    let (models, _) = bunny_obj.unwrap();
+// fn load_file(filename: &str, transform: &Transform, invert_normals: bool) -> Vec<Primitive> {
+//     let mut triangles: Vec<Primitive> = vec![];
+//     let bunny_obj = tobj::load_obj(&std::path::Path::new(filename));
+//     if bunny_obj.is_err() {
+//         panic!("obj model is not valid!");
+//     }
+//     let (models, _) = bunny_obj.unwrap();
 
-    for (_, m) in models.iter().enumerate() {
-        let mesh = &m.mesh;
-        for f in 0..mesh.indices.len() / 3 {
-            let i = 3 * f;
-            let x = 3 * mesh.indices[i] as usize;
-            let pt1 = Point(
-                -mesh.positions[x],
-                mesh.positions[x + 1],
-                mesh.positions[x + 2],
-            );
-            let x = 3 * mesh.indices[i + 1] as usize;
-            let pt2 = Point(
-                -mesh.positions[x],
-                mesh.positions[x + 1],
-                mesh.positions[x + 2],
-            );
-            let x = 3 * mesh.indices[i + 2] as usize;
-            let pt3 = Point(
-                -mesh.positions[x],
-                mesh.positions[x + 1],
-                mesh.positions[x + 2],
-            );
-            if invert_normals {
-                triangles.push(Primitive::new_triangle(
-                    transform.apply(&pt1),
-                    transform.apply(&pt2),
-                    transform.apply(&pt3),
-                    Material::white(),
-                ));
-            } else {
-                triangles.push(Primitive::new_triangle(
-                    transform.apply(&pt1),
-                    transform.apply(&pt3),
-                    transform.apply(&pt2),
-                    Material::white(),
-                ));
-            }
-        }
-    }
-    triangles
-}
+//     for (_, m) in models.iter().enumerate() {
+//         let mesh = &m.mesh;
+//         for f in 0..mesh.indices.len() / 3 {
+//             let i = 3 * f;
+//             let x = 3 * mesh.indices[i] as usize;
+//             let pt1 = Point(
+//                 -mesh.positions[x],
+//                 mesh.positions[x + 1],
+//                 mesh.positions[x + 2],
+//             );
+//             let x = 3 * mesh.indices[i + 1] as usize;
+//             let pt2 = Point(
+//                 -mesh.positions[x],
+//                 mesh.positions[x + 1],
+//                 mesh.positions[x + 2],
+//             );
+//             let x = 3 * mesh.indices[i + 2] as usize;
+//             let pt3 = Point(
+//                 -mesh.positions[x],
+//                 mesh.positions[x + 1],
+//                 mesh.positions[x + 2],
+//             );
+//             if invert_normals {
+//                 triangles.push(Primitive::new_triangle(
+//                     transform.apply(&pt1),
+//                     transform.apply(&pt2),
+//                     transform.apply(&pt3),
+//                     Material::white(),
+//                 ));
+//             } else {
+//                 triangles.push(Primitive::new_triangle(
+//                     transform.apply(&pt1),
+//                     transform.apply(&pt3),
+//                     transform.apply(&pt2),
+//                     Material::white(),
+//                 ));
+//             }
+//         }
+//     }
+//     triangles
+// }
 
 fn plane(transform: &Transform, material: &Material) -> Vec<Primitive> {
     let pt1 = || transform.apply(&Point(-0.5, 0.0, -0.5));

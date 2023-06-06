@@ -1,6 +1,4 @@
-use crate::light::{primitive::Primitive, ray::Ray, trace::Trace};
-
-
+use crate::light::{primitives::Primitive, ray::Ray, trace::Trace};
 
 pub struct BruteForce {
     primitives: Vec<usize>,

@@ -1,17 +1,18 @@
 use super::{
     accelerators::{Accelerator, AcceleratorInstance, AcceleratorStats},
+    algorithms::{path_tracing, whitted, Algorithm},
     camera::Camera,
     color::Color,
     float::Float,
-    primitive::Primitive,
+    primitives::Primitive,
+    rng::{Rng, XorRng},
     section::Section,
-    world::World, algorithms::{Algorithm, whitted, path_tracing},
+    world::World,
 };
-use rand_xoshiro::rand_core::SeedableRng;
-use rand_xoshiro::Xoshiro256PlusPlus;
+#[cfg(not(target_arch = "wasm32"))]
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
-type TraceFn = fn(&Renderer, &mut Xoshiro256PlusPlus, (u32, u32)) -> Color;
+type TraceFn = fn(&Renderer, &mut dyn Rng, (u32, u32)) -> Color;
 type RenderFn = fn(&mut Renderer, &Section, TraceFn) -> Vec<Color>;
 
 pub enum RenderMethod {
@@ -107,6 +108,7 @@ impl Renderer {
         self
     }
     pub fn threads(&mut self, count: u32) -> &mut Renderer {
+        #[cfg(not(target_arch = "wasm32"))]
         if count > 0 {
             rayon::ThreadPoolBuilder::new()
                 .num_threads(count as usize)
@@ -133,7 +135,7 @@ impl Renderer {
             Algorithm::PathTracing => path_tracing::trace_ray,
         };
         let render: RenderFn = match (&self.threads, &self.stats, &self.render_method) {
-            (Some(1), _, _) | (_, Some(_), _) => render_pixels_single_thread,
+            (Some(1), _, _) | (_, Some(_), _) => render_pixels_st,
             (_, _, RenderMethod::Pixels) => render_pixels,
             (_, _, RenderMethod::Tiles) => render_tiles,
             (_, _, RenderMethod::Scanlines) => render_scanlines,
@@ -143,6 +145,14 @@ impl Renderer {
 }
 
 fn render_pixels(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
+    #[cfg(not(target_arch = "wasm32"))]
+    return render_pixels_mt(renderer, section, trace);
+    #[cfg(target_arch = "wasm32")]
+    return render_pixels_st(renderer, section, trace);
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn render_pixels_mt(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
     let Section {
         left,
         top,
@@ -153,13 +163,34 @@ fn render_pixels(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> 
     (0..width * height)
         .into_par_iter()
         .map(|idx| (left + (idx % width), top + (idx / width)))
-        .map_init(Xoshiro256PlusPlus::from_entropy, |rng, pixel| {
-            trace(renderer, rng, pixel)
-        })
+        .map_init(|| XorRng::new(), |rng, pixel| trace(renderer, rng, pixel))
+        .collect()
+}
+
+fn render_pixels_st(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
+    let Section {
+        height,
+        width,
+        left,
+        top,
+    } = *section;
+    let mut rng = XorRng::new();
+
+    (top..height)
+        .flat_map(|y| (left..width).map(move |x| (x, y)))
+        .map(|pixel| trace(renderer, &mut rng, pixel))
         .collect()
 }
 
 fn render_tiles(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
+    #[cfg(not(target_arch = "wasm32"))]
+    return render_tiles_mt(renderer, section, trace);
+    #[cfg(target_arch = "wasm32")]
+    return render_pixels_st(renderer, section, trace);
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn render_tiles_mt(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
     let Section {
         left,
         top,
@@ -180,12 +211,15 @@ fn render_tiles(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> V
 
     let tiles = tiles
         .into_par_iter()
-        .map_init(Xoshiro256PlusPlus::from_entropy, |rnd, (x, y)| {
-            (0..tile_size * tile_size)
-                .map(|idx| (x + (idx % tile_size), y + (idx / tile_size)))
-                .map(|pixel| trace(renderer, rnd, pixel))
-                .collect()
-        })
+        .map_init(
+            || XorRng::new(),
+            |rnd, (x, y)| {
+                (0..tile_size * tile_size)
+                    .map(|idx| (x + (idx % tile_size), y + (idx / tile_size)))
+                    .map(|pixel| trace(renderer, rnd, pixel))
+                    .collect()
+            },
+        )
         .collect::<Vec<Vec<Color>>>();
 
     let mut pixels: Vec<Color> = vec![Color::default(); (width * height) as usize];
@@ -203,39 +237,31 @@ fn render_tiles(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> V
 }
 
 fn render_scanlines(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
+    #[cfg(not(target_arch = "wasm32"))]
+    return render_scanlines_mt(renderer, section, trace);
+    #[cfg(target_arch = "wasm32")]
+    return render_pixels_st(renderer, section, trace);
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn render_scanlines_mt(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
     let Section {
         height, width, top, ..
     } = section;
 
     (0..*height)
         .into_par_iter()
-        .map_init(Xoshiro256PlusPlus::from_entropy, |rng, row| {
-            let y = top + row;
+        .map_init(
+            || XorRng::new(),
+            |rng, row| {
+                let y = top + row;
 
-            (0..*width)
-                .map(|idx| (idx, y))
-                .map(|pixel| trace(renderer, rng, pixel))
-                .collect::<Vec<Color>>()
-        })
+                (0..*width)
+                    .map(|idx| (idx, y))
+                    .map(|pixel| trace(renderer, rng, pixel))
+                    .collect::<Vec<Color>>()
+            },
+        )
         .flatten()
         .collect::<Vec<Color>>()
-}
-
-fn render_pixels_single_thread(
-    renderer: &mut Renderer,
-    section: &Section,
-    trace: TraceFn,
-) -> Vec<Color> {
-    let Section {
-        height,
-        width,
-        left,
-        top,
-    } = *section;
-    let mut rng = Xoshiro256PlusPlus::from_entropy();
-
-    (top..height)
-        .flat_map(|y| (left..width).map(move |x| (x, y)))
-        .map(|pixel| trace(renderer, &mut rng, pixel))
-        .collect()
 }

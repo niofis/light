@@ -5,5 +5,5 @@ members = [
     "ilios",
     "photon",
     "screen",
-    "ilios-display"
+    "ilios-wasm"
 ]

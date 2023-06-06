@@ -8,7 +8,4 @@ edition = "2018"
 split-debuginfo = "unpacked"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-rand = "0.8"
 rayon = "1.5"
-tobj = "1.0"
-rand_xoshiro = "0.6.0"

@@ -1,17 +1,13 @@
-use crate::{Color, Material, Renderer, Vector, light::{ray::Ray, color, closest_primitive::ClosestPrimitive, primitive::Primitive}, float::{Float, PI}};
-use rand::Rng;
-use rand_xoshiro::Xoshiro256PlusPlus;
-
-
-
+use crate::{
+    float::{Float, PI},
+    light::{
+        closest_primitive::ClosestPrimitive, color, primitives::Primitive, ray::Ray, rng::Rng,
+    },
+    Color, Material, Renderer, Vector,
+};
 const MAX_DEPTH: u8 = 5;
 
-fn trace_ray_internal(
-    renderer: &Renderer,
-    rng: &mut Xoshiro256PlusPlus,
-    ray: &Ray,
-    depth: u8,
-) -> Color {
+fn trace_ray_internal(renderer: &Renderer, rng: &mut dyn Rng, ray: &Ray, depth: u8) -> Color {
     if depth > MAX_DEPTH {
         return color::BLACK;
     }
@@ -72,12 +68,14 @@ fn trace_ray_internal(
     }
 }
 
-pub fn trace_ray(renderer: &Renderer, rng: &mut Xoshiro256PlusPlus, pixel: (u32, u32)) -> Color {
+pub fn trace_ray(renderer: &Renderer, rng: &mut dyn Rng, pixel: (u32, u32)) -> Color {
     let mut final_color = color::BLACK;
     let samples = renderer.samples;
     let (x, y) = pixel;
     for _ in 0..samples {
-        let (nx, ny) = rng.gen::<(Float, Float)>();
+        // let (nx, ny) = rng.gen::<(Float, Float)>();
+        let nx = rng.gen();
+        let ny = rng.gen();
         let ray = renderer.camera.get_ray(x as Float + nx, y as Float + ny);
         let sample_color = trace_ray_internal(renderer, rng, &ray, 1);
         final_color = final_color + sample_color
@@ -114,9 +112,11 @@ fn rotate_vector(vector: &Vector, axis: &Vector, angle: Float) -> Vector {
     (vector * cos) + (axis.cross(vector) * sin) + (axis * axis.dot(vector) * (1.0 - cos))
 }
 
-fn random_dome(rng: &mut Xoshiro256PlusPlus, normal: &Vector) -> Vector {
+fn random_dome(rng: &mut dyn Rng, normal: &Vector) -> Vector {
     let (v, _) = normal.coordinate_system();
-    let (r1, r2) = rng.gen::<(Float, Float)>();
+    // let (r1, r2) = rng.gen::<(Float, Float)>();
+    let r1 = rng.gen();
+    let r2 = rng.gen();
     let first_rotation = 0.8 * r1 * PI / 2.0;
     let second_rotation = r2 * PI * 2.0;
     let nr = rotate_vector(normal, &v, first_rotation);

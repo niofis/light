@@ -1,4 +1,4 @@
-use super::primitive::Primitive;
+use super::primitives::Primitive;
 use crate::float::Float;
 
 pub struct ClosestPrimitive<'a> {
