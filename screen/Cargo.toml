@@ -10,7 +10,7 @@ split-debuginfo = "unpacked"
 [dependencies]
 clap = "3"
 time = "0.3"
-ilios = { path = "../ilios" }
+light = { path = "../light" }
 
 [dependencies.sdl2]
 version = "0.35"

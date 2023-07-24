@@ -11,5 +11,5 @@ split-debuginfo = "unpacked"
 bincode = "2.0.0-rc.2"
 clap = "3"
 chrono = "0.4.19"
-ilios = { path = "../ilios" }
+light = { path = "../light" }
 time = "0.3"

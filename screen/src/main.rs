@@ -1,10 +1,13 @@
-use ilios::float::PI;
-use ilios::{demos, Accelerator, Camera, Color, Point, RenderMethod, Renderer, Section, Algorithm};
+use light::float::PI;
+use light::{
+    demos, Accelerator, Algorithm, Camera, Color, Point, RenderMethod, Renderer, Section, Transform,
+};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::Rect;
 use std::error::Error;
+use std::fs;
 use time::Instant;
 
 struct FrameTimmings {
@@ -36,7 +39,7 @@ impl FrameTimmings {
 
 fn main() -> Result<(), Box<dyn Error>> {
     let width: u32 = 640;
-    let height: u32 = 480;
+    let height: u32 = 360;
     let bpp = 4;
     let sdl_context = sdl2::init()?;
     let video_subsystem = sdl_context.video()?;
@@ -68,7 +71,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         ))
         .algorithm(Algorithm::PathTracing)
         .render_method(RenderMethod::Tiles)
-        .world(demos::cornell())
+        // .world(demos::cornell())
+        .from_json(&fs::read_to_string("../photon/scene.json")?)
         .accelerator(Accelerator::BoundingVolumeHierarchy)
         .finish();
 
@@ -78,6 +82,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut frames_count: f32 = 0.0;
 
     let mut frame_timmings = FrameTimmings::new();
+    let mut reset: bool = false;
 
     // let cs1 = Vector::new(0.0, 1.0, 0.0).coordinate_system();
     // let u = Vector::new(1.0, 2.0, 3.0).unit();
@@ -90,6 +95,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     //     (u, v, w),
     //     (u.dot(&v), u.dot(&w), v.dot(&w))
     // );
+
+    let mut modified = fs::metadata("../photon/scene.json")?.modified()?;
+    // let json = fs::read_to_string("../photon/scene.json")?;
+    // renderer.from_json(&json);
 
     'event_loop: loop {
         let timer = Instant::now();
@@ -108,34 +117,81 @@ fn main() -> Result<(), Box<dyn Error>> {
                     ..
                 } => {
                     if keycode == Keycode::Left {
-                        renderer.camera.rotate(0.0, -PI / 100.0, 0.0);
+                        renderer
+                            .camera
+                            .apply_transform(&Transform::rotate(0.0, -PI / 100.0, 0.0));
                     } else if keycode == Keycode::Right {
-                        renderer.camera.rotate(0.0, PI / 100.0, 0.0);
+                        renderer
+                            .camera
+                            .apply_transform(&Transform::rotate(0.0, PI / 100.0, 0.0));
                     } else if keycode == Keycode::Up {
-                        renderer.camera.rotate(-PI / 100.0, 0.0, 0.0);
+                        renderer
+                            .camera
+                            .apply_transform(&Transform::rotate(-PI / 100.0, 0.0, 0.0));
                     } else if keycode == Keycode::Down {
-                        renderer.camera.rotate(PI / 100.0, 0.0, 0.0);
+                        renderer
+                            .camera
+                            .apply_transform(&Transform::rotate(PI / 100.0, 0.0, 0.0));
                     } else if keycode == Keycode::W {
-                        renderer.camera.translate(0.0, 0.0, 5.0);
+                        renderer
+                            .camera
+                            .apply_transform(&Transform::translate(0.0, 0.0, 5.0));
                     } else if keycode == Keycode::S {
-                        renderer.camera.translate(0.0, 0.0, -5.0);
+                        renderer
+                            .camera
+                            .apply_transform(&Transform::translate(0.0, 0.0, -5.0));
                     } else if keycode == Keycode::A {
-                        renderer.camera.translate(5.0, 0.0, 0.0);
+                        renderer
+                            .camera
+                            .apply_transform(&Transform::translate(5.0, 0.0, 0.0));
                     } else if keycode == Keycode::D {
-                        renderer.camera.translate(-5.0, 0.0, 0.0);
+                        renderer
+                            .camera
+                            .apply_transform(&Transform::translate(-5.0, 0.0, 0.0));
                     } else if keycode == Keycode::Q {
-                        renderer.camera.translate(0.0, 5.0, 0.0);
+                        renderer
+                            .camera
+                            .apply_transform(&Transform::translate(0.0, 5.0, 0.0));
                     } else if keycode == Keycode::E {
-                        renderer.camera.translate(0.0, -5.0, 0.0);
+                        renderer
+                            .camera
+                            .apply_transform(&Transform::translate(0.0, -5.0, 0.0));
                     }
 
-                    frames = vec![Color(0., 0., 0.); (4 * width * height) as usize];
-                    buffer = vec![0; (4 * width * height) as usize];
-                    frames_count = 0.0;
-                    frame_timmings = FrameTimmings::new();
+                    reset = true;
                 }
                 _ => {}
             }
+        }
+
+        let new_modified = fs::metadata("../photon/scene.json")?.modified()?;
+        if modified != new_modified {
+            modified = new_modified;
+            renderer = Renderer::build();
+            renderer
+                .width(width)
+                .height(height)
+                .camera(Camera::new(
+                    Point(0.0, 0.75, -36.0),
+                    Point(-1.0, 1.5, -35.0),
+                    Point(-1.0, 0.0, -35.0),
+                    Point(1.0, 1.5, -35.0),
+                ))
+                .algorithm(Algorithm::PathTracing)
+                .render_method(RenderMethod::Tiles)
+                // .world(demos::cornell())
+                .from_json(&fs::read_to_string("../photon/scene.json")?)
+                .accelerator(Accelerator::BoundingVolumeHierarchy)
+                .finish();
+            reset = true;
+        }
+
+        if reset {
+            frames = vec![Color(0., 0., 0.); (4 * width * height) as usize];
+            buffer = vec![0; (4 * width * height) as usize];
+            frames_count = 0.0;
+            frame_timmings = FrameTimmings::new();
+            reset = false;
         }
 
         let pixels = renderer.render(&section);

@@ -1,6 +1,6 @@
 use clap::{App, Arg};
-use ilios::{demos, Accelerator, RenderMethod, Renderer, Section};
-use ilios::{Camera, Point};
+use light::{demos, Accelerator, RenderMethod, Renderer, Section};
+use light::{Camera, Point};
 
 fn main() {
     let _matches = App::new("Bench")

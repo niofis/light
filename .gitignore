@@ -1,7 +1,7 @@
 
 /target
 **/*.rs.bk
-ilios/target
+light/target
 light/target
 screen/target
 photon/target

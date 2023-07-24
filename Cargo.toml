@@ -2,8 +2,8 @@
 
 members = [
     "bench",
-    "ilios",
+    "light",
     "photon",
     "screen",
-    "ilios-wasm"
+    "light-wasm"
 ]

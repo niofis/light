@@ -1,6 +1,6 @@
 use bincode::{config, Encode};
 use clap::{App, Arg};
-use ilios::{demos, Accelerator, Algorithm, Camera, Color, Point, RenderMethod, Renderer, Section};
+use light::{demos, Accelerator, Algorithm, Camera, Color, Point, RenderMethod, Renderer, Section};
 use std::fs;
 
 #[derive(Encode)]
@@ -70,7 +70,6 @@ fn main() {
         )
         .arg(
             Arg::with_name("accelerator")
-                .short('a')
                 .long("accelerator")
                 .takes_value(true)
                 .multiple(false)
@@ -95,7 +94,6 @@ fn main() {
                 .help("renders the specified obj file"))
         .arg(
             Arg::with_name("stats")
-                .short('t')
                 .long("stats")
                 .takes_value(false)
                 .multiple(false)
@@ -171,6 +169,13 @@ fn main() {
             .multiple(false)
             .help("outupt image height")
         )
+        .arg(
+            Arg::with_name("json")
+            .long("json")
+            .takes_value(true)
+            .multiple(false)
+            .help("load scene from the specified json file")
+        )
         .get_matches();
     let mut width: u32 = 640;
     let mut height: u32 = 360;
@@ -236,11 +241,16 @@ fn main() {
         Some("shader_bench") => {
             renderer.world(demos::shader_bench());
         }
-        _ => return println!("scene not found!"),
+        _ => {}
     }
 
-    if let Some(val) = matches.value_of("obj") {
-        renderer.world(demos::obj(val));
+    // if let Some(val) = matches.value_of("obj") {
+    //     renderer.world(demos::obj(val));
+    // }
+
+    if let Some(json_file) = matches.value_of("json") {
+        let json = fs::read_to_string(json_file).unwrap();
+        renderer.from_json(&json);
     }
 
     match matches.value_of("accelerator") {

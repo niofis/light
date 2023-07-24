@@ -33,7 +33,7 @@ name = "bench"
 version = "0.1.0"
 dependencies = [
  "clap",
- "ilios",
+ "light",
  "num_cpus",
  "time 0.3.17",
 ]
@@ -284,20 +284,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ilios"
-version = "0.1.0"
-dependencies = [
- "rayon",
-]
-
-[[package]]
-name = "ilios-wasm"
-version = "0.1.0"
-dependencies = [
- "ilios",
-]
-
-[[package]]
 name = "indexmap"
 version = "1.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -306,6 +292,12 @@ dependencies = [
  "autocfg",
  "hashbrown",
 ]
+
+[[package]]
+name = "itoa"
+version = "1.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "453ad9f582a441959e5f0d088b02ce04cfe8d51a8eaf077f12ac6d3e94164ca6"
 
 [[package]]
 name = "js-sys"
@@ -327,6 +319,21 @@ name = "libc"
 version = "0.2.139"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "201de327520df007757c1f0adce6e827fe8562fbc28bfd9c15571c66ca1f5f79"
+
+[[package]]
+name = "light"
+version = "0.1.0"
+dependencies = [
+ "rayon",
+ "serde_json",
+]
+
+[[package]]
+name = "light-wasm"
+version = "0.1.0"
+dependencies = [
+ "light",
+]
 
 [[package]]
 name = "link-cplusplus"
@@ -403,7 +410,7 @@ dependencies = [
  "bincode",
  "chrono",
  "clap",
- "ilios",
+ "light",
  "time 0.3.17",
 ]
 
@@ -448,6 +455,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "ryu"
+version = "1.0.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f91339c0467de62360649f8d3e185ca8de4224ff281f66000de5eb2a77a79041"
+
+[[package]]
 name = "scopeguard"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -464,7 +477,7 @@ name = "screen"
 version = "0.1.0"
 dependencies = [
  "clap",
- "ilios",
+ "light",
  "sdl2",
  "time 0.3.17",
 ]
@@ -498,6 +511,17 @@ name = "serde"
 version = "1.0.152"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bb7d1f0d3021d347a83e556fc4683dea2ea09d87bccdf88ff5c12545d89d5efb"
+
+[[package]]
+name = "serde_json"
+version = "1.0.96"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "057d394a50403bcac12672b2b18fb387ab6d289d957dab67dd201875391e52f1"
+dependencies = [
+ "itoa",
+ "ryu",
+ "serde",
+]
 
 [[package]]
 name = "strsim"
