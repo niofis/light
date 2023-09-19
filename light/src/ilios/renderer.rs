@@ -84,7 +84,7 @@ impl Renderer {
     pub fn world(&mut self, world: World) -> &mut Renderer {
         self.world = world;
         self.primitives = self.world.primitives();
-        if let Some(mut stats) = self.stats.as_mut() {
+        if let Some(stats) = self.stats.as_mut() {
             stats.primitives = self.primitives.len();
         }
         self
@@ -108,7 +108,7 @@ impl Renderer {
             Accelerator::BruteForce => AcceleratorInstance::new_brute_force(&self.primitives),
             Accelerator::BoundingVolumeHierarchy => {
                 let acc = AcceleratorInstance::new_bounding_volume_hierarchy(&self.primitives);
-                if let Some(mut stats) = self.stats.as_mut() {
+                if let Some(stats) = self.stats.as_mut() {
                     stats.accelerator = Some(acc.stats());
                 }
                 acc

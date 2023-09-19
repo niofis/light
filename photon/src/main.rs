@@ -1,5 +1,5 @@
 use bincode::{config, Encode};
-use clap::{App, Arg};
+use clap::{value_parser, Arg, ArgAction, Command};
 use light::{demos, Accelerator, Algorithm, Camera, Color, Point, RenderMethod, Renderer, Section};
 use std::fs;
 
@@ -56,144 +56,127 @@ fn format_as_binary(pixels: &[Color], width: u32, height: u32) -> Vec<u8> {
 }
 
 fn main() {
-    let matches = App::new("Photon")
+    let matches = Command::new("Photon")
         .version("0.1")
         .author("Enrique <niofis@gmail.com>")
         .about("Renders a scene using the light engine")
         .arg(
-            Arg::with_name("threads")
+            Arg::new("threads")
                 .short('t')
                 .long("threads")
-                .takes_value(true)
-                .multiple(false)
+                .action(ArgAction::Set)
+                .value_parser(value_parser!(u32))
                 .help("specify the number of threads to use, defaults to the number of cpus available"),
         )
         .arg(
-            Arg::with_name("accelerator")
+            Arg::new("accelerator")
                 .long("accelerator")
-                .takes_value(true)
-                .multiple(false)
-                .possible_values(&["brute_force", "bvh"])
+                .action(ArgAction::Set)
+                .value_parser(value_parser!(String))
                 .default_value("bvh")
-                .help("specify the accelerator structure to use, defaults to bvh"))
+                .help("specify the accelerator structure to use from: brute_force and bvh. Defaults to bvh"))
         .arg(
-            Arg::with_name("demo")
+            Arg::new("demo")
                 .short('d')
                 .long("demo")
-                .takes_value(true)
-                .multiple(false)
-                .possible_values(&["simple", "cornell", "bunny"])
-                .help("renders one of the demo scenes"))
+                .action(ArgAction::Set)
+                .value_parser(value_parser!(String))
+                .help("renders one of the demo scenes: simple, cornell, bunny"))
         .arg(
-            Arg::with_name("obj")
+            Arg::new("obj")
                 .short('o')
                 .long("obj")
-                .takes_value(true)
-                .multiple(false)
+                .action(ArgAction::Set)
+                .value_parser(value_parser!(String))
                 .conflicts_with("demo")
                 .help("renders the specified obj file"))
         .arg(
-            Arg::with_name("stats")
+            Arg::new("stats")
                 .long("stats")
-                .takes_value(false)
-                .multiple(false)
+                .action(ArgAction::Set)
+                .value_parser(value_parser!(u32))
                 .conflicts_with("threads")
                 .help("captures stats and prints them when done rendering. cannot be used with threads"))
         .arg(
-            Arg::with_name("algorithm")
+            Arg::new("algorithm")
                 .short('a')
                 .long("algorithm")
-                .takes_value(true)
-                .multiple(false)
+                .action(ArgAction::Set)
+                .value_parser(value_parser!(String))
                 .help("choose the rendering algorithm, options: pathtracing, whitted. Not setting this option defaults to pathtracing"))
         .arg(
-            Arg::with_name("render method")
+            Arg::new("render method")
                 .short('r')
                 .long("rendermethod")
-                .takes_value(true)
-                .multiple(false)
+                .action(ArgAction::Set)
+                .value_parser(value_parser!(String))
                 .help("select the rendering method: pixels, tiles, scanlines. Not setting this option defaults to tiles.")
         )
         .arg(
-            Arg::with_name("samples count")
+            Arg::new("samples count")
                 .short('c')
                 .long("samples")
-                .takes_value(true)
-                .multiple(false)
+                .action(ArgAction::Set)
+                .value_parser(value_parser!(u32))
                 .help("specify the number of samples per pixel to collect")
         )
         .arg(
-            Arg::with_name("ppm")
+            Arg::new("ppm")
                 .short('p')
                 .long("ppm")
-                .takes_value(false)
-                .multiple(false)
+                .action(ArgAction::SetTrue)
                 .help("outputs ppm to the stdio")
         )
         .arg(
-            Arg::with_name("savefile")
+            Arg::new("savefile")
                 .short('s')
                 .long("save")
-                .takes_value(false)
-                .multiple(false)
                 .help("saves the ppm to disk using the default name structure: YYYYMMDD-HHMM-SAMPLES-TIME.ppm")
         )
         .arg(
-            Arg::with_name("save binary")
+            Arg::new("save binary")
                 .short('b')
                 .long("binary")
-                .takes_value(false)
-                .multiple(false)
                 .help("saves the render result as a binary file using the default name structure: YYYMMDD-HHMM-SAMPLES-TIME.brf"))
         .arg(
-            Arg::with_name("ml")
+            Arg::new("ml")
             .short('m')
             .long("machine-learning")
-            .takes_value(false)
-            .multiple(false)
             .help("generates a 1000 samples image plus 1000 single sample images to use for ml; saves to /.ml folder")
         )
         .arg(
-            Arg::with_name("width")
+            Arg::new("width")
             .short('w')
             .long("width")
-            .takes_value(true)
-            .multiple(false)
+            .value_parser(value_parser!(u32))
             .help("outupt image width")
         )
         .arg(
-            Arg::with_name("height")
+            Arg::new("height")
             .short('h')
             .long("height")
-            .takes_value(true)
-            .multiple(false)
+            .value_parser(value_parser!(u32))
             .help("outupt image height")
         )
         .arg(
-            Arg::with_name("json")
+            Arg::new("json")
             .long("json")
-            .takes_value(true)
-            .multiple(false)
             .help("load scene from the specified json file")
         )
         .get_matches();
     let mut width: u32 = 640;
     let mut height: u32 = 360;
 
-    if let Some(val) = matches.value_of("width") {
-        if let Ok(parsed_width) = val.parse() {
-            width = parsed_width;
-        } else {
-            eprintln!("invalid width value!");
-        }
+    if let Some(val) = matches.get_one::<u32>("width") {
+        width = *val;
+    } else {
+        eprintln!("invalid width value!");
     }
 
-    if let Some(val) = matches.value_of("height") {
-        if let Ok(parsed_height) = val.parse() {
-            height = parsed_height;
-        } else {
-            eprintln!("invalid height value!");
-        }
+    if let Some(val) = matches.get_one::<u32>("height") {
+        height = *val;
+    } else {
+        eprintln!("invalid height value!");
     }
 
     let mut renderer = Renderer::build();
@@ -206,8 +189,8 @@ fn main() {
         Point(8.0, 9.0 + v_offset, -50.0 - z_offset),
     ));
 
-    match matches.value_of("algorithm") {
-        Some("whitted") => {
+    match matches.get_one::<String>("algorithm") {
+        Some(val) if val == "whitted" => {
             renderer.algorithm(Algorithm::Whitted);
         }
         _ => {
@@ -215,11 +198,11 @@ fn main() {
         }
     }
 
-    match matches.value_of("render method") {
-        Some("pixels") => {
+    match matches.get_one::<String>("render method") {
+        Some(val) if val == "pixels" => {
             renderer.render_method(RenderMethod::Pixels);
         }
-        Some("scanlines") => {
+        Some(val) if val == "scanlines" => {
             renderer.render_method(RenderMethod::Scanlines);
         }
         _ => {
@@ -227,18 +210,18 @@ fn main() {
         }
     }
 
-    if matches.is_present("stats") {
+    if matches.contains_id("stats") {
         renderer.use_stats();
     }
 
-    match matches.value_of("demo") {
-        Some("simple") => {
+    match matches.get_one::<String>("demo") {
+        Some(val) if val == "simple" => {
             renderer.world(demos::simple());
         }
-        Some("cornell") => {
+        Some(val) if val == "cornell" => {
             renderer.world(demos::cornell());
         }
-        Some("shader_bench") => {
+        Some(val) if val == "shader_bench" => {
             renderer.world(demos::shader_bench());
         }
         _ => {}
@@ -248,35 +231,29 @@ fn main() {
     //     renderer.world(demos::obj(val));
     // }
 
-    if let Some(json_file) = matches.value_of("json") {
+    if let Some(json_file) = matches.get_one::<String>("json") {
         let json = fs::read_to_string(json_file).unwrap();
         renderer.from_json(&json);
     }
 
-    match matches.value_of("accelerator") {
-        Some("brute_force") => {
+    match matches.get_one::<String>("accelerator") {
+        Some(val) if val == "brute_force" => {
             renderer.accelerator(Accelerator::BruteForce);
         }
-        Some("bvh") => {
+        Some(val) if val == "bvh" => {
             renderer.accelerator(Accelerator::BoundingVolumeHierarchy);
         }
         _ => {}
     }
 
-    if let Some(val) = matches.value_of("threads") {
-        if let Ok(threads) = val.parse() {
-            renderer.threads(threads);
-        } else {
-            eprintln!("invalid threads value!");
-        }
+    if let Some(val) = matches.get_one::<u32>("threads") {
+        renderer.threads(*val);
+    } else {
+        eprintln!("invalid threads value!");
     }
 
-    if let Some(val) = matches.value_of("samples count") {
-        if let Ok(samples) = val.parse() {
-            renderer.samples(samples);
-        } else {
-            eprintln!("invalid samples value!");
-        }
+    if let Some(val) = matches.get_one::<u32>("samples count") {
+        renderer.samples(*val);
     } else {
         renderer.samples(10);
     }
@@ -284,8 +261,8 @@ fn main() {
     let section = Section::new(0, 0, width, height);
     renderer.finish();
 
-    if matches.is_present("ml") {
-        let demo = matches.value_of("demo").unwrap();
+    if matches.contains_id("ml") {
+        let demo: String = matches.get_one::<String>("demo").unwrap().to_owned();
         let start = time::Instant::now();
         renderer.samples(1000);
         let pixels = renderer.render(&section);
@@ -312,21 +289,21 @@ fn main() {
     let elapsed = start.elapsed().as_seconds_f32();
     eprintln!("Rendering time: {}s", elapsed);
 
-    if matches.is_present("save binary") {
+    if matches.contains_id("save binary") {
         let now = chrono::offset::Local::now();
         let date = now.format("%Y%m%d-%H%M%S");
         let filename = format!("{}-{}-{}.brf", date, renderer.samples, elapsed.ceil());
         let data = format_as_binary(&pixels, width, height);
         fs::write(&filename, data).unwrap();
         eprintln!("saved file {}", filename);
-    } else if matches.is_present("savefile") {
+    } else if matches.contains_id("savefile") {
         let ppm = format_as_ppm(&pixels, width, height);
         let now = chrono::offset::Local::now();
         let date = now.format("%Y%m%d-%H%M%S");
         let filename = format!("{}-{}-{}.ppm", date, renderer.samples, elapsed.ceil());
         fs::write(&filename, ppm).unwrap();
         eprintln!("saved file {}", filename);
-    } else if matches.is_present("ppm") {
+    } else if matches.contains_id("ppm") {
         let ppm = format_as_ppm(&pixels, width, height);
         println!("{}", ppm);
     }

@@ -2,9 +2,9 @@
 /target
 **/*.rs.bk
 light/target
-light/target
 screen/target
 photon/target
 bench/target
+light-wasm/target
 .DS_Store
 photon/ml

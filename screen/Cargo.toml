@@ -8,7 +8,7 @@ edition = "2018"
 split-debuginfo = "unpacked"
 
 [dependencies]
-clap = "3"
+clap = "4"
 time = "0.3"
 light = { path = "../light" }
 

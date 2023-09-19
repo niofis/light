@@ -11,4 +11,4 @@ split-debuginfo = "unpacked"
 serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-rayon = "1.5"
+rayon = "1.7"

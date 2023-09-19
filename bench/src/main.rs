@@ -1,34 +1,28 @@
-use clap::{App, Arg};
+use clap::{Command, Arg};
 use light::{demos, Accelerator, RenderMethod, Renderer, Section};
 use light::{Camera, Point};
 
 fn main() {
-    let _matches = App::new("Bench")
+    let _matches = Command::new("Bench")
         .version("0.1")
         .author("Enrique <niofis@gmail.com>")
         .about("Benchmarks the light engine")
         .arg(
-            Arg::with_name("no save")
+            Arg::new("no save")
                 .short('n')
                 .long("no-save")
-                .takes_value(false)
-                .multiple(false)
                 .help("don't save the result"),
         )
         .arg(
-            Arg::with_name("compare")
+            Arg::new("compare")
                 .short('c')
                 .long("compare")
-                .takes_value(false)
-                .multiple(false)
                 .help("compares agains the latest saved run"),
         )
         .arg(
-            Arg::with_name("comment")
+            Arg::new("comment")
                 .short('C')
                 .long("comment")
-                .takes_value(true)
-                .multiple(false)
                 .help("adds a comment to the saved result"),
         )
         .get_matches();

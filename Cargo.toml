@@ -1,9 +1,0 @@
-[workspace]
-
-members = [
-    "bench",
-    "light",
-    "photon",
-    "screen",
-    "light-wasm"
-]

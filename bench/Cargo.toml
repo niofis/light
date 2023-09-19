@@ -9,7 +9,7 @@ edition = "2018"
 split-debuginfo = "unpacked"
 
 [dependencies]
-clap = "3.2"
+clap = "4.4"
 time = "0.3"
 light = { path = "../light" }
 num_cpus = "1"

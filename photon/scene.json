@@ -29,10 +29,9 @@
       },
       {
         "type": "emissive",
-        "color": [1.0, 1.0, 1.0],
+        "color": [10.0, 10.0, 10.0],
         "id": "emissive-white"
       },
-
       {
         "type": "emissive",
         "color": [1.0, 0.0, 0.0],
@@ -52,15 +51,15 @@
     "objects": [
       {
         "type": "sphere",
-        "center": [-11.0, -9.0, -11.0],
-        "radius": 1.0,
-        "material": "emissive-white"
-      },
-      {
-        "type": "sphere",
         "center": [17.0, -3.0, 10.0],
         "radius": 7.0,
         "material": "blue-reflective"
+      },
+      {
+        "type": "sphere",
+        "center": [-22.0, -7.0, -10.0],
+        "radius": 3.0,
+        "material": "test-refractive"
       },
       {
         "type": "cube",
