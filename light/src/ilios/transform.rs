@@ -3,7 +3,7 @@ use crate::ilios::point::Point;
 
 type Matrix = [Float; 16];
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Transform(pub Matrix);
 
 fn combine(mts: &[Matrix]) -> Matrix {

@@ -179,92 +179,95 @@ fn main() {
         eprintln!("invalid height value!");
     }
 
-    let mut renderer = Renderer::build();
+    let mut renderer_builder = Renderer::builder();
     let v_offset = 3.0;
     let z_offset = -10.0;
-    renderer.width(width).height(height).camera(Camera::new(
-        Point(0.0, 9.0 / 2.0 + v_offset, -60.0 - z_offset),
-        Point(-8.0, 9.0 + v_offset, -50.0 - z_offset),
-        Point(-8.0, 0.0 + v_offset, -50.0 - z_offset),
-        Point(8.0, 9.0 + v_offset, -50.0 - z_offset),
-    ));
+    renderer_builder
+        .width(width)
+        .height(height)
+        .camera(Camera::new(
+            Point(0.0, 9.0 / 2.0 + v_offset, -60.0 - z_offset),
+            Point(-8.0, 9.0 + v_offset, -50.0 - z_offset),
+            Point(-8.0, 0.0 + v_offset, -50.0 - z_offset),
+            Point(8.0, 9.0 + v_offset, -50.0 - z_offset),
+        ));
 
     match matches.get_one::<String>("algorithm") {
         Some(val) if val == "whitted" => {
-            renderer.algorithm(Algorithm::Whitted);
+            renderer_builder.algorithm(Algorithm::Whitted);
         }
         _ => {
-            renderer.algorithm(Algorithm::PathTracing);
+            renderer_builder.algorithm(Algorithm::PathTracing);
         }
     }
 
     match matches.get_one::<String>("render method") {
         Some(val) if val == "pixels" => {
-            renderer.render_method(RenderMethod::Pixels);
+            renderer_builder.render_method(RenderMethod::Pixels);
         }
         Some(val) if val == "scanlines" => {
-            renderer.render_method(RenderMethod::Scanlines);
+            renderer_builder.render_method(RenderMethod::Scanlines);
         }
         _ => {
-            renderer.render_method(RenderMethod::Tiles);
+            renderer_builder.render_method(RenderMethod::Tiles);
         }
     }
 
     if matches.contains_id("stats") {
-        renderer.use_stats();
+        renderer_builder.use_stats();
     }
 
     match matches.get_one::<String>("demo") {
         Some(val) if val == "simple" => {
-            renderer.world(demos::simple());
+            renderer_builder.world(demos::simple());
         }
         Some(val) if val == "cornell" => {
-            renderer.world(demos::cornell());
+            renderer_builder.world(demos::cornell());
         }
         Some(val) if val == "shader_bench" => {
-            renderer.world(demos::shader_bench());
+            renderer_builder.world(demos::shader_bench());
         }
         _ => {}
     }
 
     // if let Some(val) = matches.value_of("obj") {
-    //     renderer.world(demos::obj(val));
+    //     renderer_builder.world(demos::obj(val));
     // }
 
     if let Some(json_file) = matches.get_one::<String>("json") {
         let json = fs::read_to_string(json_file).unwrap();
-        renderer.from_json(&json);
+        renderer_builder.from_json(&json);
     }
 
     match matches.get_one::<String>("accelerator") {
         Some(val) if val == "brute_force" => {
-            renderer.accelerator(Accelerator::BruteForce);
+            renderer_builder.accelerator(Accelerator::BruteForce);
         }
         Some(val) if val == "bvh" => {
-            renderer.accelerator(Accelerator::BoundingVolumeHierarchy);
+            renderer_builder.accelerator(Accelerator::BoundingVolumeHierarchy);
         }
         _ => {}
     }
 
     if let Some(val) = matches.get_one::<u32>("threads") {
-        renderer.threads(*val);
+        renderer_builder.threads(*val);
     } else {
         eprintln!("invalid threads value!");
     }
 
     if let Some(val) = matches.get_one::<u32>("samples count") {
-        renderer.samples(*val);
+        renderer_builder.samples(*val);
     } else {
-        renderer.samples(10);
+        renderer_builder.samples(10);
     }
 
     let section = Section::new(0, 0, width, height);
-    renderer.finish();
 
     if matches.contains_id("ml") {
         let demo: String = matches.get_one::<String>("demo").unwrap().to_owned();
         let start = time::Instant::now();
-        renderer.samples(1000);
+        renderer_builder.samples(1000);
+        let mut renderer = renderer_builder.build();
         let pixels = renderer.render(&section);
         let data = format_as_binary(&pixels, width, height);
         fs::write(format!("./ml/{}-target.brf", demo), data).unwrap();
@@ -272,7 +275,8 @@ fn main() {
         eprintln!("Target image rendering time: {}s", elapsed);
 
         let start = time::Instant::now();
-        renderer.samples(1);
+        renderer_builder.samples(1);
+        let mut renderer = renderer_builder.build();
         for i in 0..100 {
             let pixels = renderer.render(&section);
             let data = format_as_binary(&pixels, width, height);
@@ -284,6 +288,7 @@ fn main() {
         return;
     }
 
+    let mut renderer = renderer_builder.build();
     let start = time::Instant::now();
     let pixels = renderer.render(&section);
     let elapsed = start.elapsed().as_seconds_f32();

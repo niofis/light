@@ -10,20 +10,19 @@ use super::{
     section::Section,
     world::World,
 };
-#[cfg(not(target_arch = "wasm32"))]
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
 type TraceFn = fn(&Renderer, &mut dyn Rng, (u32, u32)) -> Color;
 type RenderFn = fn(&mut Renderer, &Section, TraceFn) -> Vec<Color>;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum RenderMethod {
     Pixels,
     Tiles,
     Scanlines,
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Stats {
     primitives: usize,
     accelerator: Option<AcceleratorStats>,
@@ -49,8 +48,8 @@ pub struct Renderer {
 }
 
 impl Renderer {
-    pub fn build() -> Renderer {
-        Renderer {
+    pub fn builder() -> RendererBuilder {
+        RendererBuilder {
             width: 0,
             height: 0,
             accelerator: AcceleratorInstance::None,
@@ -64,80 +63,7 @@ impl Renderer {
             samples: 1,
         }
     }
-    pub fn algorithm(&mut self, algorithm: Algorithm) -> &mut Renderer {
-        self.algorithm = algorithm;
-        self
-    }
-    pub fn width(&mut self, width: u32) -> &mut Renderer {
-        self.width = width;
-        self
-    }
-    pub fn height(&mut self, height: u32) -> &mut Renderer {
-        self.height = height;
-        self
-    }
-    pub fn camera(&mut self, camera: Camera) -> &mut Renderer {
-        self.camera = camera;
-        self.camera.init(self.width as Float, self.height as Float);
-        self
-    }
-    pub fn world(&mut self, world: World) -> &mut Renderer {
-        self.world = world;
-        self.primitives = self.world.primitives();
-        if let Some(stats) = self.stats.as_mut() {
-            stats.primitives = self.primitives.len();
-        }
-        self
-    }
-    pub fn render_method(&mut self, render_method: RenderMethod) -> &mut Renderer {
-        self.render_method = render_method;
-        self
-    }
-    pub fn illumination(&mut self, algorithm: Algorithm) -> &mut Renderer {
-        self.algorithm = algorithm;
-        self
-    }
-    pub fn from_json(&mut self, json: &str) -> &mut Renderer {
-        let (camera, world) = parse_scene(json);
-        self.camera(camera);
-        self.world(world);
-        self
-    }
-    pub fn accelerator(&mut self, accelerator: Accelerator) -> &mut Renderer {
-        self.accelerator = match accelerator {
-            Accelerator::BruteForce => AcceleratorInstance::new_brute_force(&self.primitives),
-            Accelerator::BoundingVolumeHierarchy => {
-                let acc = AcceleratorInstance::new_bounding_volume_hierarchy(&self.primitives);
-                if let Some(stats) = self.stats.as_mut() {
-                    stats.accelerator = Some(acc.stats());
-                }
-                acc
-            }
-        };
-        self
-    }
-    pub fn threads(&mut self, count: u32) -> &mut Renderer {
-        #[cfg(not(target_arch = "wasm32"))]
-        if count > 0 {
-            rayon::ThreadPoolBuilder::new()
-                .num_threads(count as usize)
-                .build_global()
-                .unwrap();
-            self.threads = Some(count);
-        }
-        self
-    }
-    pub fn samples(&mut self, samples: u32) -> &mut Renderer {
-        self.samples = samples;
-        self
-    }
-    pub fn use_stats(&mut self) -> &mut Renderer {
-        self.stats = Some(Stats::default());
-        self
-    }
-    pub fn finish(&mut self) -> &Renderer {
-        self
-    }
+
     pub fn render(&mut self, section: &Section) -> Vec<Color> {
         let trace: TraceFn = match self.algorithm {
             Algorithm::Whitted => whitted::trace_ray,
@@ -153,14 +79,126 @@ impl Renderer {
     }
 }
 
-fn render_pixels(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
-    #[cfg(not(target_arch = "wasm32"))]
-    return render_pixels_mt(renderer, section, trace);
-    #[cfg(target_arch = "wasm32")]
-    return render_pixels_st(renderer, section, trace);
+#[derive(Clone)]
+pub struct RendererBuilder {
+    pub width: u32,
+    pub height: u32,
+    pub accelerator: AcceleratorInstance,
+    pub world: World,
+    pub primitives: Vec<Primitive>,
+    pub camera: Camera,
+    pub render_method: RenderMethod,
+    pub algorithm: Algorithm,
+    pub stats: Option<Stats>,
+    pub threads: Option<u32>,
+    pub samples: u32,
 }
 
-#[cfg(not(target_arch = "wasm32"))]
+impl RendererBuilder {
+    pub fn algorithm(&mut self, algorithm: Algorithm) -> &mut RendererBuilder {
+        self.algorithm = algorithm;
+        self
+    }
+    pub fn width(&mut self, width: u32) -> &mut RendererBuilder {
+        self.width = width;
+        self
+    }
+    pub fn height(&mut self, height: u32) -> &mut RendererBuilder {
+        self.height = height;
+        self
+    }
+    pub fn camera(&mut self, camera: Camera) -> &mut RendererBuilder {
+        self.camera = camera;
+        self.camera.init(self.width as Float, self.height as Float);
+        self
+    }
+    pub fn world(&mut self, world: World) -> &mut RendererBuilder {
+        self.world = world;
+        self.primitives = self.world.primitives();
+        if let Some(stats) = self.stats.as_mut() {
+            stats.primitives = self.primitives.len();
+        }
+        self
+    }
+    pub fn render_method(&mut self, render_method: RenderMethod) -> &mut RendererBuilder {
+        self.render_method = render_method;
+        self
+    }
+    pub fn illumination(&mut self, algorithm: Algorithm) -> &mut RendererBuilder {
+        self.algorithm = algorithm;
+        self
+    }
+    pub fn from_json(&mut self, json: &str) -> &mut RendererBuilder {
+        let (camera, world) = parse_scene(json);
+        self.camera(camera);
+        self.world(world);
+        self
+    }
+    pub fn accelerator(&mut self, accelerator: Accelerator) -> &mut RendererBuilder {
+        self.accelerator = match accelerator {
+            Accelerator::BruteForce => AcceleratorInstance::new_brute_force(&self.primitives),
+            Accelerator::BoundingVolumeHierarchy => {
+                let acc = AcceleratorInstance::new_bounding_volume_hierarchy(&self.primitives);
+                if let Some(stats) = self.stats.as_mut() {
+                    stats.accelerator = Some(acc.stats());
+                }
+                acc
+            }
+        };
+        self
+    }
+    pub fn threads(&mut self, count: u32) -> &mut RendererBuilder {
+        if count > 0 {
+            rayon::ThreadPoolBuilder::new()
+                .num_threads(count as usize)
+                .build_global()
+                .unwrap();
+            self.threads = Some(count);
+        }
+        self
+    }
+    pub fn samples(&mut self, samples: u32) -> &mut RendererBuilder {
+        self.samples = samples;
+        self
+    }
+    pub fn use_stats(&mut self) -> &mut RendererBuilder {
+        self.stats = Some(Stats::default());
+        self
+    }
+    pub fn build(&mut self) -> Renderer {
+        let RendererBuilder {
+            width,
+            height,
+            accelerator,
+            world,
+            primitives,
+            camera,
+            render_method,
+            algorithm,
+            stats,
+            threads,
+            samples,
+        } = self.to_owned();
+        Renderer {
+            width,
+            height,
+            accelerator,
+            world,
+            primitives,
+            camera,
+            render_method,
+            algorithm,
+            stats,
+            threads,
+            samples,
+        }
+    }
+}
+
+fn render_pixels(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
+    return render_pixels_mt(renderer, section, trace);
+}
+
 fn render_pixels_mt(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
     let Section {
         left,
@@ -192,13 +230,9 @@ fn render_pixels_st(renderer: &mut Renderer, section: &Section, trace: TraceFn) 
 }
 
 fn render_tiles(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
-    #[cfg(not(target_arch = "wasm32"))]
     return render_tiles_mt(renderer, section, trace);
-    #[cfg(target_arch = "wasm32")]
-    return render_pixels_st(renderer, section, trace);
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 fn render_tiles_mt(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
     let Section {
         left,
@@ -246,13 +280,9 @@ fn render_tiles_mt(renderer: &mut Renderer, section: &Section, trace: TraceFn) -
 }
 
 fn render_scanlines(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
-    #[cfg(not(target_arch = "wasm32"))]
     return render_scanlines_mt(renderer, section, trace);
-    #[cfg(target_arch = "wasm32")]
-    return render_pixels_st(renderer, section, trace);
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 fn render_scanlines_mt(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
     let Section {
         height, width, top, ..

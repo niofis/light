@@ -4,7 +4,7 @@ use super::{
 };
 use crate::{Material, Point, Transform};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Solid {
     Triangle(Point, Point, Point, Material),
     Sphere(Point, Float, Material),

@@ -4,7 +4,7 @@ use crate::Material;
 
 use super::{light_source::LightSource, primitives::Primitive, solids::Solid};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct World {
     pub lights: Vec<LightSource>,
     pub objects: Vec<Solid>,

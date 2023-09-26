@@ -11,14 +11,14 @@ pub enum Accelerator {
     BoundingVolumeHierarchy,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum AcceleratorInstance {
     None,
     BruteForce(BruteForce),
     BoundingVolumeHierarchy(Bvh),
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum AcceleratorStats {
     None,
     BoundingVolumeHierachy(BVHStats),

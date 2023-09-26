@@ -59,8 +59,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut fps: String;
 
-    let mut renderer = Renderer::build();
-    renderer
+    let mut renderer_builder = Renderer::builder();
+    renderer_builder
         .width(width)
         .height(height)
         .camera(Camera::new(
@@ -71,10 +71,9 @@ fn main() -> Result<(), Box<dyn Error>> {
         ))
         .algorithm(Algorithm::PathTracing)
         .render_method(RenderMethod::Tiles)
-        // .world(demos::cornell())
-        .from_json(&fs::read_to_string("../photon/scene.json")?)
-        .accelerator(Accelerator::BoundingVolumeHierarchy)
-        .finish();
+        .world(demos::cornell())
+        // .from_json(&fs::read_to_string("../photon/scene.json")?)
+        .accelerator(Accelerator::BoundingVolumeHierarchy);
 
     let mut frames: Vec<Color> = vec![Color(0., 0., 0.); (4 * width * height) as usize];
     let mut buffer: Vec<u8> = vec![0; (4 * width * height) as usize];
@@ -98,7 +97,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut modified = fs::metadata("../photon/scene.json")?.modified()?;
     // let json = fs::read_to_string("../photon/scene.json")?;
-    // renderer.from_json(&json);
+    // renderer_builder.from_json(&json);
 
     'event_loop: loop {
         let timer = Instant::now();
@@ -117,43 +116,51 @@ fn main() -> Result<(), Box<dyn Error>> {
                     ..
                 } => {
                     if keycode == Keycode::Left {
-                        renderer
-                            .camera
-                            .apply_transform(&Transform::rotate(0.0, -PI / 100.0, 0.0));
+                        renderer_builder.camera.apply_transform(&Transform::rotate(
+                            0.0,
+                            -PI / 100.0,
+                            0.0,
+                        ));
                     } else if keycode == Keycode::Right {
-                        renderer
-                            .camera
-                            .apply_transform(&Transform::rotate(0.0, PI / 100.0, 0.0));
+                        renderer_builder.camera.apply_transform(&Transform::rotate(
+                            0.0,
+                            PI / 100.0,
+                            0.0,
+                        ));
                     } else if keycode == Keycode::Up {
-                        renderer
-                            .camera
-                            .apply_transform(&Transform::rotate(-PI / 100.0, 0.0, 0.0));
+                        renderer_builder.camera.apply_transform(&Transform::rotate(
+                            -PI / 100.0,
+                            0.0,
+                            0.0,
+                        ));
                     } else if keycode == Keycode::Down {
-                        renderer
-                            .camera
-                            .apply_transform(&Transform::rotate(PI / 100.0, 0.0, 0.0));
+                        renderer_builder.camera.apply_transform(&Transform::rotate(
+                            PI / 100.0,
+                            0.0,
+                            0.0,
+                        ));
                     } else if keycode == Keycode::W {
-                        renderer
+                        renderer_builder
                             .camera
                             .apply_transform(&Transform::translate(0.0, 0.0, 5.0));
                     } else if keycode == Keycode::S {
-                        renderer
+                        renderer_builder
                             .camera
                             .apply_transform(&Transform::translate(0.0, 0.0, -5.0));
                     } else if keycode == Keycode::A {
-                        renderer
+                        renderer_builder
                             .camera
                             .apply_transform(&Transform::translate(5.0, 0.0, 0.0));
                     } else if keycode == Keycode::D {
-                        renderer
+                        renderer_builder
                             .camera
                             .apply_transform(&Transform::translate(-5.0, 0.0, 0.0));
                     } else if keycode == Keycode::Q {
-                        renderer
+                        renderer_builder
                             .camera
                             .apply_transform(&Transform::translate(0.0, 5.0, 0.0));
                     } else if keycode == Keycode::E {
-                        renderer
+                        renderer_builder
                             .camera
                             .apply_transform(&Transform::translate(0.0, -5.0, 0.0));
                     }
@@ -167,8 +174,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         let new_modified = fs::metadata("../photon/scene.json")?.modified()?;
         if modified != new_modified {
             modified = new_modified;
-            renderer = Renderer::build();
-            renderer
+            renderer_builder = Renderer::builder();
+            renderer_builder
                 .width(width)
                 .height(height)
                 .camera(Camera::new(
@@ -181,8 +188,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 .render_method(RenderMethod::Tiles)
                 // .world(demos::cornell())
                 .from_json(&fs::read_to_string("../photon/scene.json")?)
-                .accelerator(Accelerator::BoundingVolumeHierarchy)
-                .finish();
+                .accelerator(Accelerator::BoundingVolumeHierarchy);
             reset = true;
         }
 
@@ -194,6 +200,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             reset = false;
         }
 
+        let mut renderer = renderer_builder.build();
         let pixels = renderer.render(&section);
         frames_count += 1.0;
         for (idx, pixel) in pixels.into_iter().enumerate() {

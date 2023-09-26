@@ -1,7 +1,7 @@
 pub mod path_tracing;
 pub mod whitted;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Algorithm {
     Whitted,
     PathTracing,

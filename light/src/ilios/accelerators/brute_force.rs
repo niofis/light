@@ -1,6 +1,6 @@
 use crate::ilios::{primitives::Primitive, ray::Ray, trace::Trace};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct BruteForce {
     primitives: Vec<usize>,
 }

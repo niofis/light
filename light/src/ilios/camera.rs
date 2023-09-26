@@ -5,7 +5,7 @@ use crate::Transform;
 
 use super::float::Float;
 
-#[derive(Default, Debug)]
+#[derive(Clone, Default, Debug)]
 pub struct CoordinateSystem {
     pub u: Vector,
     pub v: Vector,
@@ -22,7 +22,7 @@ impl CoordinateSystem {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Camera {
     pub eye: Point,
     pub left_top: Point,

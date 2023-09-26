@@ -7,7 +7,7 @@ use crate::ilios::vector::Vector;
 
 use super::super::float::{MAX, MIN};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Bvh {
     Empty,
     Node {
@@ -18,7 +18,7 @@ pub enum Bvh {
     },
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct BVHStats {
     pub height: usize,
     pub nodes: usize,
