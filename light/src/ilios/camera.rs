@@ -35,8 +35,8 @@ pub struct Camera {
     coordinate_system: CoordinateSystem,
 }
 
-impl Camera {
-    pub fn default() -> Camera {
+impl Default for Camera {
+    fn default() -> Camera {
         Camera {
             eye: Point::new(0.0, 0.0, -5.0),
             left_top: Point::new(-8.0, 4.5, 5.0),
@@ -49,7 +49,9 @@ impl Camera {
             coordinate_system: CoordinateSystem::default(),
         }
     }
+}
 
+impl Camera {
     pub fn new(eye: Point, left_top: Point, left_bottom: Point, right_top: Point) -> Camera {
         Camera {
             eye,
@@ -90,32 +92,6 @@ impl Camera {
 
         Ray::new(origin, direction.unit(), Float::INFINITY, 1.0)
     }
-
-    // pub fn rotate(&mut self, x: Float, y: Float, z: Float) {
-    //     let transform = Transform::rotate(x, y, z);
-    //     self.left_top = &transform.apply(&(&self.left_top - &self.eye).into()) + &self.eye;
-    //     self.left_bottom = &transform.apply(&(&self.left_bottom - &self.eye).into()) + &self.eye;
-    //     self.right_top = &transform.apply(&(&self.right_top - &self.eye).into()) + &self.eye;
-    //     self.init(self.width, self.height);
-    // }
-
-    // pub fn translate(&mut self, x: Float, y: Float, z: Float) {
-    //     let CoordinateSystem { u, v, w } = self.coordinate_system;
-    //     let dw = w * -z;
-    //     let du = u * -x;
-    //     let dv = v * y;
-    //     let transform = Transform::combine(&[
-    //         Transform::translate(dw.0, dw.1, dw.2),
-    //         Transform::translate(du.0, du.1, du.2),
-    //         Transform::translate(dv.0, dv.1, dv.2),
-    //     ]);
-
-    //     self.eye = transform.apply(&self.eye);
-    //     self.left_top = transform.apply(&self.left_top);
-    //     self.left_bottom = transform.apply(&self.left_bottom);
-    //     self.right_top = transform.apply(&self.right_top);
-    //     self.init(self.width, self.height);
-    // }
 
     pub fn apply_transform(&mut self, transform: &Transform) {
         self.eye = transform.apply(&self.eye);

@@ -187,7 +187,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 .algorithm(Algorithm::PathTracing)
                 .render_method(RenderMethod::Tiles)
                 // .world(demos::cornell())
-                .from_json(&fs::read_to_string("../photon/scene.json")?)
+                .load_json(&fs::read_to_string("../photon/scene.json")?)
                 .accelerator(Accelerator::BoundingVolumeHierarchy);
             reset = true;
         }
@@ -208,7 +208,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             let x = section.left + (idx as u32 % section.width);
             let y = section.top + (idx as u32 / section.width);
             let offset = (y * (width) + x) * 4;
-            let (red, green, blue) = (point / frames_count.into()).as_gamma_corrected_rgb_u8();
+            let (red, green, blue) = (point / frames_count).as_gamma_corrected_rgb_u8();
             buffer[offset as usize] = blue;
             buffer[(offset + 1) as usize] = green;
             buffer[(offset + 2) as usize] = red;

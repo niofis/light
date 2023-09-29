@@ -8,3 +8,4 @@ bench/target
 light-wasm/target
 .DS_Store
 photon/ml
+.vscode

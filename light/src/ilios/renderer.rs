@@ -128,7 +128,7 @@ impl RendererBuilder {
         self.algorithm = algorithm;
         self
     }
-    pub fn from_json(&mut self, json: &str) -> &mut RendererBuilder {
+    pub fn load_json(&mut self, json: &str) -> &mut RendererBuilder {
         let (camera, world) = parse_scene(json);
         self.camera(camera);
         self.world(world);
@@ -196,7 +196,7 @@ impl RendererBuilder {
 }
 
 fn render_pixels(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
-    return render_pixels_mt(renderer, section, trace);
+    render_pixels_mt(renderer, section, trace)
 }
 
 fn render_pixels_mt(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
@@ -210,7 +210,7 @@ fn render_pixels_mt(renderer: &mut Renderer, section: &Section, trace: TraceFn) 
     (0..width * height)
         .into_par_iter()
         .map(|idx| (left + (idx % width), top + (idx / width)))
-        .map_init(|| XorRng::new(), |rng, pixel| trace(renderer, rng, pixel))
+        .map_init(XorRng::new, |rng, pixel| trace(renderer, rng, pixel))
         .collect()
 }
 
@@ -230,7 +230,7 @@ fn render_pixels_st(renderer: &mut Renderer, section: &Section, trace: TraceFn) 
 }
 
 fn render_tiles(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
-    return render_tiles_mt(renderer, section, trace);
+    render_tiles_mt(renderer, section, trace)
 }
 
 fn render_tiles_mt(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
@@ -254,15 +254,12 @@ fn render_tiles_mt(renderer: &mut Renderer, section: &Section, trace: TraceFn) -
 
     let tiles = tiles
         .into_par_iter()
-        .map_init(
-            || XorRng::new(),
-            |rnd, (x, y)| {
-                (0..tile_size * tile_size)
-                    .map(|idx| (x + (idx % tile_size), y + (idx / tile_size)))
-                    .map(|pixel| trace(renderer, rnd, pixel))
-                    .collect()
-            },
-        )
+        .map_init(XorRng::new, |rnd, (x, y)| {
+            (0..tile_size * tile_size)
+                .map(|idx| (x + (idx % tile_size), y + (idx / tile_size)))
+                .map(|pixel| trace(renderer, rnd, pixel))
+                .collect()
+        })
         .collect::<Vec<Vec<Color>>>();
 
     let mut pixels: Vec<Color> = vec![Color::default(); (width * height) as usize];
@@ -280,7 +277,7 @@ fn render_tiles_mt(renderer: &mut Renderer, section: &Section, trace: TraceFn) -
 }
 
 fn render_scanlines(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
-    return render_scanlines_mt(renderer, section, trace);
+    render_scanlines_mt(renderer, section, trace)
 }
 
 fn render_scanlines_mt(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
@@ -290,17 +287,14 @@ fn render_scanlines_mt(renderer: &mut Renderer, section: &Section, trace: TraceF
 
     (0..*height)
         .into_par_iter()
-        .map_init(
-            || XorRng::new(),
-            |rng, row| {
-                let y = top + row;
+        .map_init(XorRng::new, |rng, row| {
+            let y = top + row;
 
-                (0..*width)
-                    .map(|idx| (idx, y))
-                    .map(|pixel| trace(renderer, rng, pixel))
-                    .collect::<Vec<Color>>()
-            },
-        )
+            (0..*width)
+                .map(|idx| (idx, y))
+                .map(|pixel| trace(renderer, rng, pixel))
+                .collect::<Vec<Color>>()
+        })
         .flatten()
         .collect::<Vec<Color>>()
 }

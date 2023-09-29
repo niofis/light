@@ -98,10 +98,13 @@ impl ops::Index<usize> for Point {
     }
 }
 
-impl Point {
-    pub fn default() -> Point {
+impl Default for Point {
+    fn default() -> Point {
         Point(0.0, 0.0, 0.0)
     }
+}
+
+impl Point {
     pub fn new(x: Float, y: Float, z: Float) -> Point {
         Point(x, y, z)
     }

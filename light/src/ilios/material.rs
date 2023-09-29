@@ -9,10 +9,13 @@ pub enum Material {
     Refractive,
 }
 
-impl Material {
-    pub fn default() -> Material {
+impl Default for Material {
+    fn default() -> Material {
         Material::Diffuse(Color(1.0, 1.0, 1.0))
     }
+}
+
+impl Material {
     pub fn red() -> Material {
         Material::Diffuse(Color(1.0, 0.0, 0.0))
     }

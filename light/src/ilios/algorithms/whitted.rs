@@ -10,7 +10,7 @@ use crate::{
     Color, LightSource, Material, Point, Renderer, Vector,
 };
 
-fn inner_trace_ray(renderer: &Renderer, rng: &mut dyn Rng, ray: &Ray, depth: u8) -> Color {
+fn inner_trace_ray(renderer: &Renderer, ray: &Ray, depth: u8) -> Color {
     if depth > 10 {
         return color::BLACK;
     }
@@ -40,7 +40,7 @@ fn inner_trace_ray(renderer: &Renderer, rng: &mut dyn Rng, ray: &Ray, depth: u8)
                             let reflected_ray =
                                 Ray::new(point, new_dir.unit(), Float::INFINITY, 1.0);
                             (calculate_shading(renderer, primitive, &point) * (1.0 - idx))
-                                + inner_trace_ray(renderer, rng, &reflected_ray, depth + 1) * *idx
+                                + inner_trace_ray(renderer, &reflected_ray, depth + 1) * *idx
                         }
                         Material::Emissive(color) => *color,
                         Material::Refractive => {
@@ -52,7 +52,7 @@ fn inner_trace_ray(renderer: &Renderer, rng: &mut dyn Rng, ray: &Ray, depth: u8)
                             let ta = n * n * (1.0 - (dot * dot));
                             let new_dir = ((ray.direction * n) - normal * (1.0 - ta).sqrt()).unit();
                             let refracted_ray = Ray::new(point, new_dir, Float::INFINITY, 1.0);
-                            inner_trace_ray(renderer, rng, &refracted_ray, depth + 1)
+                            inner_trace_ray(renderer, &refracted_ray, depth + 1)
                         }
                     }
                 }
@@ -63,11 +63,11 @@ fn inner_trace_ray(renderer: &Renderer, rng: &mut dyn Rng, ray: &Ray, depth: u8)
     }
 }
 
-pub fn trace_ray(renderer: &Renderer, rng: &mut dyn Rng, pixel: (u32, u32)) -> Color {
+pub fn trace_ray(renderer: &Renderer, _rng: &mut dyn Rng, pixel: (u32, u32)) -> Color {
     let (x, y) = pixel;
     let ray = renderer.camera.get_ray(x as Float, y as Float);
 
-    inner_trace_ray(renderer, rng, &ray, 1)
+    inner_trace_ray(renderer, &ray, 1)
 }
 
 fn calculate_shading(renderer: &Renderer, prm: &Primitive, point: &Point) -> Color {

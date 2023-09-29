@@ -4,7 +4,7 @@ use crate::Material;
 
 use super::{light_source::LightSource, primitives::Primitive, solids::Solid};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct World {
     pub lights: Vec<LightSource>,
     pub objects: Vec<Solid>,
@@ -12,9 +12,6 @@ pub struct World {
 }
 
 impl World {
-    pub fn default() -> World {
-        World::build()
-    }
     pub fn build() -> World {
         World {
             lights: Vec::new(),
@@ -38,7 +35,7 @@ impl World {
             .iter()
             .map(|obj| obj.primitives())
             .fold(Vec::new(), |acc, prms: Vec<Primitive>| {
-                acc.into_iter().chain(prms.into_iter()).collect()
+                acc.into_iter().chain(prms).collect()
             })
     }
 }

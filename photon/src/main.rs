@@ -52,7 +52,7 @@ fn format_as_binary(pixels: &[Color], width: u32, height: u32) -> Vec<u8> {
         pixels: px,
     };
     let config = config::standard();
-    bincode::encode_to_vec(&binary_render, config).unwrap()
+    bincode::encode_to_vec(binary_render, config).unwrap()
 }
 
 fn main() {

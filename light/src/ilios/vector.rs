@@ -4,7 +4,7 @@ use crate::ilios::normal::Normal;
 use crate::Point;
 use std::ops;
 
-#[derive(Copy, Clone, Debug, Default)]
+#[derive(Copy, Clone, Debug)]
 pub struct Vector(pub Float, pub Float, pub Float); //x,y,z
 
 impl From<GVector4> for Vector {
@@ -121,12 +121,15 @@ impl From<Normal> for Vector {
     }
 }
 
+impl Default for Vector {
+    fn default() -> Vector {
+        Vector(0.0, 0.0, 0.0)
+    }
+}
+
 impl Vector {
     pub fn new(x: Float, y: Float, z: Float) -> Vector {
         Vector(x, y, z)
-    }
-    pub fn default() -> Vector {
-        Vector(0.0, 0.0, 0.0)
     }
     pub fn dot(&self, rhs: &Vector) -> Float {
         self.0 * rhs.0 + self.1 * rhs.1 + self.2 * rhs.2
