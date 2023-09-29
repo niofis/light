@@ -6,21 +6,10 @@ use super::{
     float::Float,
     parsers::json::parse_scene,
     primitives::Primitive,
-    rng::{Rng, XorRng},
+    render_method::{RenderMethod, TraceFn},
     section::Section,
     world::World,
 };
-use rayon::iter::{IntoParallelIterator, ParallelIterator};
-
-type TraceFn = fn(&Renderer, &mut dyn Rng, (u32, u32)) -> Color;
-type RenderFn = fn(&mut Renderer, &Section, TraceFn) -> Vec<Color>;
-
-#[derive(Clone, Debug)]
-pub enum RenderMethod {
-    Pixels,
-    Tiles,
-    Scanlines,
-}
 
 #[derive(Clone, Debug, Default)]
 pub struct Stats {
@@ -69,12 +58,14 @@ impl Renderer {
             Algorithm::Whitted => whitted::trace_ray,
             Algorithm::PathTracing => path_tracing::trace_ray,
         };
-        let render: RenderFn = match (&self.threads, &self.stats, &self.render_method) {
-            (Some(1), _, _) | (_, Some(_), _) => render_pixels_st,
-            (_, _, RenderMethod::Pixels) => render_pixels,
-            (_, _, RenderMethod::Tiles) => render_tiles,
-            (_, _, RenderMethod::Scanlines) => render_scanlines,
-        };
+        // let render: RenderFn = match (&self.threads, &self.stats, &self.render_method) {
+        //     (Some(1), _, _) | (_, Some(_), _) => render_pixels_st,
+        //     (_, _, RenderMethod::Pixels) => render_pixels,
+        //     (_, _, RenderMethod::Tiles) => render_tiles,
+        //     (_, _, RenderMethod::Scanlines) => render_scanlines,
+        // };
+
+        let render = self.render_method.get();
         render(self, section, trace)
     }
 }
@@ -193,108 +184,4 @@ impl RendererBuilder {
             samples,
         }
     }
-}
-
-fn render_pixels(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
-    render_pixels_mt(renderer, section, trace)
-}
-
-fn render_pixels_mt(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
-    let Section {
-        left,
-        top,
-        height,
-        width,
-    } = section;
-
-    (0..width * height)
-        .into_par_iter()
-        .map(|idx| (left + (idx % width), top + (idx / width)))
-        .map_init(XorRng::new, |rng, pixel| trace(renderer, rng, pixel))
-        .collect()
-}
-
-fn render_pixels_st(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
-    let Section {
-        height,
-        width,
-        left,
-        top,
-    } = *section;
-    let mut rng = XorRng::new();
-
-    (top..height)
-        .flat_map(|y| (left..width).map(move |x| (x, y)))
-        .map(|pixel| trace(renderer, &mut rng, pixel))
-        .collect()
-}
-
-fn render_tiles(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
-    render_tiles_mt(renderer, section, trace)
-}
-
-fn render_tiles_mt(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
-    let Section {
-        left,
-        top,
-        height,
-        width,
-    } = section;
-    let tile_size = 4;
-    let sections_v = height / tile_size;
-    let sections_h = width / tile_size;
-
-    let tiles: Vec<(u32, u32)> = (0..sections_v * sections_h)
-        .map(|idx| {
-            let x = left + (idx % sections_h) * tile_size;
-            let y = top + (idx / sections_h) * tile_size;
-            (x, y)
-        })
-        .collect();
-
-    let tiles = tiles
-        .into_par_iter()
-        .map_init(XorRng::new, |rnd, (x, y)| {
-            (0..tile_size * tile_size)
-                .map(|idx| (x + (idx % tile_size), y + (idx / tile_size)))
-                .map(|pixel| trace(renderer, rnd, pixel))
-                .collect()
-        })
-        .collect::<Vec<Vec<Color>>>();
-
-    let mut pixels: Vec<Color> = vec![Color::default(); (width * height) as usize];
-    for (section, colors) in tiles.into_iter().enumerate() {
-        let start_x = (section as u32 % sections_h) * tile_size;
-        let start_y = (section as u32 / sections_h) * tile_size;
-        for (idx, color) in colors.into_iter().enumerate() {
-            let x = idx as u32 % tile_size;
-            let y = idx as u32 / tile_size;
-            pixels[((start_y + y) * width + start_x + x) as usize] = color;
-        }
-    }
-
-    pixels
-}
-
-fn render_scanlines(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
-    render_scanlines_mt(renderer, section, trace)
-}
-
-fn render_scanlines_mt(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> Vec<Color> {
-    let Section {
-        height, width, top, ..
-    } = section;
-
-    (0..*height)
-        .into_par_iter()
-        .map_init(XorRng::new, |rng, row| {
-            let y = top + row;
-
-            (0..*width)
-                .map(|idx| (idx, y))
-                .map(|pixel| trace(renderer, rng, pixel))
-                .collect::<Vec<Color>>()
-        })
-        .flatten()
-        .collect::<Vec<Color>>()
 }

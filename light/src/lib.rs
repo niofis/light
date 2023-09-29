@@ -8,7 +8,7 @@ pub use ilios::float;
 pub use ilios::light_source::LightSource;
 pub use ilios::material::Material;
 pub use ilios::point::Point;
-pub use ilios::renderer::RenderMethod;
+pub use ilios::render_method::RenderMethod;
 pub use ilios::renderer::Renderer;
 pub use ilios::section::Section;
 pub use ilios::solids::Solid;
