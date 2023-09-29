@@ -169,14 +169,10 @@ fn main() {
 
     if let Some(val) = matches.get_one::<u32>("width") {
         width = *val;
-    } else {
-        eprintln!("invalid width value!");
     }
 
     if let Some(val) = matches.get_one::<u32>("height") {
         height = *val;
-    } else {
-        eprintln!("invalid height value!");
     }
 
     let mut renderer_builder = Renderer::builder();
@@ -236,7 +232,7 @@ fn main() {
 
     if let Some(json_file) = matches.get_one::<String>("json") {
         let json = fs::read_to_string(json_file).unwrap();
-        renderer_builder.from_json(&json);
+        renderer_builder.load_json(&json);
     }
 
     match matches.get_one::<String>("accelerator") {
@@ -251,8 +247,6 @@ fn main() {
 
     if let Some(val) = matches.get_one::<u32>("threads") {
         renderer_builder.threads(*val);
-    } else {
-        eprintln!("invalid threads value!");
     }
 
     if let Some(val) = matches.get_one::<u32>("samples count") {
