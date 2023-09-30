@@ -29,7 +29,7 @@
       },
       {
         "type": "emissive",
-        "color": [10.0, 10.0, 10.0],
+        "color": [3.0, 3.0, 3.0],
         "id": "emissive-white"
       },
       {
