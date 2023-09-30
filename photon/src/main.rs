@@ -1,7 +1,7 @@
 use bincode::{config, Encode};
 use clap::{value_parser, Arg, ArgAction, Command};
 use light::{demos, Accelerator, Algorithm, Camera, Color, Point, RenderMethod, Renderer, Section};
-use std::fs;
+use std::{fs, io::BufWriter};
 
 #[derive(Encode)]
 struct BinaryRender {
@@ -42,6 +42,40 @@ fn format_as_ppm(pixels: &[Color], width: u32, height: u32) -> String {
         ));
     }
     output
+}
+
+fn format_as_png(pixels: &[Color], width: u32, height: u32) -> Vec<u8> {
+    let mut file = Vec::new();
+    {
+        let w = BufWriter::new(&mut file);
+        let mut encoder = png::Encoder::new(w, width, height);
+        encoder.set_color(png::ColorType::Rgb);
+        encoder.set_depth(png::BitDepth::Eight);
+        let mut writer = encoder.write_header().unwrap();
+        let mut data: Vec<u8> = vec![];
+        for Color(red, green, blue) in pixels.iter() {
+            let r = if *red > 1.0 {
+                255
+            } else {
+                (red * 255.99) as u8
+            };
+            let g = if *green > 1.0 {
+                255
+            } else {
+                (green * 255.99) as u8
+            };
+            let b = if *blue > 1.0 {
+                255
+            } else {
+                (blue * 255.99) as u8
+            };
+            data.push(gamma_correct(r));
+            data.push(gamma_correct(g));
+            data.push(gamma_correct(b));
+        }
+        writer.write_image_data(&data).unwrap();
+    }
+    file
 }
 
 fn format_as_binary(pixels: &[Color], width: u32, height: u32) -> Vec<u8> {
@@ -122,16 +156,22 @@ fn main() {
         )
         .arg(
             Arg::new("ppm")
-                .short('p')
                 .long("ppm")
                 .action(ArgAction::SetTrue)
                 .help("outputs ppm to the stdio")
         )
         .arg(
+            Arg::new("png")
+                .long("png")
+                .action(ArgAction::SetTrue)
+                .help("requires --save")
+        )
+        .arg(
             Arg::new("savefile")
                 .short('s')
                 .long("save")
-                .help("saves the ppm to disk using the default name structure: YYYYMMDD-HHMM-SAMPLES-TIME.ppm")
+                .action(ArgAction::SetTrue)
+                .help("saves the image file to disk using the default name structure: YYYYMMDD-HHMM-SAMPLES-TIME.ppm")
         )
         .arg(
             Arg::new("save binary")
@@ -296,11 +336,21 @@ fn main() {
         fs::write(&filename, data).unwrap();
         eprintln!("saved file {}", filename);
     } else if matches.contains_id("savefile") {
-        let ppm = format_as_ppm(&pixels, width, height);
+        let (extension, data) = if matches.contains_id("png") {
+            ("png", format_as_png(&pixels, width, height))
+        } else {
+            ("ppm", format_as_ppm(&pixels, width, height).into())
+        };
         let now = chrono::offset::Local::now();
         let date = now.format("%Y%m%d-%H%M%S");
-        let filename = format!("{}-{}-{}.ppm", date, renderer.samples, elapsed.ceil());
-        fs::write(&filename, ppm).unwrap();
+        let filename = format!(
+            "{}-{}-{}.{}",
+            date,
+            renderer.samples,
+            elapsed.ceil(),
+            extension
+        );
+        fs::write(&filename, data).unwrap();
         eprintln!("saved file {}", filename);
     } else if matches.contains_id("ppm") {
         let ppm = format_as_ppm(&pixels, width, height);

@@ -9,3 +9,5 @@ light-wasm/target
 .DS_Store
 photon/ml
 .vscode
+.ppm
+.png
