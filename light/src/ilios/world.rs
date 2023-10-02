@@ -11,24 +11,38 @@ pub struct World {
     pub materials: HashMap<String, Material>,
 }
 
-impl World {
-    pub fn build() -> World {
+#[derive(Clone, Debug, Default)]
+pub struct WorldBuilder {
+    lights: Vec<LightSource>,
+    objects: Vec<Solid>,
+    materials: HashMap<String, Material>,
+}
+
+impl WorldBuilder {
+    pub fn add_light(&mut self, light: LightSource) -> &mut WorldBuilder {
+        self.lights.push(light);
+        self
+    }
+    pub fn add_object(&mut self, object: Solid) -> &mut WorldBuilder {
+        self.objects.push(object);
+        self
+    }
+    pub fn add_material(&mut self, name: &str, material: Material) -> &mut WorldBuilder {
+        self.materials.insert(name.to_string(), material);
+        self
+    }
+    pub fn build(&mut self) -> World {
         World {
-            lights: Vec::new(),
-            objects: Vec::new(),
-            materials: HashMap::new(),
+            lights: self.lights.clone(),
+            objects: self.objects.clone(),
+            materials: self.materials.clone(),
         }
     }
-    pub fn lights(mut self, lights: Vec<LightSource>) -> World {
-        self.lights = lights;
-        self
-    }
-    pub fn objects(mut self, objects: Vec<Solid>) -> World {
-        self.objects = objects;
-        self
-    }
-    pub fn finish(self) -> World {
-        self
+}
+
+impl World {
+    pub fn builder() -> WorldBuilder {
+        WorldBuilder::default()
     }
     pub fn primitives(&self) -> Vec<Primitive> {
         self.objects
