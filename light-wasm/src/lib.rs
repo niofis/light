@@ -5,6 +5,9 @@ static mut HEIGHT: i32 = 0;
 static mut LEN: usize = 0;
 
 #[no_mangle]
+/// # Safety
+///
+/// This function is unsafe because it dereferences a raw pointer.
 pub unsafe fn render(ptr: *mut u8) {
     let mut bytes: Vec<u8> = Vec::from_raw_parts(ptr, LEN * 3, LEN * 3);
 
@@ -21,6 +24,9 @@ pub unsafe fn render(ptr: *mut u8) {
 }
 
 #[no_mangle]
+/// # Safety
+///
+/// This function is unsafe because it returns a raw pointer and dereferences it.
 pub unsafe fn init(width: i32, height: i32) -> *mut u8 {
     WIDTH = width;
     HEIGHT = height;
@@ -44,6 +50,9 @@ pub unsafe fn init(width: i32, height: i32) -> *mut u8 {
 }
 
 #[no_mangle]
+/// # Safety
+///
+/// This function is unsafe because it dereferences a raw pointer.
 pub unsafe fn deinit(ptr: *mut u8) {
     let _bytes: Vec<u8> = Vec::from_raw_parts(ptr, LEN * 3, LEN * 3);
 }

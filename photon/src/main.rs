@@ -1,7 +1,12 @@
 use bincode::{config, Encode};
-use clap::{value_parser, Arg, ArgAction, Command};
+use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use light::{demos, Accelerator, Algorithm, Camera, Color, Point, RenderMethod, Renderer, Section};
 use std::{fs, io::BufWriter};
+
+const DEFAULT_WIDTH: u32 = 640;
+const DEFAULT_HEIGHT: u32 = 360;
+const DEFAULT_THREADS: u32 = 0;
+const DEFAULT_SAMPLES: u32 = 10;
 
 #[derive(Encode)]
 struct BinaryRender {
@@ -89,8 +94,8 @@ fn format_as_binary(pixels: &[Color], width: u32, height: u32) -> Vec<u8> {
     bincode::encode_to_vec(binary_render, config).unwrap()
 }
 
-fn main() {
-    let matches = Command::new("Photon")
+fn process_cli() -> ArgMatches {
+    Command::new("Photon")
         .version("0.1")
         .author("Enrique <niofis@gmail.com>")
         .about("Renders a scene using the light engine")
@@ -177,6 +182,7 @@ fn main() {
             Arg::new("save binary")
                 .short('b')
                 .long("binary")
+                .action(ArgAction::SetTrue)
                 .help("saves the render result as a binary file using the default name structure: YYYMMDD-HHMM-SAMPLES-TIME.brf"))
         .arg(
             Arg::new("ml")
@@ -203,55 +209,50 @@ fn main() {
             .long("json")
             .help("load scene from the specified json file")
         )
-        .get_matches();
-    let mut width: u32 = 640;
-    let mut height: u32 = 360;
+        .get_matches()
+}
 
-    if let Some(val) = matches.get_one::<u32>("width") {
-        width = *val;
-    }
-
-    if let Some(val) = matches.get_one::<u32>("height") {
-        height = *val;
-    }
-
-    let mut renderer_builder = Renderer::builder();
+fn build_renderer(matches: &ArgMatches) -> Renderer {
     let v_offset = 3.0;
     let z_offset = -10.0;
+    let mut renderer_builder = Renderer::builder();
+
     renderer_builder
-        .width(width)
-        .height(height)
+        .width(
+            matches
+                .get_one::<u32>("width")
+                .map_or(DEFAULT_WIDTH, |v| *v),
+        )
+        .height(
+            matches
+                .get_one::<u32>("height")
+                .map_or(DEFAULT_HEIGHT, |v| *v),
+        )
         .camera(Camera::new(
             Point(0.0, 9.0 / 2.0 + v_offset, -60.0 - z_offset),
             Point(-8.0, 9.0 + v_offset, -50.0 - z_offset),
             Point(-8.0, 0.0 + v_offset, -50.0 - z_offset),
             Point(8.0, 9.0 + v_offset, -50.0 - z_offset),
-        ));
-
-    match matches.get_one::<String>("algorithm") {
-        Some(val) if val == "whitted" => {
-            renderer_builder.algorithm(Algorithm::Whitted);
-        }
-        _ => {
-            renderer_builder.algorithm(Algorithm::PathTracing);
-        }
-    }
-
-    match matches.get_one::<String>("render method") {
-        Some(val) if val == "pixels" => {
-            renderer_builder.render_method(RenderMethod::Pixels);
-        }
-        Some(val) if val == "scanlines" => {
-            renderer_builder.render_method(RenderMethod::Scanlines);
-        }
-        _ => {
-            renderer_builder.render_method(RenderMethod::Tiles);
-        }
-    }
-
-    if matches.contains_id("stats") {
-        renderer_builder.use_stats();
-    }
+        ))
+        .algorithm(match matches.get_one::<String>("algorithm") {
+            Some(val) if val == "whitted" => Algorithm::Whitted,
+            _ => Algorithm::PathTracing,
+        })
+        .render_method(match matches.get_one::<String>("render method") {
+            Some(val) if val == "pixels" => RenderMethod::Pixels,
+            Some(val) if val == "scanlines" => RenderMethod::Scanlines,
+            _ => RenderMethod::Tiles,
+        })
+        .threads(
+            matches
+                .get_one::<u32>("threads")
+                .map_or(DEFAULT_THREADS, |v| *v),
+        )
+        .samples(
+            matches
+                .get_one::<u32>("samples count")
+                .map_or(DEFAULT_SAMPLES, |v| *v),
+        );
 
     match matches.get_one::<String>("demo") {
         Some(val) if val == "simple" => {
@@ -266,77 +267,42 @@ fn main() {
         _ => {}
     }
 
-    // if let Some(val) = matches.value_of("obj") {
-    //     renderer_builder.world(demos::obj(val));
-    // }
-
     if let Some(json_file) = matches.get_one::<String>("json") {
         let json = fs::read_to_string(json_file).unwrap();
         renderer_builder.load_json(&json);
     }
 
-    match matches.get_one::<String>("accelerator") {
-        Some(val) if val == "brute_force" => {
-            renderer_builder.accelerator(Accelerator::BruteForce);
-        }
-        Some(val) if val == "bvh" => {
-            renderer_builder.accelerator(Accelerator::BoundingVolumeHierarchy);
-        }
-        _ => {}
-    }
+    // This  needs to happen after the scene is passed, need to remove this dependency
+    renderer_builder.accelerator(match matches.get_one::<String>("accelerator") {
+        Some(val) if val == "brute_force" => Accelerator::BruteForce,
+        Some(val) if val == "bvh" => Accelerator::BoundingVolumeHierarchy,
+        _ => Accelerator::BoundingVolumeHierarchy,
+    });
 
-    if let Some(val) = matches.get_one::<u32>("threads") {
-        renderer_builder.threads(*val);
-    }
+    renderer_builder.build()
+}
 
-    if let Some(val) = matches.get_one::<u32>("samples count") {
-        renderer_builder.samples(*val);
-    } else {
-        renderer_builder.samples(10);
-    }
-
+fn main() {
+    let matches = process_cli();
+    let mut renderer = build_renderer(&matches);
+    let width: u32 = renderer.width;
+    let height: u32 = renderer.height;
     let section = Section::new(0, 0, width, height);
 
-    if matches.contains_id("ml") {
-        let demo: String = matches.get_one::<String>("demo").unwrap().to_owned();
-        let start = time::Instant::now();
-        renderer_builder.samples(1000);
-        let mut renderer = renderer_builder.build();
-        let pixels = renderer.render(&section);
-        let data = format_as_binary(&pixels, width, height);
-        fs::write(format!("./ml/{}-target.brf", demo), data).unwrap();
-        let elapsed = start.elapsed().as_seconds_f32();
-        eprintln!("Target image rendering time: {}s", elapsed);
-
-        let start = time::Instant::now();
-        renderer_builder.samples(1);
-        let mut renderer = renderer_builder.build();
-        for i in 0..100 {
-            let pixels = renderer.render(&section);
-            let data = format_as_binary(&pixels, width, height);
-            fs::write(format!("./ml/{}-training-{}.brf", demo, i), data).unwrap();
-        }
-        let elapsed = start.elapsed().as_seconds_f32();
-        eprintln!("Training images rendering time: {}s", elapsed);
-
-        return;
-    }
-
-    let mut renderer = renderer_builder.build();
     let start = time::Instant::now();
     let pixels = renderer.render(&section);
     let elapsed = start.elapsed().as_seconds_f32();
     eprintln!("Rendering time: {}s", elapsed);
 
-    if matches.contains_id("save binary") {
+    if matches.get_flag("save binary") {
         let now = chrono::offset::Local::now();
         let date = now.format("%Y%m%d-%H%M%S");
         let filename = format!("{}-{}-{}.brf", date, renderer.samples, elapsed.ceil());
         let data = format_as_binary(&pixels, width, height);
         fs::write(&filename, data).unwrap();
         eprintln!("saved file {}", filename);
-    } else if matches.contains_id("savefile") {
-        let (extension, data) = if matches.contains_id("png") {
+    } else if matches.get_flag("savefile") {
+        let (extension, data) = if matches.get_flag("png") {
             ("png", format_as_png(&pixels, width, height))
         } else {
             ("ppm", format_as_ppm(&pixels, width, height).into())
@@ -352,7 +318,7 @@ fn main() {
         );
         fs::write(&filename, data).unwrap();
         eprintln!("saved file {}", filename);
-    } else if matches.contains_id("ppm") {
+    } else if matches.get_flag("ppm") {
         let ppm = format_as_ppm(&pixels, width, height);
         println!("{}", ppm);
     }
