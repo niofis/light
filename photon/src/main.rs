@@ -282,44 +282,49 @@ fn build_renderer(matches: &ArgMatches) -> Renderer {
     renderer_builder.build()
 }
 
+fn output_image(
+    matches: &ArgMatches,
+    samples: u32,
+    elapsed: f32,
+    width: u32,
+    height: u32,
+    pixels: &[Color],
+) {
+    if matches.get_flag("save binary") {
+        let now = chrono::offset::Local::now();
+        let date = now.format("%Y%m%d-%H%M%S");
+        let filename = format!("{}-{}-{}.brf", date, samples, elapsed.ceil());
+        let data = format_as_binary(pixels, width, height);
+        fs::write(&filename, data).unwrap();
+        eprintln!("saved file {}", filename);
+    } else if matches.get_flag("savefile") {
+        let (extension, data) = if matches.get_flag("png") {
+            ("png", format_as_png(pixels, width, height))
+        } else {
+            ("ppm", format_as_ppm(pixels, width, height).into())
+        };
+        let now = chrono::offset::Local::now();
+        let date = now.format("%Y%m%d-%H%M%S");
+        let filename = format!("{}-{}-{}.{}", date, samples, elapsed.ceil(), extension);
+        fs::write(&filename, data).unwrap();
+        eprintln!("saved file {}", filename);
+    } else if matches.get_flag("ppm") {
+        let ppm = format_as_ppm(pixels, width, height);
+        println!("{}", ppm);
+    }
+}
+
 fn main() {
     let matches = process_cli();
     let mut renderer = build_renderer(&matches);
     let width: u32 = renderer.width;
     let height: u32 = renderer.height;
-    let section = Section::new(0, 0, width, height);
 
+    let section = Section::new(0, 0, width, height);
     let start = time::Instant::now();
     let pixels = renderer.render(&section);
     let elapsed = start.elapsed().as_seconds_f32();
     eprintln!("Rendering time: {}s", elapsed);
 
-    if matches.get_flag("save binary") {
-        let now = chrono::offset::Local::now();
-        let date = now.format("%Y%m%d-%H%M%S");
-        let filename = format!("{}-{}-{}.brf", date, renderer.samples, elapsed.ceil());
-        let data = format_as_binary(&pixels, width, height);
-        fs::write(&filename, data).unwrap();
-        eprintln!("saved file {}", filename);
-    } else if matches.get_flag("savefile") {
-        let (extension, data) = if matches.get_flag("png") {
-            ("png", format_as_png(&pixels, width, height))
-        } else {
-            ("ppm", format_as_ppm(&pixels, width, height).into())
-        };
-        let now = chrono::offset::Local::now();
-        let date = now.format("%Y%m%d-%H%M%S");
-        let filename = format!(
-            "{}-{}-{}.{}",
-            date,
-            renderer.samples,
-            elapsed.ceil(),
-            extension
-        );
-        fs::write(&filename, data).unwrap();
-        eprintln!("saved file {}", filename);
-    } else if matches.get_flag("ppm") {
-        let ppm = format_as_ppm(&pixels, width, height);
-        println!("{}", ppm);
-    }
+    output_image(&matches, renderer.samples, elapsed, width, height, &pixels);
 }
