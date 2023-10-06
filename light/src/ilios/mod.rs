@@ -9,7 +9,7 @@ mod generic_vector;
 pub(crate) mod light_source;
 pub(crate) mod material;
 mod normal;
-mod parsers;
+pub mod parsers;
 pub(crate) mod point;
 mod primitives;
 mod ray;

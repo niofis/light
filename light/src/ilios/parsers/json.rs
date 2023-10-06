@@ -4,7 +4,7 @@ use serde_json::Value;
 
 use crate::{float::Float, Camera, Color, Material, Point, Solid, Transform, Vector, World};
 
-pub fn parse_scene(json: &str) -> (Camera, World) {
+pub fn json(json: &str) -> (Camera, World) {
     let json: Value = serde_json::from_str(json).unwrap();
     let world = parse_world(&json);
     let camera = parse_camera(&json);

@@ -1,6 +1,8 @@
 use bincode::{config, Encode};
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
-use light::{demos, Accelerator, Algorithm, Camera, Color, Point, RenderMethod, Renderer, Section};
+use light::{
+    demos, parsers, Accelerator, Algorithm, Camera, Color, Point, RenderMethod, Renderer, Section,
+};
 use std::{fs, io::BufWriter};
 
 const DEFAULT_WIDTH: u32 = 640;
@@ -269,7 +271,16 @@ fn build_renderer(matches: &ArgMatches) -> Renderer {
 
     if let Some(json_file) = matches.get_one::<String>("json") {
         let json = fs::read_to_string(json_file).unwrap();
-        renderer_builder.load_json(&json);
+        let (camera, world) = parsers::json(&json);
+        renderer_builder.camera(camera).world(world);
+
+        // pub fn load_json(&mut self, json: &str) -> &mut RendererBuilder {
+        //     let (camera, world) = parse_scene(json);
+        //     self.camera(camera);
+        //     self.world(world);
+        //     self
+        // }
+        // renderer_builder.load_json(&json);
     }
 
     // This  needs to happen after the scene is passed, need to remove this dependency

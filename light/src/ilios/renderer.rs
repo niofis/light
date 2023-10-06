@@ -4,7 +4,6 @@ use super::{
     camera::Camera,
     color::Color,
     float::Float,
-    parsers::json::parse_scene,
     primitives::Primitive,
     render_method::{RenderMethod, TraceFn},
     section::Section,
@@ -117,12 +116,6 @@ impl RendererBuilder {
     }
     pub fn illumination(&mut self, algorithm: Algorithm) -> &mut RendererBuilder {
         self.algorithm = algorithm;
-        self
-    }
-    pub fn load_json(&mut self, json: &str) -> &mut RendererBuilder {
-        let (camera, world) = parse_scene(json);
-        self.camera(camera);
-        self.world(world);
         self
     }
     pub fn accelerator(&mut self, accelerator: Accelerator) -> &mut RendererBuilder {
