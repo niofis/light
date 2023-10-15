@@ -9,6 +9,6 @@ light-wasm/target
 .DS_Store
 photon/ml
 .vscode
-.ppm
-.png
+*.ppm
+*.png
 light.code-workspace
