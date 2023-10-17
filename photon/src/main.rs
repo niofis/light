@@ -254,7 +254,12 @@ fn build_renderer(matches: &ArgMatches) -> Renderer {
             matches
                 .get_one::<u32>("samples count")
                 .map_or(DEFAULT_SAMPLES, |v| *v),
-        );
+        )
+        .accelerator(match matches.get_one::<String>("accelerator") {
+            Some(val) if val == "brute_force" => Accelerator::BruteForce,
+            Some(val) if val == "bvh" => Accelerator::BoundingVolumeHierarchy,
+            _ => Accelerator::BoundingVolumeHierarchy,
+        });
 
     match matches.get_one::<String>("demo") {
         Some(val) if val == "simple" => {
@@ -273,22 +278,7 @@ fn build_renderer(matches: &ArgMatches) -> Renderer {
         let json = fs::read_to_string(json_file).unwrap();
         let (camera, world) = parsers::json(&json);
         renderer_builder.camera(camera).world(world);
-
-        // pub fn load_json(&mut self, json: &str) -> &mut RendererBuilder {
-        //     let (camera, world) = parse_scene(json);
-        //     self.camera(camera);
-        //     self.world(world);
-        //     self
-        // }
-        // renderer_builder.load_json(&json);
     }
-
-    // This  needs to happen after the scene is passed, need to remove this dependency
-    renderer_builder.accelerator(match matches.get_one::<String>("accelerator") {
-        Some(val) if val == "brute_force" => Accelerator::BruteForce,
-        Some(val) if val == "bvh" => Accelerator::BoundingVolumeHierarchy,
-        _ => Accelerator::BoundingVolumeHierarchy,
-    });
 
     renderer_builder.build()
 }

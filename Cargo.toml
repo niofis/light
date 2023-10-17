@@ -1,0 +1,2 @@
+[workspace]
+members = ["light", "photon", "screen"]

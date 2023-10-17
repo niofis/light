@@ -40,10 +40,9 @@ impl Renderer {
         RendererBuilder {
             width: 0,
             height: 0,
-            accelerator: AcceleratorInstance::None,
+            accelerator: Accelerator::BruteForce,
             camera: Camera::default(),
             world: World::default(),
-            primitives: Vec::new(),
             render_method: RenderMethod::Pixels,
             algorithm: Algorithm::Whitted,
             stats: None,
@@ -73,9 +72,8 @@ impl Renderer {
 pub struct RendererBuilder {
     pub width: u32,
     pub height: u32,
-    pub accelerator: AcceleratorInstance,
+    pub accelerator: Accelerator,
     pub world: World,
-    pub primitives: Vec<Primitive>,
     pub camera: Camera,
     pub render_method: RenderMethod,
     pub algorithm: Algorithm,
@@ -99,15 +97,10 @@ impl RendererBuilder {
     }
     pub fn camera(&mut self, camera: Camera) -> &mut RendererBuilder {
         self.camera = camera;
-        self.camera.init(self.width as Float, self.height as Float);
         self
     }
     pub fn world(&mut self, world: World) -> &mut RendererBuilder {
         self.world = world;
-        self.primitives = self.world.primitives();
-        if let Some(stats) = self.stats.as_mut() {
-            stats.primitives = self.primitives.len();
-        }
         self
     }
     pub fn render_method(&mut self, render_method: RenderMethod) -> &mut RendererBuilder {
@@ -119,26 +112,11 @@ impl RendererBuilder {
         self
     }
     pub fn accelerator(&mut self, accelerator: Accelerator) -> &mut RendererBuilder {
-        self.accelerator = match accelerator {
-            Accelerator::BruteForce => AcceleratorInstance::new_brute_force(&self.primitives),
-            Accelerator::BoundingVolumeHierarchy => {
-                let acc = AcceleratorInstance::new_bounding_volume_hierarchy(&self.primitives);
-                if let Some(stats) = self.stats.as_mut() {
-                    stats.accelerator = Some(acc.stats());
-                }
-                acc
-            }
-        };
+        self.accelerator = accelerator;
         self
     }
     pub fn threads(&mut self, count: u32) -> &mut RendererBuilder {
-        if count > 0 {
-            rayon::ThreadPoolBuilder::new()
-                .num_threads(count as usize)
-                .build_global()
-                .unwrap();
-            self.threads = Some(count);
-        }
+        self.threads = if count > 0 { Some(count) } else { None };
         self
     }
     pub fn samples(&mut self, samples: u32) -> &mut RendererBuilder {
@@ -155,7 +133,6 @@ impl RendererBuilder {
             height,
             accelerator,
             world,
-            primitives,
             camera,
             render_method,
             algorithm,
@@ -163,6 +140,24 @@ impl RendererBuilder {
             threads,
             samples,
         } = self.to_owned();
+
+        rayon::ThreadPoolBuilder::new()
+            .num_threads(threads.unwrap_or(0) as usize)
+            .build_global()
+            .unwrap();
+
+        let mut camera = camera;
+        camera.init(self.width as Float, self.height as Float);
+
+        let primitives = world.primitives();
+
+        let accelerator = match accelerator {
+            Accelerator::BruteForce => AcceleratorInstance::new_brute_force(&primitives),
+            Accelerator::BoundingVolumeHierarchy => {
+                AcceleratorInstance::new_bounding_volume_hierarchy(&primitives)
+            }
+        };
+
         Renderer {
             width,
             height,

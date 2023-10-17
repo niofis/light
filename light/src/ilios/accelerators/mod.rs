@@ -6,6 +6,7 @@ use super::{primitives::Primitive, ray::Ray, trace::Trace};
 mod bounding_volume_hierarchy;
 mod brute_force;
 
+#[derive(Clone, Debug)]
 pub enum Accelerator {
     BruteForce,
     BoundingVolumeHierarchy,
