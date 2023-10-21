@@ -117,6 +117,10 @@ impl RendererBuilder {
     }
     pub fn threads(&mut self, count: u32) -> &mut RendererBuilder {
         self.threads = if count > 0 { Some(count) } else { None };
+        rayon::ThreadPoolBuilder::new()
+            .num_threads(count as usize)
+            .build_global()
+            .unwrap();
         self
     }
     pub fn samples(&mut self, samples: u32) -> &mut RendererBuilder {
@@ -140,11 +144,6 @@ impl RendererBuilder {
             threads,
             samples,
         } = self.to_owned();
-
-        rayon::ThreadPoolBuilder::new()
-            .num_threads(threads.unwrap_or(0) as usize)
-            .build_global()
-            .unwrap();
 
         let mut camera = camera;
         camera.init(self.width as Float, self.height as Float);

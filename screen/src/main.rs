@@ -1,6 +1,7 @@
 use light::float::PI;
 use light::{
-    demos, Accelerator, Algorithm, Camera, Color, Point, RenderMethod, Renderer, Section, Transform,
+    demos, parsers, Accelerator, Algorithm, Camera, Color, Point, RenderMethod, Renderer, Section,
+    Transform,
 };
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -96,6 +97,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     // );
 
     let mut modified = fs::metadata("../photon/scene.json")?.modified()?;
+
+    let res = parsers::json(&fs::read_to_string("../photon/scene.json")?);
+    renderer_builder.camera(res.0).world(res.1);
+
+    let mut renderer = renderer_builder.build();
+
     // let json = fs::read_to_string("../photon/scene.json")?;
     // renderer_builder.from_json(&json);
 
@@ -174,21 +181,9 @@ fn main() -> Result<(), Box<dyn Error>> {
         let new_modified = fs::metadata("../photon/scene.json")?.modified()?;
         if modified != new_modified {
             modified = new_modified;
-            renderer_builder = Renderer::builder();
-            renderer_builder
-                .width(width)
-                .height(height)
-                .camera(Camera::new(
-                    Point(0.0, 0.75, -36.0),
-                    Point(-1.0, 1.5, -35.0),
-                    Point(-1.0, 0.0, -35.0),
-                    Point(1.0, 1.5, -35.0),
-                ))
-                .algorithm(Algorithm::PathTracing)
-                .render_method(RenderMethod::Tiles)
-                // .world(demos::cornell())
-                .load_json(&fs::read_to_string("../photon/scene.json")?)
-                .accelerator(Accelerator::BoundingVolumeHierarchy);
+            let res = parsers::json(&fs::read_to_string("../photon/scene.json")?);
+            renderer_builder.world(res.1);
+            renderer = renderer_builder.build();
             reset = true;
         }
 
@@ -200,7 +195,6 @@ fn main() -> Result<(), Box<dyn Error>> {
             reset = false;
         }
 
-        let mut renderer = renderer_builder.build();
         let pixels = renderer.render(&section);
         frames_count += 1.0;
         for (idx, pixel) in pixels.into_iter().enumerate() {

@@ -109,25 +109,6 @@
         ],
         "material": "diffuse-green"
       },
-
-      {
-        "type": "torus",
-        "radius1": 0.75,
-        "radius2": 5.0,
-        "steps1": 60,
-        "steps2": 100,
-        "transforms": [
-          {
-            "type": "rotate",
-            "values": [0.0, 0.0, 0.0]
-          },
-          {
-            "type": "translate",
-            "values": [-9.0, -9.0, -9.0]
-          }
-        ],
-        "material": "test-refractive"
-      },
       {
         "type": "plane",
         "material": "emissive-white",
