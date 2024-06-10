@@ -10,7 +10,7 @@ pub struct Triangle {
     pub origin: Point,
     pub edge1: Vector,
     pub edge2: Vector,
-    pub normal: Vector,
+    pub normal: Normal,
     pub material: Material,
     pub pt2: Point,
     pub pt3: Point,
@@ -21,7 +21,7 @@ impl Triangle {
     pub fn new(pt1: Point, pt2: Point, pt3: Point, material: Material) -> Triangle {
         let edge1 = &pt2 - &pt1;
         let edge2 = &pt3 - &pt1;
-        let normal = edge1.cross(&edge2).unit().into();
+        let normal = edge1.cross(&edge2).unit();
         let centroid = &(&(&pt1 + &pt2) + &pt3) / 3.0;
 
         Triangle {
@@ -37,20 +37,17 @@ impl Triangle {
     }
 
     pub fn normal(&self) -> Normal {
-        match self {
-            Triangle { normal, .. } => Normal::new(normal.0, normal.1, normal.2),
-        }
+        self.normal
     }
 
     pub fn intersect(&self, ray: &Ray) -> Option<Float> {
-        match self {
-            Triangle {
-                origin,
-                edge1,
-                edge2,
-                ..
-            } => triangle_intersect((origin, edge1, edge2), ray),
-        }
+        let Triangle {
+            origin,
+            edge1,
+            edge2,
+            ..
+        } = self;
+        triangle_intersect((origin, edge1, edge2), ray)
     }
 
     pub fn bounding_box(&self) -> BoundingBox {
