@@ -1,13 +1,11 @@
-use super::float::Float;
-use crate::ilios::point::Point;
-
+use super::{float::Float, geometry::Point};
 type Matrix = [Float; 16];
 
 #[derive(Clone, Debug)]
 pub struct Transform(pub Matrix);
 
 fn combine(mts: &[Matrix]) -> Matrix {
-    let roxcol = |a: &Matrix, b: &Matrix, r: usize, c: usize| {
+    let multiply_row_by_col = |a: &Matrix, b: &Matrix, r: usize, c: usize| {
         a[r * 4] * b[c]
             + a[1 + r * 4] * b[4 + c]
             + a[2 + r * 4] * b[8 + c]
@@ -18,7 +16,7 @@ fn combine(mts: &[Matrix]) -> Matrix {
             1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
         ],
         |a, b| {
-            let rc = |r, c| roxcol(&a, b, r, c);
+            let rc = |r, c| multiply_row_by_col(&a, b, r, c);
             [
                 rc(0, 0),
                 rc(0, 1),

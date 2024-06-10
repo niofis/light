@@ -1,5 +1,6 @@
-use crate::ilios::float::Float;
 use std::ops;
+
+use crate::float::Float;
 
 #[derive(Debug, Clone, Copy)]
 pub struct GVector4(pub Float, pub Float, pub Float, pub Float);

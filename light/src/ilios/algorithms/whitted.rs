@@ -3,11 +3,11 @@ use crate::{
     ilios::{
         closest_primitive::ClosestPrimitive,
         color::{self, BLACK},
-        primitives::Primitive,
+        geometry::{Normal, Point, Triangle, Vector},
         ray::Ray,
         rng::Rng,
     },
-    Color, LightSource, Material, Point, Renderer, Vector,
+    Color, LightSource, Material, Renderer,
 };
 
 fn inner_trace_ray(renderer: &Renderer, ray: &Ray, depth: u8) -> Color {
@@ -25,15 +25,13 @@ fn inner_trace_ray(renderer: &Renderer, ray: &Ray, depth: u8) -> Color {
                     distance,
                 }) => {
                     let point = ray.point(distance);
-                    let prm_material = match primitive {
-                        Primitive::Sphere { material, .. } => material,
-                        Primitive::Triangle { material, .. } => material,
-                    };
+                    let Triangle { material, .. } = primitive;
+                    let prm_material = material;
 
                     match prm_material {
                         Material::Diffuse(_) => calculate_shading(renderer, primitive, &point),
                         Material::Reflective(_, idx) => {
-                            let normal = primitive.normal(&point);
+                            let normal: Vector = primitive.normal().into();
                             let ri: Vector = ray.direction.into();
                             let dot = ri.dot(&normal) * 2.0;
                             let new_dir = ri - (normal * dot);
@@ -46,7 +44,7 @@ fn inner_trace_ray(renderer: &Renderer, ray: &Ray, depth: u8) -> Color {
                         Material::Refractive => {
                             let current_index = 1.52; //assume it is glass
                             let previous_index = 1.0;
-                            let normal = primitive.normal(&point);
+                            let normal = primitive.normal();
                             let n = current_index / previous_index;
                             let dot = normal.dot(&ray.direction.into());
                             let ta = n * n * (1.0 - (dot * dot));
@@ -70,14 +68,12 @@ pub fn trace_ray(renderer: &Renderer, _rng: &mut dyn Rng, pixel: (u32, u32)) -> 
     inner_trace_ray(renderer, &ray, 1)
 }
 
-fn calculate_shading(renderer: &Renderer, prm: &Primitive, point: &Point) -> Color {
-    let normal = prm.normal(point);
+fn calculate_shading(renderer: &Renderer, prm: &Triangle, point: &Point) -> Color {
+    let normal = prm.normal();
     let direct_lighting = calculate_direct_lighting(renderer, point, &normal);
 
-    let prm_material = match prm {
-        Primitive::Sphere { material, .. } => material,
-        Primitive::Triangle { material, .. } => material,
-    };
+    let Triangle { material, .. } = prm;
+    let prm_material = material;
 
     let prm_color = match prm_material {
         Material::Diffuse(color) => color,
@@ -117,7 +113,7 @@ fn find_closest_primitive<'a>(
 }
 
 fn find_shadow_primitive(
-    primitives: &[Primitive],
+    primitives: &[Triangle],
     ray: &Ray,
     prm_indexes: &[usize],
     max_dist: Float,
@@ -128,7 +124,7 @@ fn find_shadow_primitive(
         .any(|dist| dist > 0.0001 && dist <= max_dist)
 }
 
-fn calculate_direct_lighting(renderer: &Renderer, point: &Point, normal: &Vector) -> Color {
+fn calculate_direct_lighting(renderer: &Renderer, point: &Point, normal: &Normal) -> Color {
     let incident_lights = renderer.world.lights.iter().filter_map(|ll| {
         let LightSource::Point(light, intensity) = ll;
         let direction = light - point;

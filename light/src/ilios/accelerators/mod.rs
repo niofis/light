@@ -1,8 +1,5 @@
-use self::{
-    bounding_volume_hierarchy::{BVHStats, Bvh},
-    brute_force::BruteForce,
-};
-use super::{primitives::Primitive, ray::Ray, trace::Trace};
+use self::{bounding_volume_hierarchy::Bvh, brute_force::BruteForce};
+use super::{geometry::Triangle, ray::Ray, trace::Trace};
 mod bounding_volume_hierarchy;
 mod brute_force;
 
@@ -19,28 +16,14 @@ pub enum AcceleratorInstance {
     BoundingVolumeHierarchy(Bvh),
 }
 
-#[derive(Clone, Debug)]
-pub enum AcceleratorStats {
-    None,
-    BoundingVolumeHierachy(BVHStats),
-}
-
 impl AcceleratorInstance {
-    pub fn new_brute_force(primitives: &[Primitive]) -> AcceleratorInstance {
+    pub fn new_brute_force(primitives: &[Triangle]) -> AcceleratorInstance {
         let tracer = BruteForce::new(primitives);
         AcceleratorInstance::BruteForce(tracer)
     }
-    pub fn new_bounding_volume_hierarchy(primitives: &[Primitive]) -> AcceleratorInstance {
+    pub fn new_bounding_volume_hierarchy(primitives: &[Triangle]) -> AcceleratorInstance {
         let tracer = Bvh::new(primitives);
         AcceleratorInstance::BoundingVolumeHierarchy(tracer)
-    }
-    pub fn stats(&self) -> AcceleratorStats {
-        match self {
-            AcceleratorInstance::BoundingVolumeHierarchy(tracer) => {
-                AcceleratorStats::BoundingVolumeHierachy(tracer.stats())
-            }
-            _ => AcceleratorStats::None,
-        }
     }
     pub fn trace(&self, ray: &Ray) -> Option<Vec<usize>> {
         match self {

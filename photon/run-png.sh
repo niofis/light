@@ -1,1 +1,1 @@
-cargo run --release -- --json scene.json --png --save --samples 100 --width 1920 --height 1080
+cargo run --release -- --json scene.json --png --save --samples 10 --width 1280 --height 720 --threads 1

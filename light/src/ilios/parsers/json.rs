@@ -95,9 +95,16 @@ fn parse_objects(json: &Value, materials: &HashMap<String, Material>) -> Vec<Sol
 fn parse_sphere(sphere: &Value, materials: &HashMap<String, Material>) -> Solid {
     let material_key = sphere["material"].as_str().unwrap();
 
+    let center = parse_point(&sphere["center"]);
+    let radius = parse_float(&sphere["radius"]);
+    let sections = parse_float(&sphere["sections"]) as usize;
+    let transforms = Transform::combine(&[
+        Transform::scale(radius, radius, radius),
+        Transform::translate(center.0, center.1, center.2),
+    ]);
     Solid::Sphere(
-        parse_point(&sphere["center"]),
-        parse_float(&sphere["radius"]),
+        sections,
+        transforms,
         materials.get(material_key).unwrap().clone(),
     )
 }
@@ -163,7 +170,7 @@ fn parse_point(point: &Value) -> Point {
 
 fn parse_vector(vector: &Value) -> Vector {
     let values = vector.as_array().unwrap();
-    Vector(
+    Vector::new(
         parse_float(&values[0]),
         parse_float(&values[1]),
         parse_float(&values[2]),

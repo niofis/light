@@ -1,8 +1,7 @@
-use super::float::Float;
-use crate::ilios::generic_vector::GVector4;
-use crate::ilios::normal::Normal;
-use crate::Point;
+use crate::{float::Float, Point};
 use std::ops;
+
+use super::{generic_vector::GVector4, Normal};
 
 #[derive(Copy, Clone, Debug)]
 pub struct Vector(pub Float, pub Float, pub Float); //x,y,z
@@ -141,8 +140,7 @@ impl Vector {
         self.dot(self).sqrt()
     }
     pub fn unit(&self) -> Normal {
-        let Vector(x, y, z) = self / self.norm();
-        Normal(x, y, z)
+        Normal::new(self.0, self.1, self.2)
     }
     pub fn cross(&self, rhs: &Vector) -> Vector {
         let x1 = self.0 as f64;

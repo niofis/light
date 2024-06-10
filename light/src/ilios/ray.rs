@@ -1,6 +1,7 @@
-use super::float::Float;
-use super::normal::Normal;
-use crate::ilios::point::Point;
+use super::{
+    float::Float,
+    geometry::{Normal, Point},
+};
 
 #[derive(Debug)]
 pub struct Ray {

@@ -1,9 +1,8 @@
-use crate::ilios::point::Point;
 use crate::ilios::ray::Ray;
-use crate::ilios::vector::Vector;
 use crate::Transform;
 
 use super::float::Float;
+use super::geometry::{Point, Vector};
 
 #[derive(Clone, Default, Debug)]
 pub struct CoordinateSystem {

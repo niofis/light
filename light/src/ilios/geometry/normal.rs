@@ -1,12 +1,12 @@
-use super::{float::Float, generic_vector::GVector4};
-use crate::ilios::vector::Vector;
+use super::{generic_vector::GVector4, Vector};
+use crate::float::Float;
 use std::ops;
 #[derive(Copy, Clone, Debug)]
 pub struct Normal(pub Float, pub Float, pub Float); //x,y,z
 
 impl From<GVector4> for Normal {
     fn from(gv: GVector4) -> Self {
-        Normal(gv.0, gv.1, gv.2)
+        Normal::new(gv.0, gv.1, gv.2)
     }
 }
 
@@ -89,7 +89,8 @@ impl ops::Neg for &Normal {
 
 impl Normal {
     pub fn new(x: Float, y: Float, z: Float) -> Normal {
-        Normal(x, y, z)
+        let norm = (x * x + y * y + z * z).sqrt();
+        Normal(x / norm, y / norm, z / norm)
     }
     pub fn default() -> Normal {
         Normal(1.0, 0.0, 0.0)
@@ -108,6 +109,17 @@ impl Normal {
         let y = z1 * x2 - x1 * z2;
         let z = x1 * y2 - y1 * x2;
         Vector(x as Float, y as Float, z as Float)
+    }
+
+    pub fn coordinate_system(&self) -> (Vector, Vector) {
+        let Normal(x, y, z) = self;
+        let v2 = if x.abs() > y.abs() {
+            Vector::new(-z, 0.0, *x) / (x * x + z * z)
+        } else {
+            Vector::new(0.0, *z, -y) / (y * y + z * z)
+        };
+        let v3 = self.cross(&v2);
+        (v2, v3)
     }
 }
 

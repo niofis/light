@@ -1,8 +1,6 @@
 use crate::{
     float::{Float, PI},
-    ilios::{
-        closest_primitive::ClosestPrimitive, color, primitives::Primitive, ray::Ray, rng::Rng,
-    },
+    ilios::{closest_primitive::ClosestPrimitive, color, geometry::Triangle, ray::Ray, rng::Rng},
     Color, Material, Renderer, Vector,
 };
 const MAX_DEPTH: u8 = 5;
@@ -21,20 +19,18 @@ fn trace_ray_internal(renderer: &Renderer, rng: &mut dyn Rng, ray: &Ray, depth: 
                     distance,
                 }) => {
                     let point = ray.point(distance);
-                    let prm_material = match primitive {
-                        Primitive::Sphere { material, .. } => material,
-                        Primitive::Triangle { material, .. } => material,
-                    };
+                    let Triangle { material, .. } = primitive;
+                    let prm_material = material;
 
                     match prm_material {
                         Material::Diffuse(color) => {
-                            let normal = primitive.normal(&point);
+                            let normal: Vector = primitive.normal().into();
                             let new_dir = random_dome(rng, &normal);
                             let path_ray = Ray::new(point, new_dir.unit(), Float::INFINITY, 1.0);
                             *color * trace_ray_internal(renderer, rng, &path_ray, depth + 1)
                         }
                         Material::Reflective(_, idx) => {
-                            let normal = primitive.normal(&point);
+                            let normal: Vector = primitive.normal().into();
                             let ri: Vector = ray.direction.into();
                             let dot = ri.dot(&normal) * 2.0;
                             let new_dir = ri - (normal * dot);
@@ -46,7 +42,7 @@ fn trace_ray_internal(renderer: &Renderer, rng: &mut dyn Rng, ray: &Ray, depth: 
                         Material::Refractive => {
                             let previous_index = ray.refraction_index;
                             let next_index = 1.52;
-                            let mut normal = primitive.normal(&point);
+                            let mut normal: Vector = primitive.normal().into();
                             let n = previous_index / next_index;
                             let dot = normal.dot(&ray.direction.into());
                             let ta = n * n * (1.0 - (dot * dot));

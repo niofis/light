@@ -1,4 +1,4 @@
-use crate::ilios::{primitives::Primitive, ray::Ray, trace::Trace};
+use crate::ilios::{geometry::Triangle, ray::Ray, trace::Trace};
 
 #[derive(Clone, Debug)]
 pub struct BruteForce {
@@ -6,7 +6,7 @@ pub struct BruteForce {
 }
 
 impl BruteForce {
-    pub fn new(primitives: &[Primitive]) -> BruteForce {
+    pub fn new(primitives: &[Triangle]) -> BruteForce {
         let primitives = (0..primitives.len()).collect();
         BruteForce { primitives }
     }

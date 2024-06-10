@@ -7,8 +7,11 @@ pub fn cornell() -> World {
     let mut world_builder = World::builder();
 
     let simple_sphere = Solid::Sphere(
-        Point(16.0, -2.0, 10.0),
-        5.0,
+        10,
+        Transform::combine(&[
+            Transform::scale(5.0, 5.0, 5.0),
+            Transform::translate(16.0, -2.0, 10.0),
+        ]),
         Material::Reflective(Color(0.0, 0.0, 1.0), 1.0),
     );
 
@@ -46,18 +49,11 @@ pub fn cornell() -> World {
     );
     world_builder.add_object(donut);
 
-    // bunny!
-    let bunny_trs = Transform::combine(&[
-        Transform::scale(80.0, 80.0, 80.0),
-        Transform::translate(0.0, -11.0, 0.0),
-        Transform::rotate(0.0, PI, 0.0),
+    let geo_trs = Transform::combine(&[
+        Transform::scale(3.0, 3.0, 3.0),
+        Transform::translate(10.0, 10.0, -10.0),
     ]);
-    let bunny = Solid::InvertedFile(String::from("../models/bunny_res2.obj"), bunny_trs);
-    world_builder.add_object(bunny);
-
-    // bunny!
-    let geo_trs = Transform::combine(&[Transform::translate(10.0, 10.0, -10.0)]);
-    let geo = Solid::GeodesicSphere(3.0, 20, geo_trs);
+    let geo = Solid::Sphere(20, geo_trs, Material::blue());
     world_builder.add_object(geo);
 
     world_builder.add_light(LightSource::Point(Point(0.0, 15.0, 0.0), 100.0));
@@ -75,9 +71,11 @@ pub fn cornell() -> World {
     world_builder.add_object(top_light);
 
     let light_sphere_2 = Solid::Sphere(
-        // Point(-16.0, -5.5, -27.0),
-        Point(0., -4., -1.0),
-        2.0,
+        10,
+        Transform::combine(&[
+            Transform::scale(2.0, 2.0, 2.0),
+            Transform::translate(0., -4., -1.0),
+        ]),
         Material::Emissive(crate::ilios::color::WHITE * 1.),
     );
     world_builder.add_object(light_sphere_2);
@@ -91,13 +89,23 @@ pub fn cornell() -> World {
     world_builder.add_object(corner_cube);
 
     let corner_cube_light = Solid::Sphere(
-        Point(-21. + tmp / 2., 22.5 - tmp / 2., 25. - tmp / 2.),
-        tmp / 2.1,
+        10,
+        Transform::combine(&[
+            Transform::scale(tmp / 2.1, tmp / 2.1, tmp / 2.1),
+            Transform::translate(-21. + tmp / 2., 22.5 - tmp / 2., 25. - tmp / 2.),
+        ]),
         Material::Emissive(crate::ilios::color::WHITE * 5.),
     );
     world_builder.add_object(corner_cube_light);
 
-    let glass_sphere = Solid::Sphere(Point(-16.0, -5.0, -10.0), 2.0, Material::Refractive);
+    let glass_sphere = Solid::Sphere(
+        10,
+        Transform::combine(&[
+            Transform::scale(2.0, 2.0, 2.0),
+            Transform::translate(-16.0, -5.0, -10.0),
+        ]),
+        Material::Refractive,
+    );
     world_builder.add_object(glass_sphere);
 
     world_builder.build()
@@ -107,8 +115,11 @@ pub fn simple() -> World {
     let mut world_builder = World::builder();
 
     let simple_sphere = Solid::Sphere(
-        Point(16.0, -2.0, 10.0),
-        5.0,
+        10,
+        Transform::combine(&[
+            Transform::scale(5.0, 5.0, 5.0),
+            Transform::translate(16.0, -2.0, 10.0),
+        ]),
         Material::Reflective(Color(0.0, 0.0, 1.0), 1.0),
     );
     world_builder.add_object(simple_sphere);
@@ -142,11 +153,13 @@ pub fn simple() -> World {
     );
     world_builder.add_object(donut);
 
-    let sphere_trs = vec![Transform::translate(-16.0, -2.0, 10.0)];
-    let geo_sphere = Solid::GeodesicSphere(2.0, 20, Transform::combine(&sphere_trs));
+    let sphere_trs = vec![
+        Transform::scale(2.0, 2.0, 2.0),
+        Transform::translate(-16.0, -2.0, 10.0),
+    ];
+    let geo_sphere = Solid::Sphere(20, Transform::combine(&sphere_trs), Material::blue());
     world_builder.add_object(geo_sphere);
 
-    // let lights = vec![LightSource::Point(Point(-10.0, 10.0, -10.0), 100.0)];
     world_builder.add_light(LightSource::Point(Point(-10.0, 10.0, -10.0), 100.0));
 
     let top_light_trs = Transform::combine(&[
@@ -160,7 +173,14 @@ pub fn simple() -> World {
     );
     world_builder.add_object(top_light);
 
-    let glass_sphere = Solid::Sphere(Point(0.0, -5.0, -7.0), 2.0, Material::Refractive);
+    let glass_sphere = Solid::Sphere(
+        10,
+        Transform::combine(&[
+            Transform::scale(2.0, 2.0, 2.0),
+            Transform::translate(0.0, -5.0, -7.0),
+        ]),
+        Material::Refractive,
+    );
     world_builder.add_object(glass_sphere);
 
     world_builder.build()

@@ -1,11 +1,8 @@
+use super::super::float::{MAX, MIN};
 use crate::ilios::bounding_box::BoundingBox;
-use crate::ilios::point::Point;
-use crate::ilios::primitives::Primitive;
+use crate::ilios::geometry::{Point, Triangle, Vector};
 use crate::ilios::ray::Ray;
 use crate::ilios::trace::Trace;
-use crate::ilios::vector::Vector;
-
-use super::super::float::{MAX, MIN};
 
 #[derive(Clone, Debug)]
 pub enum Bvh {
@@ -16,13 +13,6 @@ pub enum Bvh {
         left: Box<Bvh>,
         right: Box<Bvh>,
     },
-}
-
-#[derive(Clone, Debug, Default)]
-pub struct BVHStats {
-    pub height: usize,
-    pub nodes: usize,
-    pub leaves: usize,
 }
 
 fn rec_trace(bvh: &Bvh, ray: &Ray, prm_vec: &mut Vec<usize>) {
@@ -43,29 +33,6 @@ fn rec_trace(bvh: &Bvh, ray: &Ray, prm_vec: &mut Vec<usize>) {
             rec_trace(right, ray, prm_vec);
         }
     };
-}
-
-fn in_order_walk(node: &Bvh, mut stats: BVHStats) -> BVHStats {
-    match node {
-        Bvh::Node {
-            left,
-            right,
-            primitives: _,
-            bounding_box: _,
-        } => {
-            stats.nodes += 1;
-            let stats = in_order_walk(left, stats);
-            in_order_walk(right, stats)
-        }
-        _ => stats,
-    }
-}
-
-impl Bvh {
-    pub fn stats(&self) -> BVHStats {
-        let stats = BVHStats::default();
-        in_order_walk(self, stats)
-    }
 }
 
 impl Trace for Bvh {
@@ -116,7 +83,7 @@ fn octree_grouping(items: &[(Point, usize)]) -> Bvh {
         maxz = if *z > maxz { *z } else { maxz };
     }
 
-    let center = Vector(
+    let center = Vector::new(
         (minx + maxx) / 2.0,
         (miny + maxy) / 2.0,
         (minz + maxz) / 2.0,
@@ -242,7 +209,7 @@ fn octree_grouping(items: &[(Point, usize)]) -> Bvh {
     }
 }
 
-fn rebuild(prms: &[Primitive], root: Bvh) -> Bvh {
+fn rebuild(prms: &[Triangle], root: Bvh) -> Bvh {
     match root {
         Bvh::Empty => Bvh::Empty,
         Bvh::Node {
@@ -285,7 +252,7 @@ fn rebuild(prms: &[Primitive], root: Bvh) -> Bvh {
 }
 
 impl Bvh {
-    pub fn new(primitives: &[Primitive]) -> Bvh {
+    pub fn new(primitives: &[Triangle]) -> Bvh {
         let len = primitives.len();
         if len == 0 {
             return Bvh::Empty;

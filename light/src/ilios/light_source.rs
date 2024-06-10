@@ -1,5 +1,6 @@
-use crate::ilios::float::Float;
-use crate::ilios::point::Point;
+use crate::float::Float;
+
+use super::geometry::Point;
 
 #[derive(Clone, Debug)]
 pub enum LightSource {

@@ -53,12 +53,14 @@
         "type": "sphere",
         "center": [17.0, -3.0, 10.0],
         "radius": 7.0,
+        "sections": 10.0,
         "material": "blue-reflective"
       },
       {
         "type": "sphere",
         "center": [-22.0, -7.0, -10.0],
         "radius": 3.0,
+        "sections": 10.0,
         "material": "test-refractive"
       },
       {

@@ -294,7 +294,7 @@ fn output_image(
     if matches.get_flag("save binary") {
         let now = chrono::offset::Local::now();
         let date = now.format("%Y%m%d-%H%M%S");
-        let filename = format!("{}-{}-{}.brf", date, samples, elapsed.ceil());
+        let filename = format!("renders/{}-{}-{}.brf", date, samples, elapsed.floor());
         let data = format_as_binary(pixels, width, height);
         fs::write(&filename, data).unwrap();
         eprintln!("saved file {}", filename);
@@ -306,7 +306,13 @@ fn output_image(
         };
         let now = chrono::offset::Local::now();
         let date = now.format("%Y%m%d-%H%M%S");
-        let filename = format!("{}-{}-{}.{}", date, samples, elapsed.ceil(), extension);
+        let filename = format!(
+            "renders/{}-{}-{}.{}",
+            date,
+            samples,
+            elapsed.floor(),
+            extension
+        );
         fs::write(&filename, data).unwrap();
         eprintln!("saved file {}", filename);
     } else if matches.get_flag("ppm") {
@@ -324,8 +330,8 @@ fn main() {
     let section = Section::new(0, 0, width, height);
     let start = time::Instant::now();
     let pixels = renderer.render(&section);
-    let elapsed = start.elapsed().as_seconds_f32();
-    eprintln!("Rendering time: {}s", elapsed);
+    let elapsed = start.elapsed().as_seconds_f32() * 1000.0;
+    eprintln!("Rendering time: {}ms", elapsed);
 
     output_image(&matches, renderer.samples, elapsed, width, height, &pixels);
 }

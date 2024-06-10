@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::Material;
 
-use super::{light_source::LightSource, primitives::Primitive, solids::Solid};
+use super::{geometry::Triangle, light_source::LightSource, solids::Solid};
 
 #[derive(Clone, Debug, Default)]
 pub struct World {
@@ -44,11 +44,11 @@ impl World {
     pub fn builder() -> WorldBuilder {
         WorldBuilder::default()
     }
-    pub fn primitives(&self) -> Vec<Primitive> {
+    pub fn primitives(&self) -> Vec<Triangle> {
         self.objects
             .iter()
             .map(|obj| obj.primitives())
-            .fold(Vec::new(), |acc, prms: Vec<Primitive>| {
+            .fold(Vec::new(), |acc, prms: Vec<Triangle>| {
                 acc.into_iter().chain(prms).collect()
             })
     }

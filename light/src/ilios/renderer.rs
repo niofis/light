@@ -1,24 +1,14 @@
 use super::{
-    accelerators::{Accelerator, AcceleratorInstance, AcceleratorStats},
+    accelerators::{Accelerator, AcceleratorInstance},
     algorithms::{path_tracing, whitted, Algorithm},
     camera::Camera,
     color::Color,
     float::Float,
-    primitives::Primitive,
+    geometry::Triangle,
     render_method::{RenderMethod, TraceFn},
     section::Section,
     world::World,
 };
-
-#[derive(Clone, Debug, Default)]
-pub struct Stats {
-    primitives: usize,
-    accelerator: Option<AcceleratorStats>,
-    // bvh_nodes: usize,
-    // bvh_height: usize,
-    // bvh_leaves: usize,
-    // bvh_ppn: usize,
-}
 
 #[derive(Debug)]
 pub struct Renderer {
@@ -26,11 +16,10 @@ pub struct Renderer {
     pub height: u32,
     pub accelerator: AcceleratorInstance,
     pub world: World,
-    pub primitives: Vec<Primitive>,
+    pub primitives: Vec<Triangle>,
     pub camera: Camera,
     pub render_method: RenderMethod,
     pub algorithm: Algorithm,
-    pub stats: Option<Stats>,
     pub threads: Option<u32>,
     pub samples: u32,
 }
@@ -45,7 +34,6 @@ impl Renderer {
             world: World::default(),
             render_method: RenderMethod::Pixels,
             algorithm: Algorithm::Whitted,
-            stats: None,
             threads: None,
             samples: 1,
         }
@@ -56,13 +44,6 @@ impl Renderer {
             Algorithm::Whitted => whitted::trace_ray,
             Algorithm::PathTracing => path_tracing::trace_ray,
         };
-        // let render: RenderFn = match (&self.threads, &self.stats, &self.render_method) {
-        //     (Some(1), _, _) | (_, Some(_), _) => render_pixels_st,
-        //     (_, _, RenderMethod::Pixels) => render_pixels,
-        //     (_, _, RenderMethod::Tiles) => render_tiles,
-        //     (_, _, RenderMethod::Scanlines) => render_scanlines,
-        // };
-
         let render = self.render_method.get();
         render(self, section, trace)
     }
@@ -77,7 +58,6 @@ pub struct RendererBuilder {
     pub camera: Camera,
     pub render_method: RenderMethod,
     pub algorithm: Algorithm,
-    pub stats: Option<Stats>,
     pub threads: Option<u32>,
     pub samples: u32,
 }
@@ -127,10 +107,6 @@ impl RendererBuilder {
         self.samples = samples;
         self
     }
-    pub fn use_stats(&mut self) -> &mut RendererBuilder {
-        self.stats = Some(Stats::default());
-        self
-    }
     pub fn build(&mut self) -> Renderer {
         let RendererBuilder {
             width,
@@ -140,7 +116,6 @@ impl RendererBuilder {
             camera,
             render_method,
             algorithm,
-            stats,
             threads,
             samples,
         } = self.to_owned();
@@ -166,7 +141,6 @@ impl RendererBuilder {
             camera,
             render_method,
             algorithm,
-            stats,
             threads,
             samples,
         }

@@ -1,7 +1,8 @@
-use super::float::Float;
-use crate::ilios::generic_vector::GVector4;
-use crate::ilios::vector::Vector;
 use std::ops;
+
+use crate::float::Float;
+
+use super::{generic_vector::GVector4, Vector};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Point(pub Float, pub Float, pub Float); //x,y,z
