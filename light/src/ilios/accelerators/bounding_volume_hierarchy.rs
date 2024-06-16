@@ -7,35 +7,40 @@ use crate::ilios::trace::Trace;
 pub enum Bvh {
     Empty,
     Node {
-        primitives: Option<Vec<usize>>,
         bounding_box: BoundingBox,
         left: Box<Bvh>,
         right: Box<Bvh>,
     },
     Leaf {
-        primitives: Option<Vec<usize>>,
+        primitives: Vec<usize>,
         bounding_box: BoundingBox,
     },
 }
 
 fn rec_trace(bvh: &Bvh, ray: &Ray, prm_vec: &mut Vec<usize>) {
-    if let Bvh::Node {
-        primitives,
-        bounding_box,
-        left,
-        right,
-    } = bvh
-    {
-        if bounding_box.intersect(ray) {
-            if let Some(prms) = primitives {
-                for p in prms {
-                    prm_vec.push(*p);
+    match bvh {
+        Bvh::Empty => (),
+        Bvh::Node {
+            bounding_box,
+            left,
+            right,
+        } => {
+            if bounding_box.intersect(ray) {
+                rec_trace(left, ray, prm_vec);
+                rec_trace(right, ray, prm_vec);
+            }
+        }
+        Bvh::Leaf {
+            primitives,
+            bounding_box,
+        } => {
+            if bounding_box.intersect(ray) {
+                for p in primitives {
+                    prm_vec.push(*p)
                 }
             }
-            rec_trace(left, ray, prm_vec);
-            rec_trace(right, ray, prm_vec);
         }
-    };
+    }
 }
 
 impl Trace for Bvh {
@@ -57,16 +62,12 @@ fn octree_grouping(items: &[(Point, usize)]) -> Bvh {
         return Bvh::Empty;
     }
 
-    let first = &items[0];
-
     // Termination condition, checks the size of the items for this group
     // and returns a leaf node, which has no left/right children
-    if items.len() <= 2 || items.iter().all(|pt| pt.0 == first.0) {
-        return Bvh::Node {
-            primitives: Some(items.iter().map(|x| x.1).collect::<Vec<usize>>()),
+    if items.len() <= 2 {
+        return Bvh::Leaf {
+            primitives: items.iter().map(|x| x.1).collect::<Vec<usize>>(),
             bounding_box: BoundingBox::default(),
-            left: Box::new(Bvh::Empty),
-            right: Box::new(Bvh::Empty),
         };
     }
 
@@ -143,49 +144,53 @@ fn octree_grouping(items: &[(Point, usize)]) -> Bvh {
     // The new BVH node with no primitives yet, but a split of space
     // The bounding box has no meaning right now, this is just a grouping of indexes
     Bvh::Node {
-        primitives: None,
         bounding_box: BoundingBox::default(),
         left,
         right,
     }
 }
 
+// Will simply recourse the BVH and update the building boxes accordingly
 fn rebuild(prms: &[Triangle], root: Bvh) -> Bvh {
     match root {
         Bvh::Empty => Bvh::Empty,
-        Bvh::Node {
-            primitives,
-            left,
-            right,
-            ..
-        } => {
+        Bvh::Node { left, right, .. } => {
             let left = rebuild(prms, *left);
             let right = rebuild(prms, *right);
             let mut bounding_box = BoundingBox::default();
-
-            if let Some(indexes) = &primitives {
-                bounding_box = indexes.iter().fold(BoundingBox::default(), |acc, p| {
-                    acc.combine(&prms[*p].bounding_box())
-                });
-            }
-            if let Bvh::Node {
-                bounding_box: lbb, ..
-            } = &left
-            {
-                bounding_box = bounding_box.combine(lbb);
+            match &left {
+                Bvh::Empty => (),
+                Bvh::Node {
+                    bounding_box: bb, ..
+                } => bounding_box = bounding_box.combine(bb),
+                Bvh::Leaf {
+                    bounding_box: bb, ..
+                } => bounding_box = bounding_box.combine(bb),
             }
 
-            if let Bvh::Node {
-                bounding_box: rbb, ..
-            } = &right
-            {
-                bounding_box = bounding_box.combine(rbb);
+            match &right {
+                Bvh::Empty => (),
+                Bvh::Node {
+                    bounding_box: bb, ..
+                } => bounding_box = bounding_box.combine(bb),
+                Bvh::Leaf {
+                    bounding_box: bb, ..
+                } => bounding_box = bounding_box.combine(bb),
             }
 
             Bvh::Node {
-                primitives,
                 left: Box::new(left),
                 right: Box::new(right),
+                bounding_box,
+            }
+        }
+        Bvh::Leaf { primitives, .. } => {
+            let bounding_box = primitives.iter().fold(BoundingBox::default(), |acc, p| {
+                acc.combine(&prms[*p].bounding_box())
+            });
+
+            Bvh::Leaf {
+                primitives,
                 bounding_box,
             }
         }
