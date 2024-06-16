@@ -1,4 +1,3 @@
-use super::super::float::{MAX, MIN};
 use crate::ilios::bounding_box::BoundingBox;
 use crate::ilios::geometry::{Point, Triangle, Vector};
 use crate::ilios::ray::Ray;
@@ -12,6 +11,10 @@ pub enum Bvh {
         bounding_box: BoundingBox,
         left: Box<Bvh>,
         right: Box<Bvh>,
+    },
+    Leaf {
+        primitives: Option<Vec<usize>>,
+        bounding_box: BoundingBox,
     },
 }
 
@@ -56,7 +59,9 @@ fn octree_grouping(items: &[(Point, usize)]) -> Bvh {
 
     let first = &items[0];
 
-    if items.len() == 2 || items.iter().all(|pt| pt.0 == first.0) {
+    // Termination condition, checks the size of the items for this group
+    // and returns a leaf node, which has no left/right children
+    if items.len() <= 2 || items.iter().all(|pt| pt.0 == first.0) {
         return Bvh::Node {
             primitives: Some(items.iter().map(|x| x.1).collect::<Vec<usize>>()),
             bounding_box: BoundingBox::default(),
@@ -65,34 +70,20 @@ fn octree_grouping(items: &[(Point, usize)]) -> Bvh {
         };
     }
 
-    let mut minx = MAX;
-    let mut miny = MAX;
-    let mut minz = MAX;
-    let mut maxx = MIN;
-    let mut maxy = MIN;
-    let mut maxz = MIN;
+    // Calculate the center for all the items
+    let center: Vector = items
+        .iter()
+        .fold(Point(0.0, 0.0, 0.0), |acc, (pt, _)| pt + &acc)
+        .into();
+    let center = center / (items.len() as f32);
 
-    for item in items {
-        let (Point(x, y, z), _) = item;
-        minx = if *x < minx { *x } else { minx };
-        miny = if *y < miny { *y } else { miny };
-        minz = if *z < minz { *z } else { minz };
-
-        maxx = if *x > maxx { *x } else { maxx };
-        maxy = if *y > maxy { *y } else { maxy };
-        maxz = if *z > maxz { *z } else { maxz };
-    }
-
-    let center = Vector::new(
-        (minx + maxx) / 2.0,
-        (miny + maxy) / 2.0,
-        (minz + maxz) / 2.0,
-    );
-
+    // Return the section a particular point is in
+    // The section is one of the eight octree regions
     let sector = |c: &Point| if c.0 >= center.0 { 1 } else { 0 } +
         if c.1 >= center.1 { 2 } else { 0 } +
         if c.2 >= center.2 { 4 } else { 0 };
 
+    // Collects all the points for a given sector
     let in_sector = |s| {
         items
             .iter()
@@ -100,6 +91,7 @@ fn octree_grouping(items: &[(Point, usize)]) -> Bvh {
             .collect::<Vec<(Point, usize)>>()
     };
 
+    // All the sectors with their corresponding points
     let sectors = [
         in_sector(0),
         in_sector(1),
@@ -111,7 +103,10 @@ fn octree_grouping(items: &[(Point, usize)]) -> Bvh {
         in_sector(7),
     ];
 
+    // Gets the number of points on each sector
     let lens = sectors.iter().map(|s| s.len() as i64).collect::<Vec<i64>>();
+
+    // Calculates the difference between opposite sectors on a given axis
     let xdiff =
         ((lens[0] + lens[2] + lens[4] + lens[6]) - (lens[1] + lens[3] + lens[5] + lens[7])).abs();
     let ydiff =
@@ -119,93 +114,39 @@ fn octree_grouping(items: &[(Point, usize)]) -> Bvh {
     let zdiff =
         ((lens[0] + lens[1] + lens[2] + lens[3]) - (lens[4] + lens[5] + lens[6] + lens[7])).abs();
 
-    if xdiff <= ydiff && xdiff <= zdiff {
-        return Bvh::Node {
-            primitives: None,
-            bounding_box: BoundingBox::default(),
-            left: Box::new(octree_grouping(
-                &items
-                    .iter()
-                    .filter_map(|x| {
-                        if [0, 2, 4, 6].contains(&sector(&x.0)) {
-                            Some(*x)
-                        } else {
-                            None
-                        }
-                    })
-                    .collect::<Vec<(Point, usize)>>(),
-            )),
-            right: Box::new(octree_grouping(
-                &items
-                    .iter()
-                    .filter_map(|x| {
-                        if [1, 3, 5, 7].contains(&sector(&x.0)) {
-                            Some(*x)
-                        } else {
-                            None
-                        }
-                    })
-                    .collect::<Vec<(Point, usize)>>(),
-            )),
-        };
+    let box_for_sectors = |sectors: [usize; 4]| {
+        Box::new(octree_grouping(
+            &items
+                .iter()
+                .filter_map(|x| {
+                    if sectors.contains(&sector(&x.0)) {
+                        Some(*x)
+                    } else {
+                        None
+                    }
+                })
+                .collect::<Vec<(Point, usize)>>(),
+        ))
+    };
+
+    // Determinies which axis contains the smallest difference of points
+    // This indicates what would be the best splitting position
+    // Returns two boxes for this BVH node
+    let (left, right) = if xdiff <= ydiff && xdiff <= zdiff {
+        (box_for_sectors([0, 2, 4, 6]), box_for_sectors([1, 3, 5, 7]))
     } else if ydiff <= xdiff && ydiff <= zdiff {
-        return Bvh::Node {
-            primitives: None,
-            bounding_box: BoundingBox::default(),
-            left: Box::new(octree_grouping(
-                &items
-                    .iter()
-                    .filter_map(|x| {
-                        if [0, 1, 4, 5].contains(&sector(&x.0)) {
-                            Some(*x)
-                        } else {
-                            None
-                        }
-                    })
-                    .collect::<Vec<(Point, usize)>>(),
-            )),
-            right: Box::new(octree_grouping(
-                &items
-                    .iter()
-                    .filter_map(|x| {
-                        if [2, 3, 6, 7].contains(&sector(&x.0)) {
-                            Some(*x)
-                        } else {
-                            None
-                        }
-                    })
-                    .collect::<Vec<(Point, usize)>>(),
-            )),
-        };
+        (box_for_sectors([0, 1, 4, 5]), box_for_sectors([2, 3, 6, 7]))
     } else {
-        return Bvh::Node {
-            primitives: None,
-            bounding_box: BoundingBox::default(),
-            left: Box::new(octree_grouping(
-                &items
-                    .iter()
-                    .filter_map(|x| {
-                        if [0, 1, 2, 3].contains(&sector(&x.0)) {
-                            Some(*x)
-                        } else {
-                            None
-                        }
-                    })
-                    .collect::<Vec<(Point, usize)>>(),
-            )),
-            right: Box::new(octree_grouping(
-                &items
-                    .iter()
-                    .filter_map(|x| {
-                        if [4, 5, 6, 7].contains(&sector(&x.0)) {
-                            Some(*x)
-                        } else {
-                            None
-                        }
-                    })
-                    .collect::<Vec<(Point, usize)>>(),
-            )),
-        };
+        (box_for_sectors([0, 1, 2, 3]), box_for_sectors([4, 5, 6, 7]))
+    };
+
+    // The new BVH node with no primitives yet, but a split of space
+    // The bounding box has no meaning right now, this is just a grouping of indexes
+    Bvh::Node {
+        primitives: None,
+        bounding_box: BoundingBox::default(),
+        left,
+        right,
     }
 }
 

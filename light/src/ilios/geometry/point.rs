@@ -31,6 +31,12 @@ impl From<Vector> for Point {
     }
 }
 
+impl From<Point> for Vector {
+    fn from(val: Point) -> Self {
+        Vector(val.0, val.1, val.2)
+    }
+}
+
 impl ops::Add<&Vector> for &Point {
     type Output = Point;
 
