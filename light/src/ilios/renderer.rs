@@ -97,10 +97,6 @@ impl RendererBuilder {
     }
     pub fn threads(&mut self, count: u32) -> &mut RendererBuilder {
         self.threads = if count > 0 { Some(count) } else { None };
-        rayon::ThreadPoolBuilder::new()
-            .num_threads(count as usize)
-            .build_global()
-            .unwrap();
         self
     }
     pub fn samples(&mut self, samples: u32) -> &mut RendererBuilder {

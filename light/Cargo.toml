@@ -9,4 +9,4 @@ split-debuginfo = "unpacked"
 
 [dependencies]
 serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
-rayon = "1.7"
+

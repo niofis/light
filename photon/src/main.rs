@@ -194,14 +194,12 @@ fn process_cli() -> ArgMatches {
         )
         .arg(
             Arg::new("width")
-            .short('w')
             .long("width")
             .value_parser(value_parser!(u32))
             .help("outupt image width")
         )
         .arg(
             Arg::new("height")
-            .short('h')
             .long("height")
             .value_parser(value_parser!(u32))
             .help("outupt image height")

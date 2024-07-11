@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::ilios::bounding_box::BoundingBox;
 use crate::ilios::geometry::{Point, Triangle, Vector};
 use crate::ilios::ray::Ray;
@@ -151,12 +153,14 @@ fn octree_grouping(items: &[(Point, usize)]) -> Bvh {
 }
 
 // Will simply recourse the BVH and update the building boxes accordingly
-fn rebuild(prms: &[Triangle], root: Bvh) -> Bvh {
+fn rebuild(prms: &[Triangle], root: Bvh, total_nodes: &mut usize) -> Bvh {
     match root {
         Bvh::Empty => Bvh::Empty,
         Bvh::Node { left, right, .. } => {
-            let left = rebuild(prms, *left);
-            let right = rebuild(prms, *right);
+            // let t = Rc::get_mut(&mut total_nodes).unwrap();
+            *total_nodes += 1;
+            let left = rebuild(prms, *left, total_nodes);
+            let right = rebuild(prms, *right, total_nodes);
             let mut bounding_box = BoundingBox::default();
             match &left {
                 Bvh::Empty => (),
@@ -197,6 +201,10 @@ fn rebuild(prms: &[Triangle], root: Bvh) -> Bvh {
     }
 }
 
+fn rebuild_as_heap(heap: &mut Vec<Bvh>, bvh: &Bvh, current_index: usize) {
+    heap[current_index] = bvh.clone();
+}
+
 impl Bvh {
     pub fn new(primitives: &[Triangle]) -> Bvh {
         let len = primitives.len();
@@ -208,6 +216,11 @@ impl Bvh {
         let centroid = primitives.iter().map(|x| x.bounding_box().centroid);
         let items: Vec<(Point, usize)> = centroid.zip(indexes).collect();
         let root = octree_grouping(&items);
-        rebuild(primitives, root)
+        let mut total_nodes: usize = 0;
+        let bvh = rebuild(primitives, root, &mut total_nodes);
+        println!("total_nodes: {}", total_nodes);
+        let mut heap: Vec<Bvh> = Vec::with_capacity(total_nodes);
+        rebuild_as_heap(&mut heap, &bvh, 0);
+        bvh
     }
 }
