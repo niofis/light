@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::ilios::bounding_box::BoundingBox;
 use crate::ilios::geometry::{Point, Triangle, Vector};
 use crate::ilios::ray::Ray;
@@ -219,8 +217,8 @@ impl Bvh {
         let mut total_nodes: usize = 0;
         let bvh = rebuild(primitives, root, &mut total_nodes);
         println!("total_nodes: {}", total_nodes);
-        let mut heap: Vec<Bvh> = Vec::with_capacity(total_nodes);
-        rebuild_as_heap(&mut heap, &bvh, 0);
+        // let mut heap: Vec<Bvh> = Vec::with_capacity(total_nodes);
+        // rebuild_as_heap(&mut heap, &bvh, 0);
         bvh
     }
 }

@@ -25,6 +25,44 @@ pub struct Renderer {
 }
 
 impl Renderer {
+    pub fn new(builder: &RendererBuilder) -> Renderer {
+        let RendererBuilder {
+            width,
+            height,
+            accelerator,
+            world,
+            camera,
+            render_method,
+            algorithm,
+            threads,
+            samples,
+        } = builder.to_owned();
+
+        let mut camera = camera;
+        camera.init(width as Float, height as Float);
+
+        let primitives = world.primitives();
+
+        let accelerator = match accelerator {
+            Accelerator::BruteForce => AcceleratorInstance::new_brute_force(&primitives),
+            Accelerator::BoundingVolumeHierarchy => {
+                AcceleratorInstance::new_bounding_volume_hierarchy(&primitives)
+            }
+        };
+
+        Renderer {
+            width,
+            height,
+            accelerator,
+            world,
+            primitives,
+            camera,
+            render_method,
+            algorithm,
+            threads,
+            samples,
+        }
+    }
     pub fn builder() -> RendererBuilder {
         RendererBuilder {
             width: 0,
@@ -104,41 +142,6 @@ impl RendererBuilder {
         self
     }
     pub fn build(&mut self) -> Renderer {
-        let RendererBuilder {
-            width,
-            height,
-            accelerator,
-            world,
-            camera,
-            render_method,
-            algorithm,
-            threads,
-            samples,
-        } = self.to_owned();
-
-        let mut camera = camera;
-        camera.init(self.width as Float, self.height as Float);
-
-        let primitives = world.primitives();
-
-        let accelerator = match accelerator {
-            Accelerator::BruteForce => AcceleratorInstance::new_brute_force(&primitives),
-            Accelerator::BoundingVolumeHierarchy => {
-                AcceleratorInstance::new_bounding_volume_hierarchy(&primitives)
-            }
-        };
-
-        Renderer {
-            width,
-            height,
-            accelerator,
-            world,
-            primitives,
-            camera,
-            render_method,
-            algorithm,
-            threads,
-            samples,
-        }
+        Renderer::new(self)
     }
 }
