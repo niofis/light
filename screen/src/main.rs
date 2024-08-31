@@ -41,6 +41,7 @@ impl FrameTimmings {
 fn main() -> Result<(), Box<dyn Error>> {
     let width: u32 = 640;
     let height: u32 = 360;
+    let scene: &str = "../photon/scene-simple.json";
     let bpp = 4;
     let sdl_context = sdl2::init()?;
     let video_subsystem = sdl_context.video()?;
@@ -96,9 +97,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     //     (u.dot(&v), u.dot(&w), v.dot(&w))
     // );
 
-    let mut modified = fs::metadata("../photon/scene.json")?.modified()?;
+    let mut modified = fs::metadata(scene)?.modified()?;
 
-    let res = parsers::json(&fs::read_to_string("../photon/scene.json")?);
+    let res = parsers::json(&fs::read_to_string(scene)?);
     renderer_builder.camera(res.0).world(res.1);
 
     let mut renderer = renderer_builder.build();
@@ -178,10 +179,10 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
         }
 
-        let new_modified = fs::metadata("../photon/scene.json")?.modified()?;
+        let new_modified = fs::metadata(scene)?.modified()?;
         if modified != new_modified {
             modified = new_modified;
-            let res = parsers::json(&fs::read_to_string("../photon/scene.json")?);
+            let res = parsers::json(&fs::read_to_string(scene)?);
             renderer_builder.world(res.1);
             renderer = renderer_builder.build();
             reset = true;
@@ -202,7 +203,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             let x = section.left + (idx as u32 % section.width);
             let y = section.top + (idx as u32 / section.width);
             let offset = (y * (width) + x) * 4;
-            let (red, green, blue) = (point / frames_count).as_gamma_corrected_rgb_u8();
+            let (red, green, blue) = (point / frames_count.into()).as_gamma_corrected_rgb_u8();
             buffer[offset as usize] = blue;
             buffer[(offset + 1) as usize] = green;
             buffer[(offset + 2) as usize] = red;

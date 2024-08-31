@@ -1,0 +1,98 @@
+{
+  "camera": {
+    "eye": [0.0, 0.0, -5.0],
+    "leftBottom": [-8.0, -4.5, 5.0],
+    "leftTop": [-8.0, 4.5, 5.0],
+    "rightTop": [8.0, 4.5, 5.0],
+    "transforms": [
+      {
+        "type": "rotate",
+        "values": [0.0, 0.0, 0.0]
+      },
+      {
+        "type": "translate",
+        "values": [0.0, 7.5, -50.0]
+      }
+    ]
+  },
+  "world": {
+    "materials": [
+      {
+        "type": "diffuse",
+        "color": [1.0, 0.0, 0.0],
+        "id": "diffuse-red"
+      },
+      {
+        "type": "diffuse",
+        "color": [0.0, 1.0, 0.0],
+        "id": "diffuse-green"
+      },
+      {
+        "type": "emissive",
+        "color": [3.0, 3.0, 3.0],
+        "id": "emissive-white"
+      },
+      {
+        "type": "diffuse",
+        "color": [1.0, 1.0, 1.0],
+        "id": "diffuse-white"
+      },
+      {
+        "type": "emissive",
+        "color": [1.0, 0.0, 0.0],
+        "id": "emissive-red"
+      },
+      {
+        "type": "reflective",
+        "color": [0.0, 0.0, 1.0],
+        "id": "blue-reflective"
+      },
+      {
+        "type": "refractive",
+        "color": [1.0, 1.0, 1.0],
+        "id": "test-refractive"
+      }
+    ],
+    "objects": [
+      {
+        "type": "sphere",
+        "center": [0.0, 0.0, 0.0],
+        "radius": 5.0,
+        "sections": 100.0,
+        "material": "diffuse-green"
+      },
+      {
+        "type": "plane",
+        "material": "emissive-white",
+        "transforms": [
+          {
+            "type": "scale",
+            "values": [30.0, 10.0, 10.0]
+          },
+          {
+            "type": "translate",
+            "values": [0.0, 25.0, -5.0]
+          }
+        ]
+      },
+      {
+        "type": "plane",
+        "material": "diffuse-white",
+        "transforms": [
+          {
+            "type": "scale",
+            "values": [30.0, 30.0, 30.0]
+          },
+          {
+            "type": "rotate",
+            "values": [3.1415926, 0.0, 0.0]
+          },
+          {
+            "type": "translate",
+            "values": [0.0, -6.0, 0.0]
+          }
+        ]
+      }
+    ]
+  }
+}

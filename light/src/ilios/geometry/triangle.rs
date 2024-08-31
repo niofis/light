@@ -1,5 +1,5 @@
 use super::Normal;
-use crate::float::Float;
+use crate::float::{Float, EPSILON};
 use crate::ilios::bounding_box::BoundingBox;
 use crate::ilios::material::Material;
 use crate::ilios::ray::Ray;
@@ -84,11 +84,10 @@ fn triangle_intersect(triangle: (&Point, &Vector, &Vector), ray: &Ray) -> Option
         refraction_index: _,
     } = ray;
     let pvec = direction.cross(edge2);
-    let epsilon = 0.007;
 
     let det = edge1.dot(&pvec);
     //No culling version
-    if det > -epsilon && det < epsilon {
+    if det > -EPSILON && det < EPSILON {
         return None;
     }
 
@@ -97,21 +96,21 @@ fn triangle_intersect(triangle: (&Point, &Vector, &Vector), ray: &Ray) -> Option
     let tvec = origin - v0;
 
     let u = tvec.dot(&pvec) * inv_det;
-    if u < 0.0 || u > 1.0 + epsilon {
+    if u < 0.0 || u > 1.0 + EPSILON {
         return None;
     }
 
     let qvec = tvec.cross(edge1);
 
     let v = direction.dot(&qvec) * inv_det;
-    if v < 0.0 || (u + v) > 1.0 + epsilon {
+    if v < 0.0 || (u + v) > 1.0 + EPSILON {
         //add EPSILON to offset small precision errors
         return None;
     }
 
     let t = edge2.dot(&qvec) * inv_det;
 
-    if t > epsilon {
+    if t > EPSILON {
         return Some(t);
     }
 

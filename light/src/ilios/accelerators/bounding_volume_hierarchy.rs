@@ -1,3 +1,4 @@
+use crate::float::Float;
 use crate::ilios::bounding_box::BoundingBox;
 use crate::ilios::geometry::{Point, Triangle, Vector};
 use crate::ilios::ray::Ray;
@@ -76,7 +77,7 @@ fn octree_grouping(items: &[(Point, usize)]) -> Bvh {
         .iter()
         .fold(Point(0.0, 0.0, 0.0), |acc, (pt, _)| pt + &acc)
         .into();
-    let center = center / (items.len() as f32);
+    let center = center / (items.len() as Float);
 
     // Return the section a particular point is in
     // The section is one of the eight octree regions
