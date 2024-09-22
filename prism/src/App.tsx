@@ -4,6 +4,7 @@ import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 import "./skeleton.css";
 import { Viewport } from "./Viewport";
+import { SceneProvider } from "./contexts/SceneContext";
 
 function App() {
   // const [greetMsg, setGreetMsg] = createSignal("");
@@ -14,7 +15,11 @@ function App() {
   //   setGreetMsg(await invoke("greet", { name: name() }));
   // }
 
-  return <Viewport />;
+  return (
+    <SceneProvider>
+      <Viewport />
+    </SceneProvider>
+  );
 }
 
 export default App;

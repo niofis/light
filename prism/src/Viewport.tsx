@@ -1,24 +1,35 @@
 import { invoke } from "@tauri-apps/api/core";
 import { createSignal } from "solid-js";
+import { Button } from "@kobalte/core/button";
+import { Accordion } from "@kobalte/core/accordion";
+import SceneEditor from "./components/SceneEditor";
 
 const WIDTH = 640;
 const HEIGHT = 360;
 
 export function Viewport() {
-  let [running, setRunning] = createSignal<boolean>(false);
-  let [sceneJson, setSceneJson] = createSignal<string>(SAMPLE_SCENE_JSON);
+  const [running, setRunning] = createSignal<boolean>(false);
+  const [sceneJson, setSceneJson] = createSignal<string>(SAMPLE_SCENE_JSON);
+  const [framesCount, setFramesCount] = createSignal<number>(0);
+  const [framesTime, setFramesTime] = createSignal<number>(0.0);
   let canvas: HTMLCanvasElement | undefined;
 
   const initializeRenderer = (json: string) => {
     invoke("initialize_renderer", { json });
+    setFramesCount(0);
+    setFramesTime(0.0);
   };
   const generateImage = async () => {
     if (!canvas) return;
     while (running()) {
+      const startTime = performance.now();
       const imgArray: ArrayBuffer = await invoke("generate_image");
       const ctx = canvas.getContext("2d");
       const imageData = new ImageData(new Uint8ClampedArray(imgArray), WIDTH);
       ctx?.putImageData(imageData, 0, 0);
+
+      setFramesCount((a) => a + 1);
+      setFramesTime((a) => a + (performance.now() - startTime));
     }
   };
 
@@ -34,22 +45,6 @@ export function Viewport() {
   return (
     <div class="container">
       <div class="row">
-        <div class="three columns">
-          <textarea
-            value={sceneJson()}
-            style={{ height: "40rem", width: "100%" }}
-            onChange={(e) => setSceneJson(e.target.value)}
-          />
-          <br />
-          <button
-            type="button"
-            class="button-primary"
-            style={{ width: "100%" }}
-            onClick={toggleImageGeneration}
-          >
-            {running() ? "Stop" : "Start"}
-          </button>
-        </div>
         <div class="nine columns">
           <canvas
             ref={canvas}
@@ -61,6 +56,44 @@ export function Viewport() {
               height: "auto",
             }}
           ></canvas>
+        </div>
+        <div class="three columns">
+          <Accordion class="accordion" defaultValue={["item-1"]}>
+            <Accordion.Item class="accordion__item" value="item-1">
+              <Accordion.Header class="accordion__item-header">
+                <Accordion.Trigger class="accordion__item-trigger">
+                  <span>Render</span>v
+                </Accordion.Trigger>
+              </Accordion.Header>
+              <Accordion.Content class="accordion__item-content">
+                <Button
+                  class="button-primary"
+                  onClick={toggleImageGeneration}
+                  style={{ width: "100%" }}
+                >
+                  {running() ? "Stop" : "Start Rendering"}
+                </Button>
+                Total samples: {framesCount()}
+                <br />
+                Frame time avg: {Math.floor(framesTime() / framesCount() || 0)}
+                ms
+              </Accordion.Content>
+            </Accordion.Item>
+            <Accordion.Item class="accordion__item" value="item-2">
+              <Accordion.Header class="accordion__item-header">
+                <Accordion.Trigger class="accordion__item-trigger">
+                  <span>Scene</span>v
+                </Accordion.Trigger>
+              </Accordion.Header>
+              <Accordion.Content class="accordion__item-content">
+                <textarea
+                  value={sceneJson()}
+                  style={{ height: "40em", width: "100%" }}
+                  onChange={(e) => setSceneJson(e.target.value)}
+                />
+              </Accordion.Content>
+            </Accordion.Item>
+          </Accordion>
         </div>
       </div>
     </div>
