@@ -51,6 +51,15 @@ impl ops::Add<Color> for Color {
 }
 
 impl Color {
+    pub fn as_rgb_u8(&self) -> (u8, u8, u8) {
+        let Color(red, green, blue) = self;
+        (
+            (255.0 * red).min(255.0) as u8,
+            (255.0 * green).min(255.0) as u8,
+            (255.0 * blue).min(255.0) as u8,
+        )
+    }
+
     pub fn as_gamma_corrected_rgb_u8(&self) -> (u8, u8, u8) {
         let Color(red, green, blue) = self;
         (

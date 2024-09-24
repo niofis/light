@@ -1,8 +1,12 @@
-use light::{Camera, Point, Renderer};
+use light::{
+    demos, Accelerator, Algorithm, Camera, Color, Material, Point, RenderMethod, Renderer, Section,
+    Solid, Transform, World,
+};
 
 static mut WIDTH: i32 = 0;
 static mut HEIGHT: i32 = 0;
 static mut LEN: usize = 0;
+static mut RENDERER: Option<Renderer> = None;
 
 #[no_mangle]
 /// # Safety
@@ -11,11 +15,16 @@ static mut LEN: usize = 0;
 pub unsafe fn render(ptr: *mut u8) {
     let mut bytes: Vec<u8> = Vec::from_raw_parts(ptr, LEN * 3, LEN * 3);
 
-    let mut offset = 0;
-    for i in 0..HEIGHT {
-        for j in 0..WIDTH {
-            bytes[offset] = i as u8;
-            bytes[offset + 1] = j as u8;
+    let section = Section::new(0, 0, WIDTH as u32, HEIGHT as u32);
+
+    if let Some(renderer) = &mut RENDERER {
+        let pixels = renderer.render(&section);
+        let mut offset = 0;
+        for color in pixels.iter() {
+            let (r, g, b) = color.as_gamma_corrected_rgb_u8();
+            bytes[offset] = r;
+            bytes[offset + 1] = g;
+            bytes[offset + 2] = b;
             offset += 3;
         }
     }
@@ -34,18 +43,50 @@ pub unsafe fn init(width: i32, height: i32) -> *mut u8 {
     let mut buffer = Vec::with_capacity(3 * LEN);
     let ptr = buffer.as_mut_ptr();
     std::mem::forget(buffer);
-    let mut renderer = Renderer::builder();
-    let v_offset = 3.0;
-    let z_offset = -10.0;
-    renderer
-        .width(width as u32)
-        .height(height as u32)
-        .camera(Camera::new(
-            Point(0.0, 9.0 / 2.0 + v_offset, -60.0 - z_offset),
-            Point(-8.0, 9.0 + v_offset, -50.0 - z_offset),
-            Point(-8.0, 0.0 + v_offset, -50.0 - z_offset),
-            Point(8.0, 9.0 + v_offset, -50.0 - z_offset),
-        ));
+    let w = 4.0;
+    let h = 3.0;
+    RENDERER = Some(
+        Renderer::builder()
+            .width(width as u32)
+            .height(height as u32)
+            .camera(Camera::new(
+                Point(0.0, 0.0, -65.0),       //eye
+                Point(-w, h + 1.0, -50.0),    //left_top
+                Point(-4.0, -h + 1.0, -50.0), //left_bottom
+                Point(w, h + 1.0, -50.0),     //right_top
+            ))
+            .algorithm(Algorithm::PathTracing)
+            .render_method(RenderMethod::Tiles)
+            .accelerator(Accelerator::BoundingVolumeHierarchy)
+            .world(
+                World::builder()
+                    .add_object(Solid::Torus(
+                        2.0,
+                        4.0,
+                        12,
+                        24,
+                        Transform::combine(&[Transform::rotate(3.1415926 / 2.0, 0.0, 0.0)]),
+                        Material::green(),
+                    ))
+                    .add_object(Solid::Plane(
+                        Transform::combine(&[
+                            Transform::scale(20.0, 0.0, 20.0),
+                            Transform::translate(0.0, 10.0, 0.0),
+                        ]),
+                        Material::Emissive(Color(1.0, 1.0, 1.0)),
+                    ))
+                    .add_object(Solid::Plane(
+                        Transform::combine(&[
+                            Transform::scale(1000.0, 0.0, 1000.0),
+                            Transform::rotate(3.1415926, 0.0, 0.0),
+                            Transform::translate(0.0, -5.0, 0.0),
+                        ]),
+                        Material::Diffuse(Color(3.0, 3.0, 3.0)),
+                    ))
+                    .build(),
+            )
+            .build(),
+    );
     ptr
 }
 
