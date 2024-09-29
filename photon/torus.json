@@ -1,0 +1,91 @@
+{
+  "camera": {
+    "eye": [0.0, 0.0, -65.0],
+    "leftTop": [-4.0, 4.0, -50.0],
+    "leftBottom": [-4.0, -2.0, -50.0],
+    "rightTop": [4.0, 4.0, -50.0],
+    "transforms": []
+  },
+  "world": {
+    "materials": [
+      {
+        "type": "diffuse",
+        "color": [0.0, 1.0, 0.0],
+        "id": "diffuse-green"
+      },
+      {
+        "type": "emissive",
+        "color": [3.0, 3.0, 3.0],
+        "id": "emissive-white"
+      },
+      {
+        "type": "diffuse",
+        "color": [1.0, 1.0, 1.0],
+        "id": "diffuse-white"
+      },
+      {
+        "type": "emissive",
+        "color": [1.0, 0.0, 0.0],
+        "id": "emissive-red"
+      },
+      {
+        "type": "reflective",
+        "color": [0.0, 0.0, 1.0],
+        "id": "blue-reflective"
+      },
+      {
+        "type": "refractive",
+        "color": [1.0, 1.0, 1.0],
+        "id": "test-refractive"
+      }
+    ],
+    "objects": [
+      {
+        "type": "torus",
+        "radius1": 2.0,
+        "radius2": 4.0,
+        "steps1": 12,
+        "steps2": 24,
+        "material": "diffuse-green",
+        "transforms": [
+          {
+            "type": "rotate",
+            "values": [1.5707963, 0.0, 0.0]
+          }
+        ]
+      },
+      {
+        "type": "plane",
+        "material": "emissive-white",
+        "transforms": [
+          {
+            "type": "scale",
+            "values": [20.0, 0.0, 20.0]
+          },
+          {
+            "type": "translate",
+            "values": [0.0, 10.0, 0.0]
+          }
+        ]
+      },
+      {
+        "type": "plane",
+        "material": "diffuse-white",
+        "transforms": [
+          {
+            "type": "scale",
+            "values": [1000.0, 0.0, 1000.0]
+          },
+          {
+            "type": "rotate",
+            "values": [3.1415926, 0.0, 0.0]
+          },
+          {
+            "type": "translate",
+            "values": [0.0, -5.0, 0.0]
+          }
+        ]
+      }
+    ]
+  }
+}
