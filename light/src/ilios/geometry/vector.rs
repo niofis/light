@@ -1,7 +1,6 @@
+use super::{generic_vector::GVector4, Axis, Normal};
 use crate::{float::Float, Point};
 use std::ops;
-
-use super::{generic_vector::GVector4, Normal};
 
 #[derive(Copy, Clone, Debug)]
 pub struct Vector(pub Float, pub Float, pub Float); //x,y,z
@@ -189,6 +188,13 @@ impl Vector {
         };
         let v3 = self.cross(&v2);
         (v2, v3)
+    }
+    pub fn get_component(&self, axis: Axis) -> Float {
+        match axis {
+            Axis::X => self.0,
+            Axis::Y => self.1,
+            Axis::Z => self.2,
+        }
     }
 }
 

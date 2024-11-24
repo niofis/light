@@ -12,3 +12,6 @@ photon/ml
 *.ppm
 *.png
 light.code-workspace
+photon/.DS_Store
+*.svg
+perf.data*

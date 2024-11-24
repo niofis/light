@@ -1,6 +1,6 @@
+use crate::float::Float;
+use crate::{Point, Vector};
 use std::ops::{self};
-
-use crate::Point;
 
 use super::{
     float::{MAX, MIN},
@@ -85,5 +85,10 @@ impl BoundingBox {
             self.max.2.max(rhs.max.2),
         );
         BoundingBox::new(min, max)
+    }
+
+    pub fn surface_area(&self) -> Float {
+        let Vector(x, y, z) = &self.max - &self.min;
+        2.0 * (x * y + x * z + y * z)
     }
 }

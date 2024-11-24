@@ -1,6 +1,6 @@
 use crate::float::Float;
 use crate::ilios::bounding_box::BoundingBox;
-use crate::ilios::geometry::{Point, Triangle, Vector};
+use crate::ilios::geometry::{Axis, Point, Triangle, Vector};
 use crate::ilios::ray::Ray;
 use crate::ilios::trace::Trace;
 
@@ -151,6 +151,44 @@ fn octree_grouping(items: &[(Point, usize)]) -> Bvh {
     }
 }
 
+fn sah_grouping(triangles: &[Triangle]) -> Bvh {
+    if triangles.is_empty() {
+        return Bvh::Empty;
+    }
+
+    let Point(x, y, z) = triangles[0].bounding_box().centroid;
+    let mut min_x = x;
+    let mut min_y = y;
+    let mut min_z = z;
+    let mut max_x = x;
+    let mut max_y = y;
+    let mut max_z = z;
+
+    for triangle in triangles {
+        let Point(x, y, z) = triangle.bounding_box().centroid;
+        min_x = min_x.min(x);
+        min_y = min_y.min(y);
+        min_z = min_z.min(z);
+        max_x = max_x.max(x);
+        max_y = max_y.max(y);
+        max_z = max_z.max(z);
+    }
+
+    let x_extent = max_x - min_x;
+    let y_extent = max_y - min_y;
+    let z_extent = max_z - min_z;
+
+    let (largest_axis, extent) = if x_extent > y_extent && x_extent > z_extent {
+        (Axis::X, x_extent)
+    } else if y_extent > z_extent {
+        (Axis::Y, y_extent)
+    } else {
+        (Axis::Z, z_extent)
+    };
+
+    Bvh::Empty
+}
+
 // Will simply recourse the BVH and update the building boxes accordingly
 fn rebuild(prms: &[Triangle], root: Bvh, total_nodes: &mut usize) -> Bvh {
     match root {
@@ -198,10 +236,6 @@ fn rebuild(prms: &[Triangle], root: Bvh, total_nodes: &mut usize) -> Bvh {
             }
         }
     }
-}
-
-fn rebuild_as_heap(heap: &mut Vec<Bvh>, bvh: &Bvh, current_index: usize) {
-    heap[current_index] = bvh.clone();
 }
 
 impl Bvh {

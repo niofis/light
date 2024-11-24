@@ -1,6 +1,6 @@
-use crate::{Color, Renderer, Section};
-
 use super::rng::{Rng, XorRng};
+use crate::{Color, Renderer, Section};
+use rayon::prelude::*;
 
 #[derive(Clone, Debug)]
 pub enum RenderMethod {
@@ -54,13 +54,13 @@ fn render_tiles(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> V
             (x, y)
         })
         .collect();
-    let mut rng = XorRng::new();
+    // let mut rng = XorRng::new();
     let tiles = tiles
-        .into_iter()
-        .map(|(x, y)| {
+        .into_par_iter()
+        .map_init(XorRng::new, |rng, (x, y)| {
             (0..tile_size * tile_size)
                 .map(|idx| (x + (idx % tile_size), y + (idx / tile_size)))
-                .map(|pixel| trace(renderer, &mut rng, pixel))
+                .map(|pixel| trace(renderer, rng, pixel))
                 .collect()
         })
         .collect::<Vec<Vec<Color>>>();
