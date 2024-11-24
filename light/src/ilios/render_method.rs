@@ -54,6 +54,7 @@ fn render_tiles(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> V
             (x, y)
         })
         .collect();
+    println!("Threads: {}", rayon::current_num_threads());
     // let mut rng = XorRng::new();
     let tiles = tiles
         .into_par_iter()

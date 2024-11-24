@@ -50,6 +50,13 @@ impl Renderer {
             }
         };
 
+        if let Some(trds) = threads {
+            rayon::ThreadPoolBuilder::new()
+                .num_threads(trds as usize)
+                .build_global()
+                .unwrap();
+        }
+
         Renderer {
             width,
             height,
