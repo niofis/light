@@ -29,10 +29,12 @@ fn render_pixels(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> 
         height,
         width,
     } = section;
-    let mut rng = XorRng::new();
     (0..width * height)
-        .map(|idx| (left + (idx % width), top + (idx / width)))
-        .map(|pixel| trace(renderer, &mut rng, pixel))
+        .into_par_iter()
+        .map_init(XorRng::new, |rng, idx| {
+            let pixel = (left + (idx % width), top + (idx / width));
+            trace(renderer, rng, pixel)
+        })
         .collect()
 }
 
@@ -54,8 +56,6 @@ fn render_tiles(renderer: &mut Renderer, section: &Section, trace: TraceFn) -> V
             (x, y)
         })
         .collect();
-    println!("Threads: {}", rayon::current_num_threads());
-    // let mut rng = XorRng::new();
     let tiles = tiles
         .into_par_iter()
         .map_init(XorRng::new, |rng, (x, y)| {
@@ -85,16 +85,20 @@ fn render_scanlines(renderer: &mut Renderer, section: &Section, trace: TraceFn) 
         height, width, top, ..
     } = section;
 
-    let mut rng = XorRng::new();
-
     (0..*height)
-        .flat_map(|row| {
+        .into_par_iter()
+        .map_init(XorRng::new, |rng, row| {
             let y = top + row;
 
             (0..*width)
                 .map(|idx| (idx, y))
-                .map(|pixel| trace(renderer, &mut rng, pixel))
+                .map(|pixel| trace(renderer, rng, pixel))
                 .collect::<Vec<Color>>()
         })
-        .collect::<Vec<Color>>()
+        .collect::<Vec<Vec<Color>>>()
+        .into_iter()
+        .fold(Vec::new(), |mut acc, mut colors| {
+            acc.append(&mut colors);
+            acc
+        })
 }
