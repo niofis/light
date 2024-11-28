@@ -2,7 +2,7 @@ use std::ops;
 
 use crate::float::Float;
 
-use super::{generic_vector::GVector4, Vector};
+use super::{generic_vector::GVector4, Axis, Vector};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Point(pub Float, pub Float, pub Float); //x,y,z
@@ -139,5 +139,12 @@ impl Point {
     }
     pub fn permute(&self, x: usize, y: usize, z: usize) -> Point {
         Point(self[x], self[y], self[z])
+    }
+    pub fn get_component(&self, axis: Axis) -> Float {
+        match axis {
+            Axis::X => self.0,
+            Axis::Y => self.1,
+            Axis::Z => self.2,
+        }
     }
 }
