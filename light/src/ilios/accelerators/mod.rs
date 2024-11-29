@@ -1,3 +1,5 @@
+pub use bounding_volume_hierarchy::BvhBuildMethod;
+
 use self::{bounding_volume_hierarchy::Bvh, brute_force::BruteForce};
 use super::{geometry::Triangle, ray::Ray, trace::Trace};
 mod bounding_volume_hierarchy;
@@ -21,8 +23,11 @@ impl AcceleratorInstance {
         let tracer = BruteForce::new(primitives);
         AcceleratorInstance::BruteForce(tracer)
     }
-    pub fn new_bounding_volume_hierarchy(primitives: &[Triangle]) -> AcceleratorInstance {
-        let tracer = Bvh::new(primitives);
+    pub fn new_bounding_volume_hierarchy(
+        build_method: BvhBuildMethod,
+        primitives: &[Triangle],
+    ) -> AcceleratorInstance {
+        let tracer = Bvh::new(build_method, primitives);
         AcceleratorInstance::BoundingVolumeHierarchy(tracer)
     }
     pub fn trace(&self, ray: &Ray) -> Option<Vec<usize>> {

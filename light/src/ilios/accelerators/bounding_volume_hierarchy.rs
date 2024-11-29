@@ -18,6 +18,12 @@ pub enum Bvh {
     },
 }
 
+#[derive(Clone, Copy, Debug)]
+pub enum BvhBuildMethod {
+    Octree,
+    Sah,
+}
+
 fn rec_trace(bvh: &Bvh, ray: &Ray, prm_vec: &mut Vec<usize>) {
     match bvh {
         Bvh::Empty => (),
@@ -151,20 +157,12 @@ fn octree_grouping(items: &[(Point, usize)]) -> Bvh {
     }
 }
 
-fn sah_grouping(primitives: &[(&Triangle, usize)]) -> Bvh {
+fn sah_grouping(primitives: &[(&Triangle, usize)], total_nodes: &mut usize) -> Bvh {
     if primitives.is_empty() {
         return Bvh::Empty;
     }
 
-    // println!("primivites.len(): {}", primitives.len());
-    //
-    let mut debug = false;
-
-    if primitives.len() == 3 {
-        println!("-----");
-        // println!("{:#?}", primitives);
-        debug = true;
-    }
+    *total_nodes += 1;
 
     if primitives.len() <= 2 {
         return Bvh::Leaf {
@@ -177,37 +175,27 @@ fn sah_grouping(primitives: &[(&Triangle, usize)]) -> Bvh {
         };
     }
 
-    let Point(x, y, z) = primitives[0].0.bounding_box().centroid;
-    let mut min_x = x;
-    let mut min_y = y;
-    let mut min_z = z;
-    let mut max_x = x;
-    let mut max_y = y;
-    let mut max_z = z;
+    let mut min_point = primitives[0].0.bounding_box().centroid;
+    let mut max_point = min_point.clone();
 
     for primitive in primitives {
-        let Point(x, y, z) = primitive.0.bounding_box().centroid;
-        min_x = min_x.min(x);
-        min_y = min_y.min(y);
-        min_z = min_z.min(z);
-        max_x = max_x.max(x);
-        max_y = max_y.max(y);
-        max_z = max_z.max(z);
+        min_point = min_point.min(&primitive.0.bounding_box().centroid);
+        max_point = max_point.max(&primitive.0.bounding_box().centroid);
     }
 
-    let min_point = Point(min_x, min_y, min_z);
+    let extents = &max_point - &min_point;
 
-    let x_extent = max_x - min_x;
-    let y_extent = max_y - min_y;
-    let z_extent = max_z - min_z;
-
-    let (selected_axis, extent) = if x_extent > y_extent && x_extent > z_extent {
-        (Axis::X, x_extent)
-    } else if y_extent > z_extent {
-        (Axis::Y, y_extent)
+    let selected_axis = if extents.get_component(Axis::X) > extents.get_component(Axis::Y)
+        && extents.get_component(Axis::X) > extents.get_component(Axis::Z)
+    {
+        Axis::X
+    } else if extents.get_component(Axis::Y) > extents.get_component(Axis::Z) {
+        Axis::Y
     } else {
-        (Axis::Z, z_extent)
+        Axis::Z
     };
+
+    let extent = extents.get_component(selected_axis);
 
     // Put all primitives in the different buckets
     const BUCKETS_COUNT: usize = 12;
@@ -223,27 +211,10 @@ fn sah_grouping(primitives: &[(&Triangle, usize)]) -> Bvh {
             - min_point.get_component(selected_axis))
             / bucket_size)
             .floor() as usize;
-        // println!(
-        //     "prim_component: {} min_point: {}, bucket_
-        //    size: {} bucket_id: {} max_extent: {}",
-        //     primitive
-        //         .0
-        //         .bounding_box()
-        //         .centroid
-        //         .get_component(selected_axis),
-        //     min_point.get_component(selected_axis),
-        //     bucket_size,
-        //     bucket_id,
-        //     extent
-        // );
-        if debug {
-            println!("bucket_id: {}", bucket_id);
-        }
         buckets[bucket_id].push(*primitive);
     }
 
     // Calculate each bucket bounding box
-
     let buckets_bb = buckets
         .iter()
         .map(|primitives| {
@@ -269,9 +240,6 @@ fn sah_grouping(primitives: &[(&Triangle, usize)]) -> Bvh {
                 * (buckets[pid..]
                     .iter()
                     .fold(0, |acc, primitives| acc + primitives.len()) as Float);
-            if debug {
-                println!("left_cost: {} right_cost: {}", left_cost, right_cost);
-            }
             left_cost + right_cost
         })
         .collect::<Vec<Float>>();
@@ -284,10 +252,6 @@ fn sah_grouping(primitives: &[(&Triangle, usize)]) -> Bvh {
             min_cost = cost;
             split_bucket = idx + 1;
         }
-    }
-    if debug {
-        println!("partition_costs: {:#?}", partitions_costs);
-        println!("split_bucket: {}", split_bucket);
     }
 
     let left_group: Vec<(&Triangle, usize)> =
@@ -311,8 +275,8 @@ fn sah_grouping(primitives: &[(&Triangle, usize)]) -> Bvh {
             .fold(BoundingBox::default(), |bb, (prm, _)| {
                 bb.combine(&prm.bounding_box())
             }),
-        left: Box::new(sah_grouping(&left_group)),
-        right: Box::new(sah_grouping(&right_group)),
+        left: Box::new(sah_grouping(&left_group, total_nodes)),
+        right: Box::new(sah_grouping(&right_group, total_nodes)),
     }
 }
 
@@ -366,7 +330,7 @@ fn rebuild(prms: &[Triangle], root: Bvh, total_nodes: &mut usize) -> Bvh {
 }
 
 impl Bvh {
-    pub fn new(primitives: &[Triangle]) -> Bvh {
+    pub fn new(build_method: BvhBuildMethod, primitives: &[Triangle]) -> Bvh {
         let len = primitives.len();
         if len == 0 {
             return Bvh::Empty;
@@ -374,23 +338,29 @@ impl Bvh {
 
         let indexes = 0..len;
 
-        // let bvh = sah_grouping(
-        //     &primitives
-        //         .iter()
-        //         .zip(indexes)
-        //         .collect::<Vec<(&Triangle, usize)>>(),
-        // );
-
-        let centroid = primitives.iter().map(|x| x.bounding_box().centroid);
-        let items: Vec<(Point, usize)> = centroid.zip(indexes).collect();
-        let root = octree_grouping(&items);
         let mut total_nodes: usize = 0;
-        let bvh = rebuild(primitives, root, &mut total_nodes);
-        println!("total_nodes: {}", total_nodes);
 
-        // let mut heap: Vec<Bvh> = Vec::with_capacity(total_nodes);
-        // rebuild_as_heap(&mut heap, &bvh, 0);
+        let bvh = match build_method {
+            BvhBuildMethod::Octree => {
+                let centroid = primitives.iter().map(|x| x.bounding_box().centroid);
+                let items: Vec<(Point, usize)> = centroid.zip(indexes).collect();
+                let root = octree_grouping(&items);
+                rebuild(primitives, root, &mut total_nodes)
+            }
+            BvhBuildMethod::Sah => sah_grouping(
+                &primitives
+                    .iter()
+                    .zip(indexes)
+                    .collect::<Vec<(&Triangle, usize)>>(),
+                &mut total_nodes,
+            ),
+        };
 
+        println!(
+            "total_triangles: {}\ntotal_nodes: {}",
+            primitives.len(),
+            total_nodes
+        );
         bvh
     }
 }

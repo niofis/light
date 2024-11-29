@@ -1,7 +1,8 @@
 use bincode::{config, Encode};
 use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
 use light::{
-    demos, parsers, Accelerator, Algorithm, Camera, Color, Point, RenderMethod, Renderer, Section,
+    demos, parsers, Accelerator, Algorithm, BvhBuildMethod, Camera, Color, Point, RenderMethod,
+    Renderer, Section,
 };
 use std::{fs, io::BufWriter};
 
@@ -209,6 +210,11 @@ fn process_cli() -> ArgMatches {
             .long("json")
             .help("load scene from the specified json file")
         )
+        .arg(
+            Arg::new("BVH build method")
+                .long("bvh-build-method")
+                .help("Selects the build method to use for building th BVH. Options: octree, sah")
+        )
         .get_matches()
 }
 
@@ -257,6 +263,10 @@ fn build_renderer(matches: &ArgMatches) -> Renderer {
             Some(val) if val == "brute_force" => Accelerator::BruteForce,
             Some(val) if val == "bvh" => Accelerator::BoundingVolumeHierarchy,
             _ => Accelerator::BoundingVolumeHierarchy,
+        })
+        .bvh_build_method(match matches.get_one::<String>("BVH build method") {
+            Some(val) if val == "octree" => BvhBuildMethod::Octree,
+            _ => BvhBuildMethod::Sah,
         });
 
     match matches.get_one::<String>("demo") {

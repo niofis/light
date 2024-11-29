@@ -1,5 +1,5 @@
 use super::{
-    accelerators::{Accelerator, AcceleratorInstance},
+    accelerators::{Accelerator, AcceleratorInstance, BvhBuildMethod},
     algorithms::{path_tracing, whitted, Algorithm},
     camera::Camera,
     color::Color,
@@ -36,6 +36,7 @@ impl Renderer {
             algorithm,
             threads,
             samples,
+            bvh_build_method,
         } = builder.to_owned();
 
         let mut camera = camera;
@@ -46,7 +47,7 @@ impl Renderer {
         let accelerator = match accelerator {
             Accelerator::BruteForce => AcceleratorInstance::new_brute_force(&primitives),
             Accelerator::BoundingVolumeHierarchy => {
-                AcceleratorInstance::new_bounding_volume_hierarchy(&primitives)
+                AcceleratorInstance::new_bounding_volume_hierarchy(bvh_build_method, &primitives)
             }
         };
 
@@ -81,6 +82,7 @@ impl Renderer {
             algorithm: Algorithm::Whitted,
             threads: None,
             samples: 1,
+            bvh_build_method: BvhBuildMethod::Sah,
         }
     }
 
@@ -106,6 +108,7 @@ pub struct RendererBuilder {
     pub algorithm: Algorithm,
     pub threads: Option<u32>,
     pub samples: u32,
+    pub bvh_build_method: BvhBuildMethod,
 }
 
 impl RendererBuilder {
@@ -147,6 +150,10 @@ impl RendererBuilder {
     }
     pub fn samples(&mut self, samples: u32) -> &mut RendererBuilder {
         self.samples = samples;
+        self
+    }
+    pub fn bvh_build_method(&mut self, bvh_build_method: BvhBuildMethod) -> &mut RendererBuilder {
+        self.bvh_build_method = bvh_build_method;
         self
     }
     pub fn build(&mut self) -> Renderer {

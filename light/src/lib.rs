@@ -1,6 +1,7 @@
 pub mod demos;
 mod ilios;
 pub use ilios::accelerators::Accelerator;
+pub use ilios::accelerators::BvhBuildMethod;
 pub use ilios::algorithms::Algorithm;
 pub use ilios::camera::Camera;
 pub use ilios::color::Color;
