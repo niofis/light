@@ -58,6 +58,8 @@ impl Renderer {
                 .unwrap();
         }
 
+        println!("Threads: {}", rayon::current_num_threads());
+
         Renderer {
             width,
             height,
@@ -92,7 +94,6 @@ impl Renderer {
             Algorithm::PathTracing => path_tracing::trace_ray,
         };
         let render = self.render_method.get();
-        println!("Threads: {}", rayon::current_num_threads());
         render(self, section, trace)
     }
 }
