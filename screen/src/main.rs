@@ -1,7 +1,7 @@
 use light::float::PI;
 use light::{
-    demos, parsers, Accelerator, Algorithm, Camera, Color, Point, RenderMethod, Renderer, Section,
-    Transform,
+    demos, parsers, Accelerator, Algorithm, BvhBuildMethod, Camera, Color, Point, RenderMethod,
+    Renderer, Section, Transform,
 };
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -40,7 +40,7 @@ impl FrameTimmings {
 
 fn main() -> Result<(), Box<dyn Error>> {
     let width: u32 = 640;
-    let height: u32 = 480;//360;
+    let height: u32 = 480; //360;
     let scene: &str = "../photon/torus.json";
     let bpp = 4;
     let sdl_context = sdl2::init()?;
@@ -75,6 +75,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         .render_method(RenderMethod::Tiles)
         .world(demos::cornell())
         // .from_json(&fs::read_to_string("../photon/scene.json")?)
+        .threads(1)
+        .bvh_build_method(BvhBuildMethod::Sah)
         .accelerator(Accelerator::BoundingVolumeHierarchy);
 
     let mut frames: Vec<Color> = vec![Color(0., 0., 0.); (4 * width * height) as usize];

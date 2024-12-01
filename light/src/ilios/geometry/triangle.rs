@@ -14,7 +14,6 @@ pub struct Triangle {
     pub material: Material,
     pub pt2: Point,
     pub pt3: Point,
-    pub centroid: Point,
 }
 
 impl Triangle {
@@ -22,7 +21,6 @@ impl Triangle {
         let edge1 = &pt2 - &pt1;
         let edge2 = &pt3 - &pt1;
         let normal = edge1.cross(&edge2).unit();
-        let centroid = &(&(&pt1 + &pt2) + &pt3) / 3.0;
 
         Triangle {
             origin: pt1,
@@ -32,7 +30,6 @@ impl Triangle {
             material,
             pt2,
             pt3,
-            centroid,
         }
     }
 
@@ -67,10 +64,6 @@ impl Triangle {
                 origin.2.max(pt2.2).max(pt3.2),
             ),
         )
-    }
-
-    pub fn centroid(&self) -> Point {
-        self.centroid
     }
 }
 
