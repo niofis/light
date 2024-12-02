@@ -1,12 +1,25 @@
 use light::{
-    demos, Accelerator, Algorithm, Camera, Color, Material, Point, RenderMethod, Renderer, Section,
-    Solid, Transform, World,
+    demos, parsers, Accelerator, Algorithm, Camera, Color, Material, Point, RenderMethod, Renderer,
+    Section, Solid, Transform, World,
 };
 
 static mut WIDTH: i32 = 0;
 static mut HEIGHT: i32 = 0;
 static mut LEN: usize = 0;
 static mut RENDERER: Option<Renderer> = None;
+
+#[no_mangle]
+pub unsafe fn alloc(size_in_bytes: usize) -> *mut u8 {
+    let mut memory = Vec::with_capacity(size_in_bytes);
+    let ptr = memory.as_mut_ptr();
+    std::mem::forget(memory);
+    ptr
+}
+
+#[no_mangle]
+pub unsafe fn free(n: usize, ptr: *mut f32) {
+    let _bytes: Vec<f32> = Vec::from_raw_parts(ptr, n, n);
+}
 
 #[no_mangle]
 /// # Safety
@@ -85,6 +98,33 @@ pub unsafe fn init(width: i32, height: i32) -> *mut u8 {
                     ))
                     .build(),
             )
+            .build(),
+    );
+    ptr
+}
+
+#[no_mangle]
+pub unsafe fn init_from_json(width: i32, height: i32, str_len: i32, str_ptr: *mut u8) -> *mut u8 {
+    WIDTH = width;
+    HEIGHT = height;
+    LEN = (width * height) as usize;
+    let mut buffer = Vec::with_capacity(3 * LEN);
+    let ptr = buffer.as_mut_ptr();
+    std::mem::forget(buffer);
+    let w = 4.0;
+    let h = 3.0;
+    let str_buffer: Vec<u8> = Vec::from_raw_parts(str_ptr, str_len as usize, str_len as usize);
+    let json = String::from_utf8_lossy(&str_buffer);
+    let (camera, world) = parsers::json(&json);
+    RENDERER = Some(
+        Renderer::builder()
+            .width(width as u32)
+            .height(height as u32)
+            .camera(camera)
+            .algorithm(Algorithm::PathTracing)
+            .render_method(RenderMethod::Tiles)
+            .accelerator(Accelerator::BoundingVolumeHierarchy)
+            .world(world)
             .build(),
     );
     ptr

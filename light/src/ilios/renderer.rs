@@ -52,10 +52,9 @@ impl Renderer {
         };
 
         if let Some(trds) = threads {
-            rayon::ThreadPoolBuilder::new()
+            _ = rayon::ThreadPoolBuilder::new()
                 .num_threads(trds as usize)
-                .build_global()
-                .unwrap();
+                .build_global();
         }
 
         println!("Threads: {}", rayon::current_num_threads());

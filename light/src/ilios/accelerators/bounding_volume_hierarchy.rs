@@ -269,6 +269,7 @@ fn sah_grouping(primitives: &[(&Triangle, usize)], total_nodes: &mut usize) -> B
                 acc.append(&mut el.clone());
                 acc
             });
+
     Bvh::Node {
         bounding_box: primitives
             .iter()
