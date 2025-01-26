@@ -7,6 +7,8 @@ static mut WIDTH: i32 = 0;
 static mut HEIGHT: i32 = 0;
 static mut LEN: usize = 0;
 static mut RENDERER: Option<Renderer> = None;
+static mut FRAMES_ACC: Option<Vec<Color>> = None;
+static mut TOTAL_FRAMES: f32 = 0.0;
 
 #[no_mangle]
 pub unsafe fn alloc(size_in_bytes: usize) -> *mut u8 {
@@ -32,13 +34,18 @@ pub unsafe fn render(ptr: *mut u8) {
 
     if let Some(renderer) = &mut RENDERER {
         let pixels = renderer.render(&section);
-        let mut offset = 0;
-        for color in pixels.iter() {
-            let (r, g, b) = color.as_gamma_corrected_rgb_u8();
-            bytes[offset] = r;
-            bytes[offset + 1] = g;
-            bytes[offset + 2] = b;
-            offset += 3;
+        TOTAL_FRAMES = TOTAL_FRAMES + 1.0;
+        if let Some(frames_acc) = &mut FRAMES_ACC {
+            let mut offset = 0;
+            for (idx, color) in pixels.iter().enumerate() {
+                frames_acc[idx] = frames_acc[idx] + *color;
+                let output_color = frames_acc[idx] / TOTAL_FRAMES;
+                let (r, g, b) = output_color.as_gamma_corrected_rgb_u8();
+                bytes[offset] = r;
+                bytes[offset + 1] = g;
+                bytes[offset + 2] = b;
+                offset += 3;
+            }
         }
     }
 
@@ -58,6 +65,8 @@ pub unsafe fn init(width: i32, height: i32) -> *mut u8 {
     std::mem::forget(buffer);
     let w = 4.0;
     let h = 3.0;
+    FRAMES_ACC = Some(vec![Color::default(); LEN]);
+    TOTAL_FRAMES = 0.0;
     RENDERER = Some(
         Renderer::builder()
             .width(width as u32)
@@ -116,6 +125,8 @@ pub unsafe fn init_from_json(width: i32, height: i32, str_len: i32, str_ptr: *mu
     let str_buffer: Vec<u8> = Vec::from_raw_parts(str_ptr, str_len as usize, str_len as usize);
     let json = String::from_utf8_lossy(&str_buffer);
     let (camera, world) = parsers::json(&json);
+    FRAMES_ACC = Some(vec![Color::default(); LEN]);
+    TOTAL_FRAMES = 0.0;
     RENDERER = Some(
         Renderer::builder()
             .width(width as u32)
