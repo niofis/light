@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 pub use bounding_volume_hierarchy::BvhBuildMethod;
 
 use self::{bounding_volume_hierarchy::BoundingVolumeHierarchy, brute_force::BruteForce};

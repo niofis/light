@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use crate::{
     float::Float,
     ilios::{
@@ -97,7 +95,7 @@ fn find_closest_primitive<'a>(
         .iter()
         .filter_map(|primitive| {
             primitive.intersect(ray).map(|distance| ClosestPrimitive {
-                primitive: primitive.clone(),
+                primitive,
                 distance,
             })
         })

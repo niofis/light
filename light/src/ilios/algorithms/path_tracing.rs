@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use crate::{
     float::{Float, PI},
     ilios::{closest_primitive::ClosestPrimitive, color, geometry::Triangle, ray::Ray, rng::Rng},

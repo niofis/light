@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use crate::float::Float;
 
 use super::geometry::Triangle;
