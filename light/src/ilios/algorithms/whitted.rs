@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::{
     float::Float,
     ilios::{
@@ -17,16 +19,15 @@ fn inner_trace_ray(renderer: &Renderer, ray: &Ray, depth: u8) -> Color {
     let accelerator = &renderer.accelerator;
 
     match accelerator.trace(ray) {
-        Some(prm_idxs) => {
-            let closest = find_closest_primitive(renderer, ray, &prm_idxs);
+        Some(prms) => {
+            let closest = find_closest_primitive(&prms, ray);
             match closest {
                 Some(ClosestPrimitive {
                     primitive,
                     distance,
                 }) => {
                     let point = ray.point(distance);
-                    let Triangle { material, .. } = primitive;
-                    let prm_material = material;
+                    let prm_material = &primitive.material;
 
                     match prm_material {
                         Material::Diffuse(_) => calculate_shading(renderer, primitive, &point),
@@ -72,8 +73,7 @@ fn calculate_shading(renderer: &Renderer, prm: &Triangle, point: &Point) -> Colo
     let normal = prm.normal();
     let direct_lighting = calculate_direct_lighting(renderer, point, &normal);
 
-    let Triangle { material, .. } = prm;
-    let prm_material = material;
+    let prm_material = &prm.material;
 
     let prm_color = match prm_material {
         Material::Diffuse(color) => color,
@@ -90,20 +90,16 @@ fn calculate_shading(renderer: &Renderer, prm: &Triangle, point: &Point) -> Colo
 }
 
 fn find_closest_primitive<'a>(
-    renderer: &'a Renderer,
+    primitives: &[&'a Triangle],
     ray: &Ray,
-    prm_indexes: &[usize],
 ) -> Option<ClosestPrimitive<'a>> {
-    let primitives = &renderer.primitives;
-    prm_indexes
+    primitives
         .iter()
-        .filter_map(|idx| {
-            primitives[*idx]
-                .intersect(ray)
-                .map(|distance| ClosestPrimitive {
-                    primitive: &primitives[*idx],
-                    distance,
-                })
+        .filter_map(|primitive| {
+            primitive.intersect(ray).map(|distance| ClosestPrimitive {
+                primitive: primitive.clone(),
+                distance,
+            })
         })
         .fold(None, |closest, next| match closest {
             None => Some(next),
@@ -112,15 +108,10 @@ fn find_closest_primitive<'a>(
         })
 }
 
-fn find_shadow_primitive(
-    primitives: &[Triangle],
-    ray: &Ray,
-    prm_indexes: &[usize],
-    max_dist: Float,
-) -> bool {
-    prm_indexes
+fn find_shadow_primitive(primitives: &[&Triangle], ray: &Ray, max_dist: Float) -> bool {
+    primitives
         .iter()
-        .filter_map(|idx| primitives[*idx].intersect(ray))
+        .filter_map(|prm| prm.intersect(ray))
         .any(|dist| dist > 0.0001 && dist <= max_dist)
 }
 
@@ -136,9 +127,9 @@ fn calculate_direct_lighting(renderer: &Renderer, point: &Point, normal: &Normal
 
         let ray = Ray::new(*point, unit_dir, Float::INFINITY, 1.0);
         match renderer.accelerator.trace(&ray) {
-            Some(prm_idxs) => {
+            Some(prms) => {
                 let light_distance = direction.norm();
-                if !find_shadow_primitive(&renderer.primitives, &ray, &prm_idxs, light_distance) {
+                if !find_shadow_primitive(&prms, &ray, light_distance) {
                     let it = Float::max(0.0, (intensity - light_distance) / intensity);
                     Some(Color(1.0, 1.0, 1.0) * dot * it)
                 } else {

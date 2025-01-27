@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::float::Float;
 use crate::ilios::bounding_box::BoundingBox;
 use crate::ilios::geometry::{Axis, Point, Triangle, Vector};
@@ -5,15 +7,20 @@ use crate::ilios::ray::Ray;
 use crate::ilios::trace::Trace;
 
 #[derive(Clone, Debug)]
-pub enum Bvh {
+pub struct BoundingVolumeHierarchy {
+    root: BvhElement,
+}
+
+#[derive(Clone, Debug)]
+enum BvhElement {
     Empty,
     Node {
         bounding_box: BoundingBox,
-        left: Box<Bvh>,
-        right: Box<Bvh>,
+        left: Box<BvhElement>,
+        right: Box<BvhElement>,
     },
     Leaf {
-        primitives: Vec<usize>,
+        primitives: Vec<Arc<Triangle>>,
         bounding_box: BoundingBox,
     },
 }
@@ -24,10 +31,10 @@ pub enum BvhBuildMethod {
     Sah,
 }
 
-fn rec_trace(bvh: &Bvh, ray: &Ray, prm_vec: &mut Vec<usize>) {
+fn rec_trace<'a>(bvh: &'a BvhElement, ray: &Ray, prm_vec: &mut Vec<&'a Triangle>) {
     match bvh {
-        Bvh::Empty => (),
-        Bvh::Node {
+        BvhElement::Empty => (),
+        BvhElement::Node {
             bounding_box,
             left,
             right,
@@ -37,24 +44,24 @@ fn rec_trace(bvh: &Bvh, ray: &Ray, prm_vec: &mut Vec<usize>) {
                 rec_trace(right, ray, prm_vec);
             }
         }
-        Bvh::Leaf {
+        BvhElement::Leaf {
             primitives,
             bounding_box,
         } => {
             if bounding_box.intersect(ray) {
                 for p in primitives {
-                    prm_vec.push(*p)
+                    prm_vec.push(p.as_ref())
                 }
             }
         }
     }
 }
 
-impl Trace for Bvh {
-    fn trace(&self, ray: &Ray) -> Option<Vec<usize>> {
-        let mut idx_vec: Vec<usize> = Vec::with_capacity(256);
+impl Trace for BoundingVolumeHierarchy {
+    fn trace(&self, ray: &Ray) -> Option<Vec<&Triangle>> {
+        let mut idx_vec: Vec<&Triangle> = Vec::with_capacity(256);
 
-        rec_trace(self, ray, &mut idx_vec);
+        rec_trace(&self.root, ray, &mut idx_vec);
 
         if idx_vec.is_empty() {
             None
@@ -64,16 +71,16 @@ impl Trace for Bvh {
     }
 }
 
-fn octree_grouping(items: &[(Point, usize)]) -> Bvh {
+fn octree_grouping(items: &[Arc<Triangle>]) -> BvhElement {
     if items.is_empty() {
-        return Bvh::Empty;
+        return BvhElement::Empty;
     }
 
     // Termination condition, checks the size of the items for this group
     // and returns a leaf node, which has no left/right children
     if items.len() <= 2 {
-        return Bvh::Leaf {
-            primitives: items.iter().map(|x| x.1).collect::<Vec<usize>>(),
+        return BvhElement::Leaf {
+            primitives: items.to_vec(),
             bounding_box: BoundingBox::default(),
         };
     }
@@ -81,7 +88,9 @@ fn octree_grouping(items: &[(Point, usize)]) -> Bvh {
     // Calculate the center for all the items
     let center: Vector = items
         .iter()
-        .fold(Point(0.0, 0.0, 0.0), |acc, (pt, _)| pt + &acc)
+        .fold(Point(0.0, 0.0, 0.0), |acc, prm| {
+            &prm.bounding_box().centroid + &acc
+        })
         .into();
     let center = center / (items.len() as Float);
 
@@ -95,8 +104,14 @@ fn octree_grouping(items: &[(Point, usize)]) -> Bvh {
     let in_sector = |s| {
         items
             .iter()
-            .filter_map(|x| if sector(&x.0) == s { Some(*x) } else { None })
-            .collect::<Vec<(Point, usize)>>()
+            .filter_map(|x| {
+                if sector(&x.bounding_box().centroid) == s {
+                    Some(x.clone())
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<Arc<Triangle>>>()
     };
 
     // All the sectors with their corresponding points
@@ -123,18 +138,18 @@ fn octree_grouping(items: &[(Point, usize)]) -> Bvh {
         ((lens[0] + lens[1] + lens[2] + lens[3]) - (lens[4] + lens[5] + lens[6] + lens[7])).abs();
 
     let box_for_sectors = |sectors: [usize; 4]| {
-        Box::new(octree_grouping(
+        octree_grouping(
             &items
                 .iter()
                 .filter_map(|x| {
-                    if sectors.contains(&sector(&x.0)) {
-                        Some(*x)
+                    if sectors.contains(&sector(&x.bounding_box().centroid)) {
+                        Some(x.clone())
                     } else {
                         None
                     }
                 })
-                .collect::<Vec<(Point, usize)>>(),
-        ))
+                .collect::<Vec<Arc<Triangle>>>(),
+        )
     };
 
     // Determinies which axis contains the smallest difference of points
@@ -150,37 +165,35 @@ fn octree_grouping(items: &[(Point, usize)]) -> Bvh {
 
     // The new BVH node with no primitives yet, but a split of space
     // The bounding box has no meaning right now, this is just a grouping of indexes
-    Bvh::Node {
+    BvhElement::Node {
         bounding_box: BoundingBox::default(),
-        left,
-        right,
+        left: Box::new(left),
+        right: Box::new(right),
     }
 }
 
-fn sah_grouping(primitives: &[(&Triangle, usize)], total_nodes: &mut usize) -> Bvh {
+fn sah_grouping(primitives: &[Arc<Triangle>], total_nodes: &mut usize) -> BvhElement {
     if primitives.is_empty() {
-        return Bvh::Empty;
+        return BvhElement::Empty;
     }
 
     *total_nodes += 1;
 
     if primitives.len() <= 2 {
-        return Bvh::Leaf {
-            primitives: primitives.iter().map(|(_, idx)| *idx).collect(),
-            bounding_box: primitives
-                .iter()
-                .fold(BoundingBox::default(), |bb, (prm, _)| {
-                    bb.combine(&prm.bounding_box())
-                }),
+        return BvhElement::Leaf {
+            primitives: primitives.to_vec(),
+            bounding_box: primitives.iter().fold(BoundingBox::default(), |bb, prm| {
+                bb.combine(&prm.bounding_box())
+            }),
         };
     }
 
-    let mut min_point = primitives[0].0.bounding_box().centroid;
+    let mut min_point = primitives[0].bounding_box().centroid;
     let mut max_point = min_point.clone();
 
     for primitive in primitives {
-        min_point = min_point.min(&primitive.0.bounding_box().centroid);
-        max_point = max_point.max(&primitive.0.bounding_box().centroid);
+        min_point = min_point.min(&primitive.bounding_box().centroid);
+        max_point = max_point.max(&primitive.bounding_box().centroid);
     }
 
     let extents = &max_point - &min_point;
@@ -199,19 +212,18 @@ fn sah_grouping(primitives: &[(&Triangle, usize)], total_nodes: &mut usize) -> B
 
     // Put all primitives in the different buckets
     const BUCKETS_COUNT: usize = 12;
-    let mut buckets: [Vec<(&Triangle, usize)>; BUCKETS_COUNT] = Default::default();
+    let mut buckets: [Vec<Arc<Triangle>>; BUCKETS_COUNT] = Default::default();
     let bucket_size = extent / ((BUCKETS_COUNT - 1) as Float);
 
     for primitive in primitives {
         let bucket_id = ((primitive
-            .0
             .bounding_box()
             .centroid
             .get_component(selected_axis)
             - min_point.get_component(selected_axis))
             / bucket_size)
             .floor() as usize;
-        buckets[bucket_id].push(*primitive);
+        buckets[bucket_id].push(primitive.clone());
     }
 
     // Calculate each bucket bounding box
@@ -219,7 +231,7 @@ fn sah_grouping(primitives: &[(&Triangle, usize)], total_nodes: &mut usize) -> B
         .iter()
         .map(|primitives| {
             primitives.iter().fold(BoundingBox::default(), |bb, prm| {
-                bb.combine(&prm.0.bounding_box())
+                bb.combine(&prm.bounding_box())
             })
         })
         .collect::<Vec<BoundingBox>>();
@@ -254,7 +266,7 @@ fn sah_grouping(primitives: &[(&Triangle, usize)], total_nodes: &mut usize) -> B
         }
     }
 
-    let left_group: Vec<(&Triangle, usize)> =
+    let left_group: Vec<Arc<Triangle>> =
         buckets[0..split_bucket]
             .into_iter()
             .fold(Vec::new(), |mut acc, el| {
@@ -262,7 +274,7 @@ fn sah_grouping(primitives: &[(&Triangle, usize)], total_nodes: &mut usize) -> B
                 acc
             });
 
-    let right_group: Vec<(&Triangle, usize)> =
+    let right_group: Vec<Arc<Triangle>> =
         buckets[split_bucket..]
             .into_iter()
             .fold(Vec::new(), |mut acc, el| {
@@ -270,59 +282,57 @@ fn sah_grouping(primitives: &[(&Triangle, usize)], total_nodes: &mut usize) -> B
                 acc
             });
 
-    Bvh::Node {
-        bounding_box: primitives
-            .iter()
-            .fold(BoundingBox::default(), |bb, (prm, _)| {
-                bb.combine(&prm.bounding_box())
-            }),
+    BvhElement::Node {
+        bounding_box: primitives.iter().fold(BoundingBox::default(), |bb, prm| {
+            bb.combine(&prm.bounding_box())
+        }),
         left: Box::new(sah_grouping(&left_group, total_nodes)),
         right: Box::new(sah_grouping(&right_group, total_nodes)),
     }
 }
 
 // Will simply recourse the BVH and update the building boxes accordingly
-fn rebuild(prms: &[Triangle], root: Bvh, total_nodes: &mut usize) -> Bvh {
+fn rebuild(prms: &[Arc<Triangle>], root: BvhElement, total_nodes: &mut usize) -> BvhElement {
     match root {
-        Bvh::Empty => Bvh::Empty,
-        Bvh::Node { left, right, .. } => {
-            // let t = Rc::get_mut(&mut total_nodes).unwrap();
+        BvhElement::Empty => BvhElement::Empty,
+        BvhElement::Node { left, right, .. } => {
+            // let t = Arc::get_mut(&mut total_nodes).unwrap();
             *total_nodes += 1;
             let left = rebuild(prms, *left, total_nodes);
             let right = rebuild(prms, *right, total_nodes);
             let mut bounding_box = BoundingBox::default();
             match &left {
-                Bvh::Empty => (),
-                Bvh::Node {
+                BvhElement::Empty => (),
+                BvhElement::Node {
                     bounding_box: bb, ..
                 } => bounding_box = bounding_box.combine(bb),
-                Bvh::Leaf {
+                BvhElement::Leaf {
                     bounding_box: bb, ..
                 } => bounding_box = bounding_box.combine(bb),
             }
 
             match &right {
-                Bvh::Empty => (),
-                Bvh::Node {
+                BvhElement::Empty => (),
+                BvhElement::Node {
                     bounding_box: bb, ..
                 } => bounding_box = bounding_box.combine(bb),
-                Bvh::Leaf {
+                BvhElement::Leaf {
                     bounding_box: bb, ..
                 } => bounding_box = bounding_box.combine(bb),
             }
 
-            Bvh::Node {
+            BvhElement::Node {
                 left: Box::new(left),
                 right: Box::new(right),
                 bounding_box,
             }
         }
-        Bvh::Leaf { primitives, .. } => {
+        BvhElement::Leaf { primitives, .. } => {
             let bounding_box = primitives.iter().fold(BoundingBox::default(), |acc, p| {
-                acc.combine(&prms[*p].bounding_box())
+                acc.combine(&p.bounding_box())
             });
 
-            Bvh::Leaf {
+            BvhElement::Leaf {
                 primitives,
                 bounding_box,
             }
@@ -330,38 +340,34 @@ fn rebuild(prms: &[Triangle], root: Bvh, total_nodes: &mut usize) -> Bvh {
     }
 }
 
-impl Bvh {
-    pub fn new(build_method: BvhBuildMethod, primitives: &[Triangle]) -> Bvh {
+impl BoundingVolumeHierarchy {
+    pub fn new(build_method: BvhBuildMethod, primitives: Vec<Triangle>) -> BoundingVolumeHierarchy {
         let len = primitives.len();
         if len == 0 {
-            return Bvh::Empty;
+            return BoundingVolumeHierarchy {
+                // primitives,
+                root: BvhElement::Empty,
+            };
         }
 
-        let indexes = 0..len;
-
         let mut total_nodes: usize = 0;
+        let total_primitives = primitives.len();
 
-        let bvh = match build_method {
-            BvhBuildMethod::Octree => {
-                let centroid = primitives.iter().map(|x| x.bounding_box().centroid);
-                let items: Vec<(Point, usize)> = centroid.zip(indexes).collect();
-                let root = octree_grouping(&items);
-                rebuild(primitives, root, &mut total_nodes)
+        let bvh = {
+            let prms: Vec<Arc<Triangle>> = primitives.into_iter().map(Arc::new).collect();
+
+            match build_method {
+                BvhBuildMethod::Octree => {
+                    let root = octree_grouping(&prms);
+                    rebuild(&prms, root, &mut total_nodes)
+                }
+                BvhBuildMethod::Sah => sah_grouping(&prms, &mut total_nodes),
             }
-            BvhBuildMethod::Sah => sah_grouping(
-                &primitives
-                    .iter()
-                    .zip(indexes)
-                    .collect::<Vec<(&Triangle, usize)>>(),
-                &mut total_nodes,
-            ),
         };
-
         println!(
             "total_triangles: {}\ntotal_nodes: {}",
-            primitives.len(),
-            total_nodes
+            total_primitives, total_nodes
         );
-        bvh
+        BoundingVolumeHierarchy { root: bvh }
     }
 }

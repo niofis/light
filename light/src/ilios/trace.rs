@@ -1,5 +1,5 @@
-use super::ray::Ray;
+use super::{geometry::Triangle, ray::Ray};
 
 pub trait Trace {
-    fn trace(&self, ray: &Ray) -> Option<Vec<usize>>;
+    fn trace(&self, ray: &Ray) -> Option<Vec<&Triangle>>;
 }

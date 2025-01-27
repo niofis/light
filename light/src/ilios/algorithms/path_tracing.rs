@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::{
     float::{Float, PI},
     ilios::{closest_primitive::ClosestPrimitive, color, geometry::Triangle, ray::Ray, rng::Rng},
@@ -11,16 +13,15 @@ fn trace_ray_internal(renderer: &Renderer, rng: &mut dyn Rng, ray: &Ray, depth: 
     }
     let accelerator = &renderer.accelerator;
     match accelerator.trace(ray) {
-        Some(prm_idxs) => {
-            let closest = find_closest_primitive(renderer, ray, &prm_idxs);
+        Some(prms) => {
+            let closest = find_closest_primitive(&prms, ray);
             match closest {
                 Some(ClosestPrimitive {
                     primitive,
                     distance,
                 }) => {
                     let point = ray.point(distance);
-                    let Triangle { material, .. } = primitive;
-                    let prm_material = material;
+                    let prm_material = &primitive.material;
 
                     match prm_material {
                         Material::Diffuse(color) => {
@@ -80,20 +81,16 @@ pub fn trace_ray(renderer: &Renderer, rng: &mut dyn Rng, pixel: (u32, u32)) -> C
 }
 
 fn find_closest_primitive<'a>(
-    renderer: &'a Renderer,
+    primitives: &[&'a Triangle],
     ray: &Ray,
-    prm_indexes: &[usize],
 ) -> Option<ClosestPrimitive<'a>> {
-    let primitives = &renderer.primitives;
-    prm_indexes
+    primitives
         .iter()
-        .filter_map(|idx| {
-            primitives[*idx]
-                .intersect(ray)
-                .map(|distance| ClosestPrimitive {
-                    primitive: &primitives[*idx],
-                    distance,
-                })
+        .filter_map(|primitive| {
+            primitive.intersect(ray).map(|distance| ClosestPrimitive {
+                primitive: *primitive,
+                distance,
+            })
         })
         .fold(None, |closest, next| match closest {
             None => Some(next),

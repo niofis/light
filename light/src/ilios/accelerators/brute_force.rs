@@ -1,19 +1,22 @@
+use std::sync::Arc;
+
 use crate::ilios::{geometry::Triangle, ray::Ray, trace::Trace};
 
 #[derive(Clone, Debug)]
 pub struct BruteForce {
-    primitives: Vec<usize>,
+    primitives: Vec<Arc<Triangle>>,
 }
 
 impl BruteForce {
-    pub fn new(primitives: &[Triangle]) -> BruteForce {
-        let primitives = (0..primitives.len()).collect();
-        BruteForce { primitives }
+    pub fn new(primitives: Vec<Triangle>) -> BruteForce {
+        BruteForce {
+            primitives: primitives.into_iter().map(Arc::new).collect(),
+        }
     }
 }
 
 impl Trace for BruteForce {
-    fn trace(&self, _ray: &Ray) -> Option<Vec<usize>> {
-        Some(self.primitives.to_vec())
+    fn trace(&self, _ray: &Ray) -> Option<Vec<&Triangle>> {
+        Some(self.primitives.iter().map(Arc::as_ref).collect())
     }
 }

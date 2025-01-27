@@ -4,7 +4,6 @@ use super::{
     camera::Camera,
     color::Color,
     float::Float,
-    geometry::Triangle,
     render_method::{RenderMethod, TraceFn},
     section::Section,
     world::World,
@@ -16,7 +15,6 @@ pub struct Renderer {
     pub height: u32,
     pub accelerator: AcceleratorInstance,
     pub world: World,
-    pub primitives: Vec<Triangle>,
     pub camera: Camera,
     pub render_method: RenderMethod,
     pub algorithm: Algorithm,
@@ -37,7 +35,7 @@ impl Renderer {
             threads,
             samples,
             bvh_build_method,
-        } = builder.to_owned();
+        } = builder.clone();
 
         let mut camera = camera;
         camera.init(width as Float, height as Float);
@@ -45,9 +43,9 @@ impl Renderer {
         let primitives = world.primitives();
 
         let accelerator = match accelerator {
-            Accelerator::BruteForce => AcceleratorInstance::new_brute_force(&primitives),
+            Accelerator::BruteForce => AcceleratorInstance::new_brute_force(primitives),
             Accelerator::BoundingVolumeHierarchy => {
-                AcceleratorInstance::new_bounding_volume_hierarchy(bvh_build_method, &primitives)
+                AcceleratorInstance::new_bounding_volume_hierarchy(bvh_build_method, primitives)
             }
         };
 
@@ -64,7 +62,6 @@ impl Renderer {
             height,
             accelerator,
             world,
-            primitives,
             camera,
             render_method,
             algorithm,
