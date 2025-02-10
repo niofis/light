@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::float::Float;
 use crate::ilios::bounding_box::BoundingBox;
-use crate::ilios::geometry::{Axis, Point, Triangle, Vector};
+use crate::ilios::geometry::{Axis, PackedTriangles, Point, Triangle, Vector};
 use crate::ilios::ray::Ray;
 use crate::ilios::trace::Trace;
 
@@ -21,6 +21,7 @@ enum BvhElement {
     },
     Leaf {
         primitives: Vec<Arc<Triangle>>,
+        packed_primitives: Box<PackedTriangles>,
         bounding_box: BoundingBox,
     },
 }
@@ -31,7 +32,7 @@ pub enum BvhBuildMethod {
     Sah,
 }
 
-fn rec_trace<'a>(bvh: &'a BvhElement, ray: &Ray, prm_vec: &mut Vec<&'a Triangle>) {
+fn rec_trace<'a>(bvh: &'a BvhElement, ray: &Ray, prm_vec: &mut Vec<&'a PackedTriangles>) {
     match bvh {
         BvhElement::Empty => (),
         BvhElement::Node {
@@ -45,21 +46,20 @@ fn rec_trace<'a>(bvh: &'a BvhElement, ray: &Ray, prm_vec: &mut Vec<&'a Triangle>
             }
         }
         BvhElement::Leaf {
-            primitives,
+            primitives: _,
             bounding_box,
+            packed_primitives,
         } => {
             if bounding_box.intersect(ray) {
-                for p in primitives {
-                    prm_vec.push(p.as_ref())
-                }
+                prm_vec.push(packed_primitives)
             }
         }
     }
 }
 
 impl Trace for BoundingVolumeHierarchy {
-    fn trace(&self, ray: &Ray) -> Option<Vec<&Triangle>> {
-        let mut idx_vec: Vec<&Triangle> = Vec::with_capacity(256);
+    fn trace(&self, ray: &Ray) -> Option<Vec<&PackedTriangles>> {
+        let mut idx_vec: Vec<&PackedTriangles> = Vec::with_capacity(256);
 
         rec_trace(&self.root, ray, &mut idx_vec);
 
@@ -81,6 +81,7 @@ fn octree_grouping(items: &[Arc<Triangle>]) -> BvhElement {
     if items.len() <= 2 {
         return BvhElement::Leaf {
             primitives: items.to_vec(),
+            packed_primitives: Box::new(PackedTriangles::default()),
             bounding_box: BoundingBox::default(),
         };
     }
@@ -179,9 +180,23 @@ fn sah_grouping(primitives: &[Arc<Triangle>], total_nodes: &mut usize) -> BvhEle
 
     *total_nodes += 1;
 
-    if primitives.len() <= 2 {
+    if primitives.len() <= 4 {
+        let mut pt = PackedTriangles::default();
+        for (i, triangle) in primitives.iter().enumerate() {
+            pt.triangles.push(triangle.clone());
+            pt.origin_x[i] = triangle.origin.0;
+            pt.origin_y[i] = triangle.origin.1;
+            pt.origin_z[i] = triangle.origin.2;
+            pt.edge1_x[i] = triangle.edge1.0;
+            pt.edge1_y[i] = triangle.edge1.1;
+            pt.edge1_z[i] = triangle.edge1.2;
+            pt.edge2_x[i] = triangle.edge2.0;
+            pt.edge2_y[i] = triangle.edge2.1;
+            pt.edge2_z[i] = triangle.edge2.2;
+        }
         return BvhElement::Leaf {
             primitives: primitives.to_vec(),
+            packed_primitives: Box::new(pt),
             bounding_box: primitives.iter().fold(BoundingBox::default(), |bb, prm| {
                 bb.combine(&prm.bounding_box())
             }),
@@ -334,6 +349,7 @@ fn rebuild(prms: &[Arc<Triangle>], root: BvhElement, total_nodes: &mut usize) ->
 
             BvhElement::Leaf {
                 primitives,
+                packed_primitives: Box::new(PackedTriangles::default()),
                 bounding_box,
             }
         }

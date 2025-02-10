@@ -1,5 +1,5 @@
-use super::{geometry::Triangle, ray::Ray};
+use super::{geometry::PackedTriangles, ray::Ray};
 
 pub trait Trace {
-    fn trace(&self, ray: &Ray) -> Option<Vec<&Triangle>>;
+    fn trace(&self, ray: &Ray) -> Option<Vec<&PackedTriangles>>;
 }

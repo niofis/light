@@ -1,6 +1,8 @@
 use crate::{
     float::{Float, PI},
-    ilios::{closest_primitive::ClosestPrimitive, color, geometry::Triangle, ray::Ray, rng::Rng},
+    ilios::{
+        closest_primitive::ClosestPrimitive, color, geometry::PackedTriangles, ray::Ray, rng::Rng,
+    },
     Color, Material, Renderer, Vector,
 };
 const MAX_DEPTH: u8 = 5;
@@ -79,15 +81,28 @@ pub fn trace_ray(renderer: &Renderer, rng: &mut dyn Rng, pixel: (u32, u32)) -> C
 }
 
 fn find_closest_primitive<'a>(
-    primitives: &[&'a Triangle],
+    primitives: &[&'a PackedTriangles],
     ray: &Ray,
 ) -> Option<ClosestPrimitive<'a>> {
     primitives
         .iter()
         .filter_map(|primitive| {
-            primitive.intersect(ray).map(|distance| ClosestPrimitive {
-                primitive: *primitive,
-                distance,
+            primitive.intersect(&ray).map(|distances| {
+                let mut closest_distance = f32::MAX;
+                let mut closest_idx = 0;
+
+                for idx in 0..4 {
+                    let distance = distances[idx];
+                    if distance > 0.0 && distance < closest_distance {
+                        closest_distance = distance;
+                        closest_idx = idx;
+                    }
+                }
+
+                ClosestPrimitive {
+                    primitive: primitive.triangles[closest_idx].as_ref(),
+                    distance: closest_distance,
+                }
             })
         })
         .fold(None, |closest, next| match closest {

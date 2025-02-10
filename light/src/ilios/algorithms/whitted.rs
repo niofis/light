@@ -3,7 +3,7 @@ use crate::{
     ilios::{
         closest_primitive::ClosestPrimitive,
         color::{self, BLACK},
-        geometry::{Normal, Point, Triangle, Vector},
+        geometry::{Normal, PackedTriangles, Point, Triangle, Vector},
         ray::Ray,
         rng::Rng,
     },
@@ -88,29 +88,31 @@ fn calculate_shading(renderer: &Renderer, prm: &Triangle, point: &Point) -> Colo
 }
 
 fn find_closest_primitive<'a>(
-    primitives: &[&'a Triangle],
-    ray: &Ray,
+    _primitives: &[&'a PackedTriangles],
+    _ray: &Ray,
 ) -> Option<ClosestPrimitive<'a>> {
-    primitives
-        .iter()
-        .filter_map(|primitive| {
-            primitive.intersect(ray).map(|distance| ClosestPrimitive {
-                primitive,
-                distance,
-            })
-        })
-        .fold(None, |closest, next| match closest {
-            None => Some(next),
-            Some(current) if next.distance < current.distance => Some(next),
-            _ => closest,
-        })
+    return None;
+    // primitives
+    //     .iter()
+    //     .filter_map(|primitive| {
+    //         primitive.intersect(ray).map(|distance| ClosestPrimitive {
+    //             primitive,
+    //             distance,
+    //         })
+    //     })
+    //     .fold(None, |closest, next| match closest {
+    //         None => Some(next),
+    //         Some(current) if next.distance < current.distance => Some(next),
+    //         _ => closest,
+    //     })
 }
 
-fn find_shadow_primitive(primitives: &[&Triangle], ray: &Ray, max_dist: Float) -> bool {
-    primitives
-        .iter()
-        .filter_map(|prm| prm.intersect(ray))
-        .any(|dist| dist > 0.0001 && dist <= max_dist)
+fn find_shadow_primitive(primitives: &[&PackedTriangles], ray: &Ray, max_dist: Float) -> bool {
+    return false;
+    // primitives
+    //     .iter()
+    //     .filter_map(|prm| prm.intersect(ray))
+    //     .any(|dist| dist > 0.0001 && dist <= max_dist)
 }
 
 fn calculate_direct_lighting(renderer: &Renderer, point: &Point, normal: &Normal) -> Color {

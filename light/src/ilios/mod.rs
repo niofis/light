@@ -14,6 +14,7 @@ pub(crate) mod render_method;
 pub(crate) mod renderer;
 pub(crate) mod rng;
 pub(crate) mod section;
+mod simd;
 pub(crate) mod solids;
 mod trace;
 pub(crate) mod transform;

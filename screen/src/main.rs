@@ -41,7 +41,7 @@ impl FrameTimmings {
 fn main() -> Result<(), Box<dyn Error>> {
     let width: u32 = 640;
     let height: u32 = 480; //360;
-    let scene: &str = "../photon/scene-simple.json";
+    let scene: &str = "../photon/scene.json";
     let bpp = 4;
     let sdl_context = sdl2::init()?;
     let video_subsystem = sdl_context.video()?;
