@@ -6,6 +6,7 @@ use crate::{
         geometry::{Normal, PackedTriangles, Point, Triangle, Vector},
         ray::Ray,
         rng::Rng,
+        simd,
     },
     Color, LightSource, Material, Renderer,
 };
@@ -88,31 +89,60 @@ fn calculate_shading(renderer: &Renderer, prm: &Triangle, point: &Point) -> Colo
 }
 
 fn find_closest_primitive<'a>(
-    _primitives: &[&'a PackedTriangles],
-    _ray: &Ray,
+    primitives: &[&'a PackedTriangles],
+    ray: &Ray,
 ) -> Option<ClosestPrimitive<'a>> {
-    return None;
-    // primitives
-    //     .iter()
-    //     .filter_map(|primitive| {
-    //         primitive.intersect(ray).map(|distance| ClosestPrimitive {
-    //             primitive,
-    //             distance,
-    //         })
-    //     })
-    //     .fold(None, |closest, next| match closest {
-    //         None => Some(next),
-    //         Some(current) if next.distance < current.distance => Some(next),
-    //         _ => closest,
-    //     })
+    primitives
+        .iter()
+        .filter_map(|primitive| {
+            primitive.intersect(&ray).map(|distances| {
+                let mut closest_distance = f32::MAX;
+                let mut closest_idx = 0;
+
+                for idx in 0..4 {
+                    let distance = simd::get(distances, idx);
+                    if distance > 0.0 && distance < closest_distance {
+                        closest_distance = distance;
+                        closest_idx = idx;
+                    }
+                }
+
+                ClosestPrimitive {
+                    primitive: primitive.triangles[closest_idx].as_ref(),
+                    distance: closest_distance,
+                }
+            })
+        })
+        .fold(None, |closest, next| match closest {
+            None => Some(next),
+            Some(current) if next.distance < current.distance => Some(next),
+            _ => closest,
+        })
 }
 
 fn find_shadow_primitive(primitives: &[&PackedTriangles], ray: &Ray, max_dist: Float) -> bool {
-    return false;
-    // primitives
-    //     .iter()
-    //     .filter_map(|prm| prm.intersect(ray))
-    //     .any(|dist| dist > 0.0001 && dist <= max_dist)
+    primitives
+        .iter()
+        .filter_map(|primitive| {
+            primitive.intersect(&ray).map(|distances| {
+                let mut closest_distance = f32::MAX;
+                let mut closest_idx = 0;
+
+                for idx in 0..4 {
+                    let distance = simd::get(distances, idx);
+                    if distance > 0.0 && distance < closest_distance {
+                        closest_distance = distance;
+                        closest_idx = idx;
+                    }
+                }
+
+                ClosestPrimitive {
+                    primitive: primitive.triangles[closest_idx].as_ref(),
+                    distance: closest_distance,
+                }
+            })
+        })
+        .any(|p| p.distance > 0.0001 && p.distance <= max_dist)
 }
 
 fn calculate_direct_lighting(renderer: &Renderer, point: &Point, normal: &Normal) -> Color {

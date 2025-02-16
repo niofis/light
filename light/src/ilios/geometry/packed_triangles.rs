@@ -10,7 +10,7 @@ use crate::{
 
 use super::Triangle;
 
-#[derive(Clone, Default, Debug)]
+#[derive(Clone, Debug)]
 pub struct PackedTriangles {
     pub triangles: Vec<Arc<Triangle>>,
     pub origin_x: F32x4,
@@ -24,11 +24,27 @@ pub struct PackedTriangles {
     pub edge2_z: F32x4,
 }
 
+impl Default for PackedTriangles {
+    fn default() -> PackedTriangles {
+        PackedTriangles {
+            triangles: vec![],
+            origin_x: simd::default(),
+            origin_y: simd::default(),
+            origin_z: simd::default(),
+            edge1_x: simd::default(),
+            edge1_y: simd::default(),
+            edge1_z: simd::default(),
+            edge2_x: simd::default(),
+            edge2_y: simd::default(),
+            edge2_z: simd::default(),
+        }
+    }
+}
+
 impl PackedTriangles {
     pub fn intersect(&self, ray: &Ray) -> Option<F32x4> {
         let epsilon = simd::splat(EPSILON);
         let epsilon_p1 = simd::splat(1.0 + EPSILON);
-        let mask = simd::splat(1.0);
         let zero = simd::splat(0.0);
 
         let ray_origin_x = simd::splat(ray.origin.0);
@@ -70,7 +86,7 @@ impl PackedTriangles {
         let lt_u = simd::gte(u, zero);
         let gt_u = simd::lte(u, epsilon_p1);
 
-        let mask_u = simd::mul(lt_u, gt_u);
+        let mask = simd::and_mask(lt_u, gt_u);
 
         /*
         if u < 0.0 || u > 1.0 + EPSILON {
@@ -78,9 +94,7 @@ impl PackedTriangles {
         }
         */
 
-        let mask = simd::mul(mask, mask_u);
-
-        if simd::acc(mask) == 0.0 {
+        if simd::is_zero(mask) {
             return None;
         }
 
@@ -108,7 +122,7 @@ impl PackedTriangles {
         let lt_v = simd::gte(v, zero);
         let gt_v = simd::lte(simd::add(u, v), epsilon_p1);
 
-        let mask_v = simd::mul(lt_v, gt_v);
+        let mask_v = simd::and_mask(lt_v, gt_v);
 
         /*
         if v < 0.0 || (u + v) > 1.0 + EPSILON {
@@ -117,9 +131,9 @@ impl PackedTriangles {
         }
         */
 
-        let mask = simd::mul(mask, mask_v);
+        let mask = simd::and_mask(mask, mask_v);
 
-        if simd::acc(mask) == 0.0 {
+        if simd::is_zero(mask) {
             return None;
         }
 
@@ -137,13 +151,13 @@ impl PackedTriangles {
 
         let mask_t = simd::gt(t, epsilon);
 
-        let mask = simd::mul(mask, mask_t);
+        let mask = simd::and_mask(mask, mask_t);
 
-        if simd::acc(mask) == 0.0 {
+        if simd::is_zero(mask) {
             return None;
         }
 
-        Some(simd::mul(t, mask))
+        Some(simd::and_f32x4(t, mask))
     }
 }
 
@@ -153,7 +167,7 @@ mod tests {
         ilios::{
             geometry::{Normal, PackedTriangles},
             ray::Ray,
-            simd::{self},
+            simd::{self, ComparableF32x4},
         },
         Point,
     };
@@ -208,8 +222,10 @@ mod tests {
             1.0,
         );
         assert_eq!(
-            pt.intersect(&ray),
-            Some(simd::new(41.368675, 41.368675, 41.368675, 0.0))
+            pt.intersect(&ray).map(|v| ComparableF32x4(v)),
+            Some(ComparableF32x4(simd::new(
+                41.368675, 41.368675, 41.368675, 0.0
+            )))
         );
     }
 }

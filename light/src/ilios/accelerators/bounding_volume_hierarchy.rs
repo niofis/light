@@ -4,6 +4,7 @@ use crate::float::Float;
 use crate::ilios::bounding_box::BoundingBox;
 use crate::ilios::geometry::{Axis, PackedTriangles, Point, Triangle, Vector};
 use crate::ilios::ray::Ray;
+use crate::ilios::simd;
 use crate::ilios::trace::Trace;
 
 #[derive(Clone, Debug)]
@@ -78,10 +79,23 @@ fn octree_grouping(items: &[Arc<Triangle>]) -> BvhElement {
 
     // Termination condition, checks the size of the items for this group
     // and returns a leaf node, which has no left/right children
-    if items.len() <= 2 {
+    if items.len() <= 4 {
+        let mut pt = PackedTriangles::default();
+        for (i, triangle) in items.iter().enumerate() {
+            pt.triangles.push(triangle.clone());
+            pt.origin_x = simd::set(pt.origin_x, triangle.origin.0, i);
+            pt.origin_y = simd::set(pt.origin_y, triangle.origin.1, i);
+            pt.origin_z = simd::set(pt.origin_z, triangle.origin.2, i);
+            pt.edge1_x = simd::set(pt.edge1_x, triangle.edge1.0, i);
+            pt.edge1_y = simd::set(pt.edge1_y, triangle.edge1.1, i);
+            pt.edge1_z = simd::set(pt.edge1_z, triangle.edge1.2, i);
+            pt.edge2_x = simd::set(pt.edge2_x, triangle.edge2.0, i);
+            pt.edge2_y = simd::set(pt.edge2_y, triangle.edge2.1, i);
+            pt.edge2_z = simd::set(pt.edge2_z, triangle.edge2.2, i);
+        }
         return BvhElement::Leaf {
             primitives: items.to_vec(),
-            packed_primitives: Box::new(PackedTriangles::default()),
+            packed_primitives: Box::new(pt),
             bounding_box: BoundingBox::default(),
         };
     }
@@ -184,15 +198,15 @@ fn sah_grouping(primitives: &[Arc<Triangle>], total_nodes: &mut usize) -> BvhEle
         let mut pt = PackedTriangles::default();
         for (i, triangle) in primitives.iter().enumerate() {
             pt.triangles.push(triangle.clone());
-            pt.origin_x[i] = triangle.origin.0;
-            pt.origin_y[i] = triangle.origin.1;
-            pt.origin_z[i] = triangle.origin.2;
-            pt.edge1_x[i] = triangle.edge1.0;
-            pt.edge1_y[i] = triangle.edge1.1;
-            pt.edge1_z[i] = triangle.edge1.2;
-            pt.edge2_x[i] = triangle.edge2.0;
-            pt.edge2_y[i] = triangle.edge2.1;
-            pt.edge2_z[i] = triangle.edge2.2;
+            pt.origin_x = simd::set(pt.origin_x, triangle.origin.0, i);
+            pt.origin_y = simd::set(pt.origin_y, triangle.origin.1, i);
+            pt.origin_z = simd::set(pt.origin_z, triangle.origin.2, i);
+            pt.edge1_x = simd::set(pt.edge1_x, triangle.edge1.0, i);
+            pt.edge1_y = simd::set(pt.edge1_y, triangle.edge1.1, i);
+            pt.edge1_z = simd::set(pt.edge1_z, triangle.edge1.2, i);
+            pt.edge2_x = simd::set(pt.edge2_x, triangle.edge2.0, i);
+            pt.edge2_y = simd::set(pt.edge2_y, triangle.edge2.1, i);
+            pt.edge2_z = simd::set(pt.edge2_z, triangle.edge2.2, i);
         }
         return BvhElement::Leaf {
             primitives: primitives.to_vec(),
@@ -342,14 +356,18 @@ fn rebuild(prms: &[Arc<Triangle>], root: BvhElement, total_nodes: &mut usize) ->
                 bounding_box,
             }
         }
-        BvhElement::Leaf { primitives, .. } => {
+        BvhElement::Leaf {
+            primitives,
+            packed_primitives,
+            ..
+        } => {
             let bounding_box = primitives.iter().fold(BoundingBox::default(), |acc, p| {
                 acc.combine(&p.bounding_box())
             });
 
             BvhElement::Leaf {
                 primitives,
-                packed_primitives: Box::new(PackedTriangles::default()),
+                packed_primitives,
                 bounding_box,
             }
         }

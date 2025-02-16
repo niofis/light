@@ -2,6 +2,7 @@ use crate::{
     float::{Float, PI},
     ilios::{
         closest_primitive::ClosestPrimitive, color, geometry::PackedTriangles, ray::Ray, rng::Rng,
+        simd,
     },
     Color, Material, Renderer, Vector,
 };
@@ -92,7 +93,7 @@ fn find_closest_primitive<'a>(
                 let mut closest_idx = 0;
 
                 for idx in 0..4 {
-                    let distance = distances[idx];
+                    let distance = simd::get(distances, idx);
                     if distance > 0.0 && distance < closest_distance {
                         closest_distance = distance;
                         closest_idx = idx;

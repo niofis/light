@@ -260,7 +260,7 @@ fn build_renderer(matches: &ArgMatches) -> Renderer {
                 .map_or(DEFAULT_SAMPLES, |v| *v),
         )
         .accelerator(match matches.get_one::<String>("accelerator") {
-            Some(val) if val == "brute_force" => Accelerator::BruteForce,
+            Some(val) if val == "brute-force" => Accelerator::BruteForce,
             Some(val) if val == "bvh" => Accelerator::BoundingVolumeHierarchy,
             _ => Accelerator::BoundingVolumeHierarchy,
         })

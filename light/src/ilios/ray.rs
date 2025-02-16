@@ -1,7 +1,6 @@
 use super::{
     float::Float,
     geometry::{Normal, Point},
-    simd::{self, F32x4},
 };
 
 #[derive(Debug)]
