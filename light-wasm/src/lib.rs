@@ -1,6 +1,6 @@
 use light::{
     demos, parsers, Accelerator, Algorithm, Camera, Color, Material, Point, RenderMethod, Renderer,
-    Section, Solid, Transform, World,
+    Section, Solid, Transform, Vector, World,
 };
 
 static mut WIDTH: i32 = 0;
@@ -139,6 +139,28 @@ pub unsafe fn init_from_json(width: i32, height: i32, str_len: i32, str_ptr: *mu
             .build(),
     );
     ptr
+}
+
+#[no_mangle]
+pub unsafe fn camera_rotate(x: f32, y: f32, z: f32) {
+    if let Some(renderer) = &mut RENDERER {
+        let transform = Transform::rotate(x, y, z);
+        renderer.camera.apply_transform(&transform);
+        TOTAL_FRAMES = 0.0;
+        FRAMES_ACC = Some(vec![Color::default(); LEN]);
+    }
+}
+
+#[no_mangle]
+pub unsafe fn camera_zoom(delta: f32) {
+    if let Some(renderer) = &mut RENDERER {
+        let algo: Vector = renderer.camera.eye.into();
+        let algo = algo.unit() * delta;
+        let transform = Transform::translate(algo.0, algo.1, algo.2);
+        renderer.camera.apply_transform(&transform);
+        TOTAL_FRAMES = 0.0;
+        FRAMES_ACC = Some(vec![Color::default(); LEN]);
+    }
 }
 
 #[no_mangle]

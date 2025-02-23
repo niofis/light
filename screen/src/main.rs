@@ -1,7 +1,7 @@
 use light::float::PI;
 use light::{
     demos, parsers, Accelerator, Algorithm, BvhBuildMethod, Camera, Color, Point, RenderMethod,
-    Renderer, Section, Transform,
+    Renderer, Section, Transform, Vector,
 };
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -40,8 +40,8 @@ impl FrameTimmings {
 
 fn main() -> Result<(), Box<dyn Error>> {
     let width: u32 = 640;
-    let height: u32 = 480; //360;
-    let scene: &str = "../photon/scene.json";
+    let height: u32 = 360;
+    let scene: &str = "../photon/torus.json";
     let bpp = 4;
     let sdl_context = sdl2::init()?;
     let video_subsystem = sdl_context.video()?;
@@ -76,7 +76,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .render_method(RenderMethod::Tiles)
         .world(demos::cornell())
         // .from_json(&fs::read_to_string("../photon/scene.json")?)
-        // .threads(1)
+        .threads(1)
         .bvh_build_method(BvhBuildMethod::Sah)
         .accelerator(Accelerator::BoundingVolumeHierarchy);
 
@@ -129,13 +129,13 @@ fn main() -> Result<(), Box<dyn Error>> {
                     ..
                 } => {
                     match if keycode == Keycode::Left {
-                        Some(Transform::rotate(0.0, -PI / 100.0, 0.0))
-                    } else if keycode == Keycode::Right {
                         Some(Transform::rotate(0.0, PI / 100.0, 0.0))
+                    } else if keycode == Keycode::Right {
+                        Some(Transform::rotate(0.0, -PI / 100.0, 0.0))
                     } else if keycode == Keycode::Up {
-                        Some(Transform::rotate(-PI / 100.0, 0.0, 0.0))
-                    } else if keycode == Keycode::Down {
                         Some(Transform::rotate(PI / 100.0, 0.0, 0.0))
+                    } else if keycode == Keycode::Down {
+                        Some(Transform::rotate(-PI / 100.0, 0.0, 0.0))
                     } else if keycode == Keycode::W {
                         Some(Transform::translate(0.0, 0.0, 5.0))
                     } else if keycode == Keycode::S {
@@ -148,6 +148,14 @@ fn main() -> Result<(), Box<dyn Error>> {
                         Some(Transform::translate(0.0, 5.0, 0.0))
                     } else if keycode == Keycode::E {
                         Some(Transform::translate(0.0, -5.0, 0.0))
+                    } else if keycode == Keycode::I {
+                        let algo: Vector = renderer.camera.eye.into();
+                        let algo = algo.unit() * -1.0;
+                        Some(Transform::translate(algo.0, algo.1, algo.2))
+                    } else if keycode == Keycode::O {
+                        let algo: Vector = renderer.camera.eye.into();
+                        let algo = algo.unit();
+                        Some(Transform::translate(algo.0, algo.1, algo.2))
                     } else {
                         None
                     } {
@@ -165,14 +173,18 @@ fn main() -> Result<(), Box<dyn Error>> {
         let new_modified = fs::metadata(scene)?.modified()?;
         if modified != new_modified || reset {
             modified = new_modified;
-            let res = parsers::json(&fs::read_to_string(scene)?);
-            renderer_builder.world(res.1);
-            renderer_builder.camera(camera.clone());
-            println!("transforms size: {}", camera_transforms.len());
-            renderer_builder
+            // let res = parsers::json(&fs::read_to_string(scene)?);
+            // renderer_builder.world(res.1);
+            // renderer_builder.camera(camera.clone());
+            // println!("transforms size: {}", camera_transforms.len());
+            // renderer_builder
+            //     .camera
+            //     .apply_transform(&Transform::combine(&camera_transforms));
+            // renderer = renderer_builder.build();
+            renderer
                 .camera
                 .apply_transform(&Transform::combine(&camera_transforms));
-            renderer = renderer_builder.build();
+            camera_transforms.clear();
             reset = true;
         }
 
