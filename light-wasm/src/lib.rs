@@ -152,6 +152,20 @@ pub unsafe fn camera_rotate(x: f32, y: f32, z: f32) {
 }
 
 #[no_mangle]
+pub unsafe fn camera_rotate_orbital(x: f32, y: f32, z: f32) {
+    if let Some(renderer) = &mut RENDERER {
+        let transform = Transform::combine(&[
+            Transform::rotate_around_vector(x, renderer.camera.coordinate_system.u),
+            Transform::rotate_around_vector(y, renderer.camera.coordinate_system.v),
+            Transform::rotate_around_vector(z, renderer.camera.coordinate_system.w),
+        ]);
+        renderer.camera.apply_transform(&transform);
+        TOTAL_FRAMES = 0.0;
+        FRAMES_ACC = Some(vec![Color::default(); LEN]);
+    }
+}
+
+#[no_mangle]
 pub unsafe fn camera_zoom(delta: f32) {
     if let Some(renderer) = &mut RENDERER {
         let algo: Vector = renderer.camera.eye.into();

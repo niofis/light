@@ -74,7 +74,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .camera(camera.clone())
         .algorithm(Algorithm::PathTracing)
         .render_method(RenderMethod::Tiles)
-        .world(demos::cornell())
+        // .world(demos::cornell())
         // .from_json(&fs::read_to_string("../photon/scene.json")?)
         .threads(1)
         .bvh_build_method(BvhBuildMethod::Sah)
@@ -109,7 +109,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // let json = fs::read_to_string("../photon/scene.json")?;
     // renderer_builder.from_json(&json);
-    //
     let mut camera_transforms: Vec<Transform> = vec![];
 
     'event_loop: loop {
@@ -129,13 +128,25 @@ fn main() -> Result<(), Box<dyn Error>> {
                     ..
                 } => {
                     match if keycode == Keycode::Left {
-                        Some(Transform::rotate(0.0, PI / 100.0, 0.0))
+                        Some(Transform::rotate_around_vector(
+                            PI / 10.0,
+                            renderer.camera.coordinate_system.v,
+                        ))
                     } else if keycode == Keycode::Right {
-                        Some(Transform::rotate(0.0, -PI / 100.0, 0.0))
+                        Some(Transform::rotate_around_vector(
+                            -PI / 10.0,
+                            renderer.camera.coordinate_system.v,
+                        ))
                     } else if keycode == Keycode::Up {
-                        Some(Transform::rotate(PI / 100.0, 0.0, 0.0))
+                        Some(Transform::rotate_around_vector(
+                            PI / 10.0,
+                            renderer.camera.coordinate_system.u,
+                        ))
                     } else if keycode == Keycode::Down {
-                        Some(Transform::rotate(-PI / 100.0, 0.0, 0.0))
+                        Some(Transform::rotate_around_vector(
+                            -PI / 10.0,
+                            renderer.camera.coordinate_system.u,
+                        ))
                     } else if keycode == Keycode::W {
                         Some(Transform::translate(0.0, 0.0, 5.0))
                     } else if keycode == Keycode::S {
@@ -175,12 +186,14 @@ fn main() -> Result<(), Box<dyn Error>> {
             modified = new_modified;
             // let res = parsers::json(&fs::read_to_string(scene)?);
             // renderer_builder.world(res.1);
-            // renderer_builder.camera(camera.clone());
+
             // println!("transforms size: {}", camera_transforms.len());
             // renderer_builder
             //     .camera
             //     .apply_transform(&Transform::combine(&camera_transforms));
             // renderer = renderer_builder.build();
+            // renderer.camera = camera.clone();
+
             renderer
                 .camera
                 .apply_transform(&Transform::combine(&camera_transforms));

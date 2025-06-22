@@ -31,7 +31,7 @@ pub struct Camera {
     delta_down: Vector,
     width: Float,
     height: Float,
-    coordinate_system: CoordinateSystem,
+    pub coordinate_system: CoordinateSystem,
 }
 
 impl Default for Camera {
