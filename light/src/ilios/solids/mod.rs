@@ -12,7 +12,7 @@ pub enum Solid {
     CornellBox(Transform),
     Sphere(usize, Transform, Material),
     Torus(Float, Float, usize, usize, Transform, Material),
-    Mesh(Vec<Triangle>),
+    Mesh(Transform, Vec<Triangle>),
     Plane(Transform, Material),
 }
 
@@ -28,7 +28,7 @@ impl Solid {
             Solid::Torus(rd1, rd2, sc1, sc2, transform, material) => {
                 torus(*rd1, *rd2, *sc1, *sc2, transform, material)
             }
-            Solid::Mesh(triangles) => triangles.clone(),
+            Solid::Mesh(transform, triangles) => mesh(transform, triangles),
             Solid::Plane(transform, material) => plane(transform, material),
             Solid::InvertedCube(transform) => cube(transform, true),
         }
@@ -193,6 +193,25 @@ fn sphere(radius: Float, sc1: usize, transform: &Transform, material: &Material)
     }
 
     triangles
+}
+
+fn mesh(transform: &Transform, triangles: &[Triangle]) -> Vec<Triangle> {
+    triangles
+        .iter()
+        .map(|t: &Triangle| {
+            let Triangle {
+                origin,
+                pt2,
+                pt3,
+                material,
+                ..
+            } = t;
+            let a = transform.apply(origin);
+            let b = transform.apply(pt2);
+            let c = transform.apply(pt3);
+            Triangle::new(a, b, c, material.clone())
+        })
+        .collect()
 }
 
 fn plane(transform: &Transform, material: &Material) -> Vec<Triangle> {

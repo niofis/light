@@ -2,6 +2,9 @@ use crate::Vector;
 
 use super::{float::Float, geometry::Point};
 type Matrix = [Float; 16];
+const IDENTITY: Matrix = [
+    1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+];
 
 #[derive(Clone, Debug)]
 pub struct Transform(pub Matrix);
@@ -70,6 +73,9 @@ fn multiply(mts: &[Matrix]) -> Matrix {
 }
 
 impl Transform {
+    pub fn default() -> Transform {
+        Transform(IDENTITY)
+    }
     pub fn combine(trs: &[Transform]) -> Transform {
         let mts: Vec<Matrix> = trs.iter().map(|t| t.0).collect();
         Transform(multiply(&mts))
@@ -101,7 +107,7 @@ impl Transform {
         // https://mathworld.wolfram.com/RodriguesRotationFormula.html
         let (s, c) = o.sin_cos();
         let cr = 1.0 - c;
-        let R: Matrix = [
+        let r: Matrix = [
             v.0 * v.0 * cr + c,
             v.0 * v.1 * cr - v.2 * s,
             v.0 * v.2 * cr + v.1 * s,
@@ -120,7 +126,7 @@ impl Transform {
             1.0,
         ];
 
-        Transform(R)
+        Transform(r)
     }
 
     pub fn scale(x: Float, y: Float, z: Float) -> Transform {
@@ -150,7 +156,7 @@ impl Transform {
 
 #[cfg(test)]
 mod tests {
-    use crate::{float::PI, Point, Transform, Vector};
+    use crate::{Point, Transform, Vector, float::PI};
 
     #[test]
     fn rotation_works() {

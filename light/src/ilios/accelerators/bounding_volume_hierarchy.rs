@@ -398,7 +398,7 @@ impl BoundingVolumeHierarchy {
                 BvhBuildMethod::Sah => sah_grouping(&prms, &mut total_nodes),
             }
         };
-        println!(
+        eprintln!(
             "total_triangles: {}\ntotal_nodes: {}",
             total_primitives, total_nodes
         );

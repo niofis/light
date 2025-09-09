@@ -68,4 +68,8 @@ impl Color {
             (255.0 * (blue.powf(1.0 / 2.2))).min(255.0) as u8,
         )
     }
+
+    pub fn white() -> Color {
+        WHITE
+    }
 }

@@ -25,7 +25,7 @@ impl XorRng {
         rng
     }
 
-    pub fn gen(&mut self) -> Float {
+    pub fn r#gen(&mut self) -> Float {
         self.gen_u32() as Float / MAX
     }
 
@@ -40,11 +40,11 @@ impl XorRng {
 }
 
 pub trait Rng {
-    fn gen(&mut self) -> Float;
+    fn r#gen(&mut self) -> Float;
 }
 
 impl Rng for XorRng {
-    fn gen(&mut self) -> Float {
-        self.gen()
+    fn r#gen(&mut self) -> Float {
+        self.r#gen()
     }
 }

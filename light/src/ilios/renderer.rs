@@ -1,6 +1,6 @@
 use super::{
     accelerators::{Accelerator, AcceleratorInstance, BvhBuildMethod},
-    algorithms::{path_tracing, whitted, Algorithm},
+    algorithms::{Algorithm, path_tracing, whitted},
     camera::Camera,
     color::Color,
     float::Float,
@@ -55,7 +55,7 @@ impl Renderer {
                 .build_global();
         }
 
-        println!("Threads: {}", rayon::current_num_threads());
+        eprintln!("Threads: {}", rayon::current_num_threads());
 
         Renderer {
             width,

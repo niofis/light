@@ -1,3 +1,4 @@
 [workspace]
-members = ["light", "photon", "screen"]
+members = [ "file-loader", "light", "photon", "screen"]
 exclude = ["prism", "light-wasm"]
+resolver = "3"

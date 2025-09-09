@@ -1,5 +1,5 @@
-use crate::ilios::float::Float;
 use crate::Color;
+use crate::ilios::float::Float;
 
 #[derive(Debug, Clone)]
 pub enum Material {
@@ -36,5 +36,8 @@ impl Material {
     }
     pub fn white() -> Material {
         Material::Diffuse(Color(1.0, 1.0, 1.0))
+    }
+    pub fn emissive_white() -> Material {
+        Material::Emissive(Color(1.0, 1.0, 1.0))
     }
 }

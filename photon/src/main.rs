@@ -1,9 +1,11 @@
-use bincode::{config, Encode};
-use clap::{value_parser, Arg, ArgAction, ArgMatches, Command};
+use bincode::{Encode, config};
+use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
+use light::parsers::ply;
 use light::{
-    demos, parsers, Accelerator, Algorithm, BvhBuildMethod, Camera, Color, Point, RenderMethod,
-    Renderer, Section,
+    Accelerator, Algorithm, BoundingBox, BvhBuildMethod, Camera, Color, Material, Point,
+    RenderMethod, Renderer, Section, Solid, Transform, Triangle, World, demos, parsers,
 };
+use std::io::{self, Write};
 use std::{fs, io::BufWriter};
 
 const DEFAULT_WIDTH: u32 = 640;
@@ -132,6 +134,13 @@ fn process_cli() -> ArgMatches {
                 .value_parser(value_parser!(String))
                 .conflicts_with("demo")
                 .help("renders the specified obj file"))
+        .arg(
+            Arg::new("ply")
+                .long("ply")
+                .action(ArgAction::Set)
+                .value_parser(value_parser!(String))
+                .conflicts_with("demo")
+                .help("renders the specified ply file"))
         .arg(
             Arg::new("stats")
                 .long("stats")
@@ -288,6 +297,64 @@ fn build_renderer(matches: &ArgMatches) -> Renderer {
         renderer_builder.camera(camera).world(world);
     }
 
+    if let Some(ply_file) = matches.get_one::<String>("ply") {
+        let ply_string = fs::read_to_string(ply_file).unwrap();
+        let ply = ply::parse(&ply_string);
+        let triangles = ply
+            .faces()
+            .map(|vcts| {
+                Triangle::new(
+                    vcts[0].into(),
+                    vcts[1].into(),
+                    vcts[2].into(),
+                    Material::white(),
+                )
+            })
+            .collect::<Vec<Triangle>>();
+
+        let bb = triangles[..]
+            .into_iter()
+            .fold(BoundingBox::default(), |acc, t| {
+                acc.combine(&t.bounding_box())
+            });
+        eprintln!("Bounding Box: {:?}", bb);
+
+        let triangles_trs = Transform::combine(&[
+            Transform::scale(100.0, 100.0, 100.0),
+            Transform::rotate(0.0, 3.1415926, 0.0),
+            Transform::translate(0.0, -10.0, -15.0),
+        ]);
+
+        let top_light_trs = Transform::combine(&[
+            Transform::scale(30.0, 10.0, 10.0),
+            Transform::rotate(0.0, 0.0, 0.0),
+            Transform::translate(0.0, 22.4, -15.0),
+        ]);
+        let top_light = Solid::Plane(top_light_trs, Material::emissive_white());
+
+        let plane_trs = Transform::combine(&[
+            Transform::scale(1000.0, 1000.0, 1000.0),
+            Transform::rotate(3.1415926, 0.0, 0.0),
+            Transform::translate(0.0, -10.0, 0.0),
+        ]);
+        let plane = Solid::Plane(plane_trs, Material::white());
+
+        let back_trs = Transform::combine(&[
+            Transform::scale(1000.0, 1000.0, 1000.0),
+            Transform::rotate(3.1415926 / 2.0, 0.0, 0.0),
+            Transform::translate(0.0, 0.0, 100.0),
+        ]);
+        let back = Solid::Plane(back_trs, Material::white());
+
+        let world = World::builder()
+            .add_object(Solid::Mesh(triangles_trs, triangles))
+            .add_object(top_light)
+            .add_object(plane)
+            .add_object(back)
+            .build();
+        renderer_builder.world(world);
+    }
+
     renderer_builder.build()
 }
 
@@ -326,6 +393,9 @@ fn output_image(
     } else if matches.get_flag("ppm") {
         let ppm = format_as_ppm(pixels, width, height);
         println!("{}", ppm);
+    } else if matches.get_flag("png") {
+        let png = format_as_png(pixels, width, height);
+        io::stdout().write_all(&png).unwrap();
     }
 }
 

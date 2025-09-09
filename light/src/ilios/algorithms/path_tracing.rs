@@ -1,10 +1,10 @@
 use crate::{
+    Color, Material, Renderer, Vector,
     float::{Float, PI},
     ilios::{
         closest_primitive::ClosestPrimitive, color, geometry::PackedTriangles, ray::Ray, rng::Rng,
         simd,
     },
-    Color, Material, Renderer, Vector,
 };
 const MAX_DEPTH: u8 = 5;
 
@@ -72,8 +72,8 @@ pub fn trace_ray(renderer: &Renderer, rng: &mut dyn Rng, pixel: (u32, u32)) -> C
     let (x, y) = pixel;
     for _ in 0..samples {
         // let (nx, ny) = rng.gen::<(Float, Float)>();
-        let nx = rng.gen();
-        let ny = rng.gen();
+        let nx = rng.r#gen();
+        let ny = rng.r#gen();
         let ray = renderer.camera.get_ray(x as Float + nx, y as Float + ny);
         let sample_color = trace_ray_internal(renderer, rng, &ray, 1);
         final_color = final_color + sample_color
@@ -122,8 +122,8 @@ fn rotate_vector(vector: &Vector, axis: &Vector, angle: Float) -> Vector {
 fn random_dome(rng: &mut dyn Rng, normal: &Vector) -> Vector {
     let (v, _) = normal.coordinate_system();
     // let (r1, r2) = rng.gen::<(Float, Float)>();
-    let r1 = rng.gen();
-    let r2 = rng.gen();
+    let r1 = rng.r#gen();
+    let r2 = rng.r#gen();
     let first_rotation = 0.8 * r1 * PI / 2.0;
     let second_rotation = r2 * PI * 2.0;
     let nr = rotate_vector(normal, &v, first_rotation);

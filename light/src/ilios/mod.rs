@@ -1,6 +1,6 @@
 pub(crate) mod accelerators;
 pub(crate) mod algorithms;
-mod bounding_box;
+pub mod bounding_box;
 pub(crate) mod camera;
 mod closest_primitive;
 pub(crate) mod color;
