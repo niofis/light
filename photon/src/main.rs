@@ -1,10 +1,16 @@
 use bincode::{Encode, config};
 use clap::{Arg, ArgAction, ArgMatches, Command, value_parser};
-use light::parsers::ply;
-use light::{
-    Accelerator, Algorithm, BoundingBox, BvhBuildMethod, Camera, Color, Material, Point,
-    RenderMethod, Renderer, Section, Solid, Transform, Triangle, World, demos, parsers,
-};
+use ilios::{Accelerator, Algorithm, BvhBuildMethod, RenderMethod, Renderer, demos};
+use ilios_types::bounding_box::BoundingBox;
+use ilios_types::camera::Camera;
+use ilios_types::color::Color;
+use ilios_types::geometry::{Point, Triangle};
+use ilios_types::material::Material;
+use ilios_types::section::Section;
+use ilios_types::solids::Solid;
+use ilios_types::transform::Transform;
+use ilios_types::world::World;
+use kosmos::parsers::{self, ply};
 use std::io::{self, Write};
 use std::{fs, io::BufWriter};
 

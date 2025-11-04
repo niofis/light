@@ -4,13 +4,12 @@ version = "0.1.0"
 authors = ["Enrique <niofis@gmail.com>"]
 edition = "2024"
 
-[profile.dev]
-split-debuginfo = "unpacked"
-
 [dependencies]
 bincode = "2.0.0-rc.3"
 clap = "4"
 chrono = "0.4.31"
-light = { path = "../light" }
+ilios = { path = "../ilios" }
 time = "0.3"
 png = "0.17.10"
+ilios-types = { path = "../ilios-types" }
+kosmos = { path = "../kosmos" }

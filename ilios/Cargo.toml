@@ -1,0 +1,9 @@
+[package]
+name = "ilios"
+version = "0.1.0"
+authors = ["Enrique <niofis@gmail.com>"]
+edition = "2024"
+
+[dependencies]
+rayon = "1.10"
+ilios-types = { path = "../ilios-types" }

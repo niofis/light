@@ -4,13 +4,12 @@ version = "0.1.0"
 authors = ["Enrique <niofis@gmail.com>"]
 edition = "2024"
 
-[profile.dev]
-split-debuginfo = "unpacked"
-
 [dependencies]
 clap = "4"
 time = "0.3"
-light = { path = "../light" }
+ilios = { path = "../ilios" }
+ilios-types = { path = "../ilios-types" }
+
 
 [dependencies.sdl2]
 version = "0.35"

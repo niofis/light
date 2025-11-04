@@ -1,17 +1,22 @@
 
 /target
 **/*.rs.bk
-light/target
+ilios/target
 screen/target
 photon/target
 bench/target
-light-wasm/target
+ilios-wasm/target
+prism/target
+ilios-types/target
+kosmos/target
 .DS_Store
 photon/ml
 .vscode
 *.ppm
 *.png
-light.code-workspace
+ilios.code-workspace
 photon/.DS_Store
 *.svg
 perf.data*
+sample-scene/
+file-loader/

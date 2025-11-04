@@ -1,8 +1,10 @@
-use light::float::PI;
-use light::{
-    demos, parsers, Accelerator, Algorithm, BvhBuildMethod, Camera, Color, Point, RenderMethod,
-    Renderer, Section, Transform, Vector,
+use ilios::{
+    Accelerator, Algorithm, BvhBuildMethod, Camera, RenderMethod, Renderer, Section, Transform,
+    parsers,
 };
+use ilios_types::color::Color;
+use ilios_types::float::PI;
+use ilios_types::geometry::{Point, Vector};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::PixelFormatEnum;

@@ -243,6 +243,9 @@ dependencies = [
 [[package]]
 name = "file-loader"
 version = "0.1.0"
+dependencies = [
+ "kosmos",
+]
 
 [[package]]
 name = "flate2"
@@ -278,6 +281,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "ilios"
+version = "0.1.0"
+dependencies = [
+ "ilios-types",
+ "rayon",
+]
+
+[[package]]
+name = "ilios-types"
+version = "0.1.0"
+
+[[package]]
 name = "itoa"
 version = "1.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -293,6 +308,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "kosmos"
+version = "0.1.0"
+dependencies = [
+ "ilios-types",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "lazy_static"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -303,14 +327,6 @@ name = "libc"
 version = "0.2.158"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d8adc4bb1803a324070e64a98ae98f38934d91957a99cfb3a43dcbc01bc56439"
-
-[[package]]
-name = "light"
-version = "0.1.0"
-dependencies = [
- "rayon",
- "serde_json",
-]
 
 [[package]]
 name = "log"
@@ -350,7 +366,9 @@ dependencies = [
  "bincode",
  "chrono",
  "clap",
- "light",
+ "ilios",
+ "ilios-types",
+ "kosmos",
  "png",
  "time",
 ]
@@ -423,7 +441,8 @@ name = "screen"
 version = "0.1.0"
 dependencies = [
  "clap",
- "light",
+ "ilios",
+ "ilios-types",
  "sdl2",
  "time",
 ]

@@ -1,4 +1,7 @@
 [workspace]
-members = [ "file-loader", "light", "photon", "screen"]
-exclude = ["prism", "light-wasm"]
+members = [ "file-loader", "kosmos", "ilios", "ilios-types", "photon", "screen"]
+exclude = ["prism", "ilios-wasm"]
 resolver = "3"
+
+[profile.dev]
+split-debuginfo = "unpacked"

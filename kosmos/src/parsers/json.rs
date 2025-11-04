@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use light_types::{
+use ilios_types::{
     camera::Camera,
     color::Color,
     float::Float,

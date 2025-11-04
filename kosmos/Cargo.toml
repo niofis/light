@@ -5,4 +5,5 @@ edition = "2024"
 
 [dependencies]
 serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
-light-types = { path = "../light-types" }
+ilios-types = { path = "../ilios-types" }
+serde = { version = "1.0", features = ["derive"] }

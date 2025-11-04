@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use light_types::geometry::Vector;
+use ilios_types::geometry::Vector;
 
 #[derive(Debug)]
 pub struct Element {
