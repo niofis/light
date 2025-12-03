@@ -48,26 +48,6 @@
           "values": [0.0, 10.0, 0.0]
         }
       ]
-    },
-    {
-      "type": "ply",
-      "file": "dragon_vrip.ply",
-      "normalize": true,
-      "material": "diffuse-terracotta",
-      "transforms": [
-        {
-          "type": "scale",
-          "values": [20.0, 20.0, 20.0]
-        },
-        {
-          "type": "rotate",
-          "values": [0.0, 3.1415926, 0.0]
-        },
-        {
-          "type": "translate",
-          "values": [0.0, 0.0, 0.0]
-        }
-      ]
     }
   ]
 }
