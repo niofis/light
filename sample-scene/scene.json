@@ -1,0 +1,73 @@
+{
+  "materials": [
+    {
+      "type": "diffuse",
+      "color": [1.0, 1.0, 1.0],
+      "id": "diffuse-white"
+    },
+    {
+      "type": "diffuse",
+      "color": [0.89, 0.32, 0.21],
+      "id": "diffuse-terracotta"
+    },
+    {
+      "type": "emissive",
+      "color": [1.0, 1.0, 1.0],
+      "id": "emissive-white"
+    }
+  ],
+  "solids": [
+    {
+      "type": "plane",
+      "material": "emissive-white",
+      "transforms": [
+        {
+          "type": "scale",
+          "values": [30.0, 1.0, 15.0]
+        },
+        {
+          "type": "rotate",
+          "values": [0.0, 0.0, 0.0]
+        },
+        {
+          "type": "translate",
+          "values": [0.0, 25.0, 0.0]
+        }
+      ]
+    },
+    {
+      "type": "cornellBox",
+      "material": "diffuse-terracotta",
+      "transforms": [
+        {
+          "type": "scale",
+          "values": [50.0, 30.0, 50.0]
+        },
+        {
+          "type": "translate",
+          "values": [0.0, 10.0, 0.0]
+        }
+      ]
+    },
+    {
+      "type": "ply",
+      "file": "dragon_vrip.ply",
+      "normalize": true,
+      "material": "diffuse-terracotta",
+      "transforms": [
+        {
+          "type": "scale",
+          "values": [20.0, 20.0, 20.0]
+        },
+        {
+          "type": "rotate",
+          "values": [0.0, 3.1415926, 0.0]
+        },
+        {
+          "type": "translate",
+          "values": [0.0, 0.0, 0.0]
+        }
+      ]
+    }
+  ]
+}

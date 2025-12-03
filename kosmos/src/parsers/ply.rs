@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use ilios_types::geometry::Vector;
+use ilios_types::geometry::Point;
 
 #[derive(Debug)]
 pub struct Element {
@@ -74,7 +74,7 @@ pub struct PlyFile {
 }
 
 impl PlyFile {
-    pub fn faces(&self) -> impl Iterator<Item = Vec<Vector>> {
+    pub fn faces(&self) -> impl Iterator<Item = Vec<Point>> {
         let faces = self.element_components.get("face").unwrap();
         let vertex = self.element_components.get("vertex").unwrap();
 
@@ -101,9 +101,9 @@ impl PlyFile {
                 .collect::<Vec<f32>>();
 
             vec![
-                Vector::new(v1[0], v1[1], v1[2]),
-                Vector::new(v2[0], v2[1], v2[2]),
-                Vector::new(v3[0], v3[1], v3[2]),
+                Point::new(v1[0], v1[1], v1[2]),
+                Point::new(v2[0], v2[1], v2[2]),
+                Point::new(v3[0], v3[1], v3[2]),
             ]
         })
     }

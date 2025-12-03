@@ -1,10 +1,11 @@
-use ilios::{
-    Accelerator, Algorithm, BvhBuildMethod, Camera, RenderMethod, Renderer, Section, Transform,
-    parsers,
-};
+use ilios::{Accelerator, Algorithm, BvhBuildMethod, RenderMethod, Renderer};
+use ilios_types::camera::Camera;
 use ilios_types::color::Color;
 use ilios_types::float::PI;
 use ilios_types::geometry::{Point, Vector};
+use ilios_types::section::Section;
+use ilios_types::transform::Transform;
+use kosmos::SceneDescriptor;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::PixelFormatEnum;
@@ -43,7 +44,7 @@ impl FrameTimmings {
 fn main() -> Result<(), Box<dyn Error>> {
     let width: u32 = 640;
     let height: u32 = 360;
-    let scene: &str = "../photon/torus.json";
+    let scene: &str = "../sample-scene";
     let bpp = 4;
     let sdl_context = sdl2::init()?;
     let video_subsystem = sdl_context.video()?;
@@ -78,7 +79,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .render_method(RenderMethod::Tiles)
         // .world(demos::cornell())
         // .from_json(&fs::read_to_string("../photon/scene.json")?)
-        .threads(1)
+        // .threads(1)
         .bvh_build_method(BvhBuildMethod::Sah)
         .accelerator(Accelerator::BoundingVolumeHierarchy);
 
@@ -90,27 +91,14 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut frame_timmings = FrameTimmings::new();
     let mut reset: bool = false;
 
-    // let cs1 = Vector::new(0.0, 1.0, 0.0).coordinate_system();
-    // let u = Vector::new(1.0, 2.0, 3.0).unit();
-    // let (v, w) = u.coordinate_system();
-
-    // println!(
-    //     "Coordinate system: {:?} dot:{}\n{:?} dot:{:?}",
-    //     cs1,
-    //     cs1.0.dot(&cs1.1),
-    //     (u, v, w),
-    //     (u.dot(&v), u.dot(&w), v.dot(&w))
-    // );
-
     let mut modified = fs::metadata(scene)?.modified()?;
 
-    let res = parsers::json(&fs::read_to_string(scene)?);
-    renderer_builder.camera(res.0).world(res.1);
+    let SceneDescriptor { camera, world } = kosmos::load(scene).unwrap();
+    renderer_builder.camera(camera);
+    renderer_builder.world(world);
 
     let mut renderer = renderer_builder.build();
 
-    // let json = fs::read_to_string("../photon/scene.json")?;
-    // renderer_builder.from_json(&json);
     let mut camera_transforms: Vec<Transform> = vec![];
 
     'event_loop: loop {

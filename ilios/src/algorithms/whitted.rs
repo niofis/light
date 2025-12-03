@@ -29,7 +29,7 @@ fn inner_trace_ray(renderer: &Renderer, ray: &Ray, depth: u8) -> Color {
                     let point = ray.point(distance);
                     let prm_material = &primitive.material;
 
-                    match prm_material {
+                    match prm_material.as_ref() {
                         Material::Diffuse(_) => calculate_shading(renderer, primitive, &point),
                         Material::Reflective(_, idx) => {
                             let normal: Vector = primitive.normal().into();
@@ -75,7 +75,7 @@ fn calculate_shading(renderer: &Renderer, prm: &Triangle, point: &Point) -> Colo
 
     let prm_material = &prm.material;
 
-    let prm_color = match prm_material {
+    let prm_color = match prm_material.as_ref() {
         Material::Diffuse(color) => color,
         Material::Reflective(color, _) => color,
         Material::Emissive(color) => color,

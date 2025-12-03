@@ -18,5 +18,6 @@ ilios.code-workspace
 photon/.DS_Store
 *.svg
 perf.data*
-sample-scene/
+sample-scene/dragon_vrip.ply
+sample-scene.zip
 file-loader/

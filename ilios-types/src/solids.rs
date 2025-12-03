@@ -1,4 +1,7 @@
+use std::sync::Arc;
+
 use crate::{
+    color,
     float::{Float, PI},
     geometry::{Point, Triangle},
     material::Material,
@@ -7,14 +10,14 @@ use crate::{
 
 #[derive(Clone, Debug)]
 pub enum Solid {
-    Triangle(Point, Point, Point, Material),
-    Cube(Transform),
-    InvertedCube(Transform),
+    Triangle(Point, Point, Point, Arc<Material>),
+    ColoredCube(Transform),
+    Cube(Transform, Arc<Material>),
     CornellBox(Transform),
-    Sphere(usize, Transform, Material),
-    Torus(Float, Float, usize, usize, Transform, Material),
+    Sphere(usize, Transform, Arc<Material>),
+    Torus(Float, Float, usize, usize, Transform, Arc<Material>),
     Mesh(Transform, Vec<Triangle>),
-    Plane(Transform, Material),
+    Plane(Transform, Arc<Material>),
 }
 
 impl Solid {
@@ -23,20 +26,22 @@ impl Solid {
             Solid::Triangle(pt1, pt2, pt3, material) => {
                 vec![Triangle::new(*pt1, *pt2, *pt3, material.clone())]
             }
-            Solid::Cube(transform) => cube(transform, false),
+            Solid::ColoredCube(transform) => colored_cube(transform),
+            Solid::Cube(transform, material) => cube(transform, material.clone()),
             Solid::CornellBox(transform) => cornell_box(transform),
-            Solid::Sphere(sc1, transform, material) => sphere(1.0, *sc1, transform, material),
+            Solid::Sphere(sc1, transform, material) => {
+                sphere(1.0, *sc1, transform, material.clone())
+            }
             Solid::Torus(rd1, rd2, sc1, sc2, transform, material) => {
-                torus(*rd1, *rd2, *sc1, *sc2, transform, material)
+                torus(*rd1, *rd2, *sc1, *sc2, transform, material.clone())
             }
             Solid::Mesh(transform, triangles) => mesh(transform, triangles),
-            Solid::Plane(transform, material) => plane(transform, material),
-            Solid::InvertedCube(transform) => cube(transform, true),
+            Solid::Plane(transform, material) => plane(transform, material.clone()),
         }
     }
 }
 
-fn cube(transform: &Transform, invert_normals: bool) -> Vec<Triangle> {
+fn colored_cube(transform: &Transform) -> Vec<Triangle> {
     let pt1 = || transform.apply(&Point(-0.5, 0.5, -0.5));
     let pt2 = || transform.apply(&Point(0.5, 0.5, -0.5));
     let pt3 = || transform.apply(&Point(0.5, -0.5, -0.5));
@@ -45,49 +50,59 @@ fn cube(transform: &Transform, invert_normals: bool) -> Vec<Triangle> {
     let pt6 = || transform.apply(&Point(0.5, 0.5, 0.5));
     let pt7 = || transform.apply(&Point(0.5, -0.5, 0.5));
     let pt8 = || transform.apply(&Point(-0.5, -0.5, 0.5));
-    if invert_normals {
-        vec![
-            //frontside
-            Triangle::new(pt1(), pt4(), pt2(), Material::blue()),
-            Triangle::new(pt2(), pt4(), pt3(), Material::blue()),
-            ////right
-            Triangle::new(pt2(), pt7(), pt6(), Material::magenta()),
-            Triangle::new(pt2(), pt3(), pt7(), Material::magenta()),
-            //back
-            Triangle::new(pt5(), pt6(), pt8(), Material::green()),
-            Triangle::new(pt6(), pt7(), pt8(), Material::green()),
-            //left
-            Triangle::new(pt5(), pt4(), pt1(), Material::yellow()),
-            Triangle::new(pt5(), pt8(), pt4(), Material::yellow()),
-            //top
-            Triangle::new(pt5(), pt2(), pt6(), Material::red()),
-            Triangle::new(pt1(), pt2(), pt5(), Material::red()),
-            //bottom
-            Triangle::new(pt4(), pt8(), pt3(), Material::cyan()),
-            Triangle::new(pt3(), pt8(), pt7(), Material::cyan()),
-        ]
-    } else {
-        vec![
-            //frontside
-            Triangle::new(pt1(), pt2(), pt4(), Material::blue()),
-            Triangle::new(pt2(), pt3(), pt4(), Material::blue()),
-            ////right
-            Triangle::new(pt2(), pt6(), pt7(), Material::magenta()),
-            Triangle::new(pt2(), pt7(), pt3(), Material::magenta()),
-            //back
-            Triangle::new(pt5(), pt8(), pt6(), Material::green()),
-            Triangle::new(pt6(), pt8(), pt7(), Material::green()),
-            //left
-            Triangle::new(pt5(), pt1(), pt4(), Material::yellow()),
-            Triangle::new(pt5(), pt4(), pt8(), Material::yellow()),
-            //top
-            Triangle::new(pt5(), pt6(), pt2(), Material::red()),
-            Triangle::new(pt1(), pt5(), pt2(), Material::red()),
-            //bottom
-            Triangle::new(pt4(), pt3(), pt8(), Material::cyan()),
-            Triangle::new(pt3(), pt7(), pt8(), Material::cyan()),
-        ]
-    }
+
+    vec![
+        //frontside
+        Triangle::new(pt1(), pt2(), pt4(), Material::blue()),
+        Triangle::new(pt2(), pt3(), pt4(), Material::blue()),
+        ////right
+        Triangle::new(pt2(), pt6(), pt7(), Material::magenta()),
+        Triangle::new(pt2(), pt7(), pt3(), Material::magenta()),
+        //back
+        Triangle::new(pt5(), pt8(), pt6(), Material::green()),
+        Triangle::new(pt6(), pt8(), pt7(), Material::green()),
+        //left
+        Triangle::new(pt5(), pt1(), pt4(), Material::yellow()),
+        Triangle::new(pt5(), pt4(), pt8(), Material::yellow()),
+        //top
+        Triangle::new(pt5(), pt6(), pt2(), Material::red()),
+        Triangle::new(pt1(), pt5(), pt2(), Material::red()),
+        //bottom
+        Triangle::new(pt4(), pt3(), pt8(), Material::cyan()),
+        Triangle::new(pt3(), pt7(), pt8(), Material::cyan()),
+    ]
+}
+
+fn cube(transform: &Transform, material: Arc<Material>) -> Vec<Triangle> {
+    let pt1 = || transform.apply(&Point(-0.5, 0.5, -0.5));
+    let pt2 = || transform.apply(&Point(0.5, 0.5, -0.5));
+    let pt3 = || transform.apply(&Point(0.5, -0.5, -0.5));
+    let pt4 = || transform.apply(&Point(-0.5, -0.5, -0.5));
+    let pt5 = || transform.apply(&Point(-0.5, 0.5, 0.5));
+    let pt6 = || transform.apply(&Point(0.5, 0.5, 0.5));
+    let pt7 = || transform.apply(&Point(0.5, -0.5, 0.5));
+    let pt8 = || transform.apply(&Point(-0.5, -0.5, 0.5));
+
+    vec![
+        //frontside
+        Triangle::new(pt1(), pt2(), pt4(), material.clone()),
+        Triangle::new(pt2(), pt3(), pt4(), material.clone()),
+        ////right
+        Triangle::new(pt2(), pt6(), pt7(), material.clone()),
+        Triangle::new(pt2(), pt7(), pt3(), material.clone()),
+        //back
+        Triangle::new(pt5(), pt8(), pt6(), material.clone()),
+        Triangle::new(pt6(), pt8(), pt7(), material.clone()),
+        //left
+        Triangle::new(pt5(), pt1(), pt4(), material.clone()),
+        Triangle::new(pt5(), pt4(), pt8(), material.clone()),
+        //top
+        Triangle::new(pt5(), pt6(), pt2(), material.clone()),
+        Triangle::new(pt1(), pt5(), pt2(), material.clone()),
+        //bottom
+        Triangle::new(pt4(), pt3(), pt8(), material.clone()),
+        Triangle::new(pt3(), pt7(), pt8(), material.clone()),
+    ]
 }
 
 fn cornell_box(transform: &Transform) -> Vec<Triangle> {
@@ -124,7 +139,7 @@ fn torus(
     sc1: usize,
     sc2: usize,
     transform: &Transform,
-    material: &Material,
+    material: Arc<Material>,
 ) -> Vec<Triangle> {
     let pt = Point(0.0, rd1, 0.0);
     let rt1 = 2.0 * PI / (sc1 as Float);
@@ -161,7 +176,12 @@ fn torus(
     triangles
 }
 
-fn sphere(radius: Float, sc1: usize, transform: &Transform, material: &Material) -> Vec<Triangle> {
+fn sphere(
+    radius: Float,
+    sc1: usize,
+    transform: &Transform,
+    material: Arc<Material>,
+) -> Vec<Triangle> {
     let pt = Point(0.0, radius, 0.0);
     let sc2 = sc1 * 2;
     let rt1 = PI / (sc1 as Float);
@@ -215,7 +235,7 @@ fn mesh(transform: &Transform, triangles: &[Triangle]) -> Vec<Triangle> {
         .collect()
 }
 
-fn plane(transform: &Transform, material: &Material) -> Vec<Triangle> {
+fn plane(transform: &Transform, material: Arc<Material>) -> Vec<Triangle> {
     let pt1 = || transform.apply(&Point(-0.5, 0.0, -0.5));
     let pt2 = || transform.apply(&Point(0.5, 0.0, -0.5));
     let pt3 = || transform.apply(&Point(-0.5, 0.0, 0.5));

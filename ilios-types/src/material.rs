@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::{color::Color, float::Float};
 
 #[derive(Debug, Clone)]
@@ -15,28 +17,28 @@ impl Default for Material {
 }
 
 impl Material {
-    pub fn red() -> Material {
-        Material::Diffuse(Color(1.0, 0.0, 0.0))
+    pub fn red() -> Arc<Material> {
+        Arc::new(Material::Diffuse(Color(1.0, 0.0, 0.0)))
     }
-    pub fn green() -> Material {
-        Material::Diffuse(Color(0.0, 1.0, 0.0))
+    pub fn green() -> Arc<Material> {
+        Arc::new(Material::Diffuse(Color(0.0, 1.0, 0.0)))
     }
-    pub fn blue() -> Material {
-        Material::Diffuse(Color(0.0, 0.0, 1.0))
+    pub fn blue() -> Arc<Material> {
+        Arc::new(Material::Diffuse(Color(0.0, 0.0, 1.0)))
     }
-    pub fn yellow() -> Material {
-        Material::Diffuse(Color(1.0, 1.0, 0.0))
+    pub fn yellow() -> Arc<Material> {
+        Arc::new(Material::Diffuse(Color(1.0, 1.0, 0.0)))
     }
-    pub fn magenta() -> Material {
-        Material::Diffuse(Color(1.0, 0.0, 1.0))
+    pub fn magenta() -> Arc<Material> {
+        Arc::new(Material::Diffuse(Color(1.0, 0.0, 1.0)))
     }
-    pub fn cyan() -> Material {
-        Material::Diffuse(Color(0.0, 1.0, 1.0))
+    pub fn cyan() -> Arc<Material> {
+        Arc::new(Material::Diffuse(Color(0.0, 1.0, 1.0)))
     }
-    pub fn white() -> Material {
-        Material::Diffuse(Color(1.0, 1.0, 1.0))
+    pub fn white() -> Arc<Material> {
+        Arc::new(Material::Diffuse(Color(1.0, 1.0, 1.0)))
     }
-    pub fn emissive_white() -> Material {
-        Material::Emissive(Color(1.0, 1.0, 1.0))
+    pub fn emissive_white() -> Arc<Material> {
+        Arc::new(Material::Emissive(Color(1.0, 1.0, 1.0)))
     }
 }

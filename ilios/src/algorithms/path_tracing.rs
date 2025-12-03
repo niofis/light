@@ -28,7 +28,7 @@ fn trace_ray_internal(renderer: &Renderer, rng: &mut dyn Rng, ray: &Ray, depth: 
                     let point = ray.point(distance);
                     let prm_material = &primitive.material;
 
-                    match prm_material {
+                    match prm_material.as_ref() {
                         Material::Diffuse(color) => {
                             let normal: Vector = primitive.normal().into();
                             let new_dir = random_dome(rng, &normal);

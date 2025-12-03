@@ -8,6 +8,12 @@ pub struct Color(pub Float, pub Float, pub Float); //r,g,b
 pub const BLACK: Color = Color(0., 0., 0.);
 pub const WHITE: Color = Color(1., 1., 1.);
 
+impl From<&[f32; 3]> for Color {
+    fn from(lhs: &[f32; 3]) -> Self {
+        Color(lhs[0], lhs[1], lhs[2])
+    }
+}
+
 impl ops::Mul<Float> for Color {
     type Output = Color;
 

@@ -40,6 +40,12 @@ impl From<Vector> for Point {
     }
 }
 
+impl From<[f32; 3]> for Point {
+    fn from(lhs: [f32; 3]) -> Self {
+        Point(lhs[0], lhs[1], lhs[2])
+    }
+}
+
 impl From<Point> for Vector {
     fn from(val: Point) -> Self {
         Vector(val.0, val.1, val.2)

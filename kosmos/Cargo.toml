@@ -7,3 +7,6 @@ edition = "2024"
 serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
 ilios-types = { path = "../ilios-types" }
 serde = { version = "1.0", features = ["derive"] }
+anyhow = { version = "1.0" }
+rawzip = { version = "0.4.2" }
+flate2 = { version = "1.1.5" }

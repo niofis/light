@@ -9,6 +9,7 @@ clap = "4"
 time = "0.3"
 ilios = { path = "../ilios" }
 ilios-types = { path = "../ilios-types" }
+kosmos = { path = "../kosmos" }
 
 
 [dependencies.sdl2]

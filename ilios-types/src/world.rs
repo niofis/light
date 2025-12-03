@@ -17,11 +17,11 @@ pub struct WorldBuilder {
 }
 
 impl WorldBuilder {
-    pub fn add_light(&mut self, light: LightSource) -> &mut WorldBuilder {
-        self.lights.push(light);
-        self
-    }
-    pub fn add_object(&mut self, object: Solid) -> &mut WorldBuilder {
+    // pub fn add_light(&mut self, light: LightSource) -> &mut WorldBuilder {
+    //     self.lights.push(light);
+    //     self
+    // }
+    pub fn add_solid(&mut self, object: Solid) -> &mut WorldBuilder {
         self.objects.push(object);
         self
     }

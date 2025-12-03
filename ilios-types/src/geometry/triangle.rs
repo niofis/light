@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::{
     bounding_box::BoundingBox,
     float::{EPSILON, Float},
@@ -14,13 +16,13 @@ pub struct Triangle {
     pub edge1: Vector,
     pub edge2: Vector,
     pub normal: Normal,
-    pub material: Material,
+    pub material: Arc<Material>,
     pub pt2: Point,
     pub pt3: Point,
 }
 
 impl Triangle {
-    pub fn new(pt1: Point, pt2: Point, pt3: Point, material: Material) -> Triangle {
+    pub fn new(pt1: Point, pt2: Point, pt3: Point, material: Arc<Material>) -> Triangle {
         let edge1 = &pt2 - &pt1;
         let edge2 = &pt3 - &pt1;
         let normal = edge1.cross(&edge2).unit();
