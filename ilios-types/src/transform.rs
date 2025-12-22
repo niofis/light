@@ -11,6 +11,7 @@ const IDENTITY: Matrix = [
 #[derive(Clone, Debug)]
 pub struct Transform(pub Matrix);
 
+#[allow(dead_code)]
 fn add(mts: &[Matrix]) -> Matrix {
     mts.iter().fold(
         [

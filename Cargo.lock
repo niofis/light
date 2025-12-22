@@ -253,13 +253,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "file-loader"
-version = "0.1.0"
-dependencies = [
- "kosmos",
-]
-
-[[package]]
 name = "flate2"
 version = "1.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -303,6 +296,15 @@ dependencies = [
 [[package]]
 name = "ilios-types"
 version = "0.1.0"
+
+[[package]]
+name = "ilios-wasm"
+version = "0.1.0"
+dependencies = [
+ "ilios",
+ "ilios-types",
+ "kosmos",
+]
 
 [[package]]
 name = "itoa"

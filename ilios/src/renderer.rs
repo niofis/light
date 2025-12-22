@@ -17,6 +17,8 @@ pub struct Renderer {
     pub algorithm: Algorithm,
     pub threads: Option<u32>,
     pub samples: u32,
+    accelerator_type: Accelerator,
+    bvh_build_method: BvhBuildMethod,
 }
 
 impl Renderer {
@@ -39,7 +41,7 @@ impl Renderer {
 
         let primitives = world.primitives();
 
-        let accelerator = match accelerator {
+        let accelerator_instance = match accelerator {
             Accelerator::BruteForce => AcceleratorInstance::new_brute_force(primitives),
             Accelerator::BoundingVolumeHierarchy => {
                 AcceleratorInstance::new_bounding_volume_hierarchy(bvh_build_method, primitives)
@@ -57,15 +59,18 @@ impl Renderer {
         Renderer {
             width,
             height,
-            accelerator,
+            accelerator: accelerator_instance,
             world,
             camera,
             render_method,
             algorithm,
             threads,
             samples,
+            accelerator_type: accelerator,
+            bvh_build_method,
         }
     }
+
     pub fn builder() -> RendererBuilder {
         RendererBuilder {
             width: 0,
@@ -78,6 +83,21 @@ impl Renderer {
             threads: None,
             samples: 1,
             bvh_build_method: BvhBuildMethod::Sah,
+        }
+    }
+
+    pub fn into_builder(self) -> RendererBuilder {
+        RendererBuilder {
+            width: self.width,
+            height: self.height,
+            accelerator: self.accelerator_type,
+            camera: self.camera,
+            world: self.world,
+            render_method: self.render_method,
+            algorithm: self.algorithm,
+            threads: self.threads,
+            samples: self.samples,
+            bvh_build_method: self.bvh_build_method,
         }
     }
 

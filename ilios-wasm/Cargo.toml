@@ -9,6 +9,8 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 ilios = { path = "../ilios" }
+ilios-types = { path = "../ilios-types" }
+kosmos = { path = "../kosmos" }
 
 [profile.release]
 strip = true

@@ -1,6 +1,6 @@
 [workspace]
-members = [ "file-loader", "kosmos", "ilios", "ilios-types", "photon", "screen"]
-exclude = ["prism", "ilios-wasm"]
+members = ["kosmos", "ilios", "ilios-types", "photon", "screen", "ilios-wasm"]
+exclude = ["prism"]
 resolver = "3"
 
 [profile.dev]

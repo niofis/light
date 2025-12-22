@@ -1,7 +1,17 @@
-use light::{
-    demos, parsers, Accelerator, Algorithm, Camera, Color, Material, Point, RenderMethod, Renderer,
-    Section, Solid, Transform, Vector, World,
+use std::sync::Arc;
+
+use ilios::{Accelerator, Algorithm, RenderMethod, Renderer};
+use ilios_types::{
+    camera::Camera,
+    color::Color,
+    geometry::{Point, Vector},
+    material::Material,
+    section::Section,
+    solids::Solid,
+    transform::Transform,
+    world::World,
 };
+use kosmos::SceneDescriptor;
 
 static mut WIDTH: i32 = 0;
 static mut HEIGHT: i32 = 0;
@@ -23,11 +33,19 @@ pub unsafe fn free(n: usize, ptr: *mut f32) {
     let _bytes: Vec<f32> = Vec::from_raw_parts(ptr, n, n);
 }
 
+#[cfg(target_arch = "wasm32")]
+#[target_feature(enable = "simd128")]
 #[no_mangle]
 /// # Safety
 ///
 /// This function is unsafe because it dereferences a raw pointer.
 pub unsafe fn render(ptr: *mut u8) {
+    render_frame(ptr);
+}
+
+#[allow(dead_code)]
+#[allow(static_mut_refs)]
+unsafe fn render_frame(ptr: *mut u8) {
     let mut bytes: Vec<u8> = Vec::from_raw_parts(ptr, LEN * 3, LEN * 3);
 
     let section = Section::new(0, 0, WIDTH as u32, HEIGHT as u32);
@@ -82,7 +100,7 @@ pub unsafe fn init(width: i32, height: i32) -> *mut u8 {
             .accelerator(Accelerator::BoundingVolumeHierarchy)
             .world(
                 World::builder()
-                    .add_object(Solid::Torus(
+                    .add_solid(Solid::Torus(
                         2.0,
                         4.0,
                         12,
@@ -90,20 +108,20 @@ pub unsafe fn init(width: i32, height: i32) -> *mut u8 {
                         Transform::combine(&[Transform::rotate(3.1415926 / 2.0, 0.0, 0.0)]),
                         Material::green(),
                     ))
-                    .add_object(Solid::Plane(
+                    .add_solid(Solid::Plane(
                         Transform::combine(&[
                             Transform::scale(20.0, 0.0, 20.0),
                             Transform::translate(0.0, 10.0, 0.0),
                         ]),
-                        Material::Emissive(Color(1.0, 1.0, 1.0)),
+                        Arc::new(Material::Emissive(Color(1.0, 1.0, 1.0))),
                     ))
-                    .add_object(Solid::Plane(
+                    .add_solid(Solid::Plane(
                         Transform::combine(&[
                             Transform::scale(1000.0, 0.0, 1000.0),
                             Transform::rotate(3.1415926, 0.0, 0.0),
                             Transform::translate(0.0, -5.0, 0.0),
                         ]),
-                        Material::Diffuse(Color(3.0, 3.0, 3.0)),
+                        Arc::new(Material::Diffuse(Color(3.0, 3.0, 3.0))),
                     ))
                     .build(),
             )
@@ -112,35 +130,36 @@ pub unsafe fn init(width: i32, height: i32) -> *mut u8 {
     ptr
 }
 
-#[no_mangle]
-pub unsafe fn init_from_json(width: i32, height: i32, str_len: i32, str_ptr: *mut u8) -> *mut u8 {
-    WIDTH = width;
-    HEIGHT = height;
-    LEN = (width * height) as usize;
-    let mut buffer = Vec::with_capacity(3 * LEN);
-    let ptr = buffer.as_mut_ptr();
-    std::mem::forget(buffer);
-    let w = 4.0;
-    let h = 3.0;
-    let str_buffer: Vec<u8> = Vec::from_raw_parts(str_ptr, str_len as usize, str_len as usize);
-    let json = String::from_utf8_lossy(&str_buffer);
-    let (camera, world) = parsers::json(&json);
-    FRAMES_ACC = Some(vec![Color::default(); LEN]);
-    TOTAL_FRAMES = 0.0;
-    RENDERER = Some(
-        Renderer::builder()
-            .width(width as u32)
-            .height(height as u32)
-            .camera(camera)
-            .algorithm(Algorithm::PathTracing)
-            .render_method(RenderMethod::Tiles)
-            .accelerator(Accelerator::BoundingVolumeHierarchy)
-            .world(world)
-            .build(),
-    );
-    ptr
-}
+// #[no_mangle]
+// pub unsafe fn init_from_json(width: i32, height: i32, str_len: i32, str_ptr: *mut u8) -> *mut u8 {
+//     WIDTH = width;
+//     HEIGHT = height;
+//     LEN = (width * height) as usize;
+//     let mut buffer = Vec::with_capacity(3 * LEN);
+//     let ptr = buffer.as_mut_ptr();
+//     std::mem::forget(buffer);
+//     let w = 4.0;
+//     let h = 3.0;
+//     let str_buffer: Vec<u8> = Vec::from_raw_parts(str_ptr, str_len as usize, str_len as usize);
+//     let json = String::from_utf8_lossy(&str_buffer);
+//     let (camera, world) = parsers::json(&json);
+//     FRAMES_ACC = Some(vec![Color::default(); LEN]);
+//     TOTAL_FRAMES = 0.0;
+//     RENDERER = Some(
+//         Renderer::builder()
+//             .width(width as u32)
+//             .height(height as u32)
+//             .camera(camera)
+//             .algorithm(Algorithm::PathTracing)
+//             .render_method(RenderMethod::Tiles)
+//             .accelerator(Accelerator::BoundingVolumeHierarchy)
+//             .world(world)
+//             .build(),
+//     );
+//     ptr
+// }
 
+#[allow(static_mut_refs)]
 #[no_mangle]
 pub unsafe fn camera_rotate(x: f32, y: f32, z: f32) {
     if let Some(renderer) = &mut RENDERER {
@@ -151,6 +170,7 @@ pub unsafe fn camera_rotate(x: f32, y: f32, z: f32) {
     }
 }
 
+#[allow(static_mut_refs)]
 #[no_mangle]
 pub unsafe fn camera_rotate_orbital(x: f32, y: f32, z: f32) {
     if let Some(renderer) = &mut RENDERER {
@@ -165,6 +185,7 @@ pub unsafe fn camera_rotate_orbital(x: f32, y: f32, z: f32) {
     }
 }
 
+#[allow(static_mut_refs)]
 #[no_mangle]
 pub unsafe fn camera_zoom(delta: f32) {
     if let Some(renderer) = &mut RENDERER {
@@ -183,4 +204,18 @@ pub unsafe fn camera_zoom(delta: f32) {
 /// This function is unsafe because it dereferences a raw pointer.
 pub unsafe fn deinit(ptr: *mut u8) {
     let _bytes: Vec<u8> = Vec::from_raw_parts(ptr, LEN * 3, LEN * 3);
+}
+
+#[allow(static_mut_refs)]
+#[no_mangle]
+pub unsafe fn load_scene_zip(zip_lenght: i32, zip_ptr: *mut u8) {
+    let bytes: Vec<u8> = Vec::from_raw_parts(zip_ptr, zip_lenght as usize, zip_lenght as usize);
+    let SceneDescriptor { camera, world } = kosmos::load_zip_data(bytes).unwrap();
+
+    let renderer = RENDERER.take();
+    let mut builder = renderer.unwrap().into_builder();
+
+    builder.camera(camera);
+    builder.world(world);
+    RENDERER = Some(builder.build());
 }
